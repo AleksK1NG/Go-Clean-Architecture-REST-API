@@ -1,4 +1,4 @@
-package configpackage
+package config
 
 import (
 	"errors"
