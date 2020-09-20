@@ -22,5 +22,5 @@ config/apple_config_files
 
 # Enviroment files
 envs/
-
+main
 .idea
