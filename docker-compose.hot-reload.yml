@@ -20,8 +20,8 @@ services:
     #      - postgesql
     #      - redis
     restart: always
-#    volumes:
-#      - ./:/app
+    volumes:
+      - ./:/app
 #    networks:
 #      - web-api--network
 
