@@ -12,6 +12,18 @@ import (
 	"time"
 )
 
+// type deliveries struct {
+// 	auth auth.Delivery
+// }
+//
+// type useCases struct {
+// 	auth auth.UseCase
+// }
+//
+// type repositories struct {
+// 	auth auth.Repository
+// }
+
 // Server struct
 type server struct {
 	echo   *echo.Echo
@@ -22,6 +34,7 @@ type server struct {
 // New server constructor
 func NewServer(config *config.Config, logger *logger.Logger) *server {
 	e := echo.New()
+
 	return &server{e, config, logger}
 }
 
@@ -98,4 +111,8 @@ func (s *server) Run() error {
 		s.l.Info("Server Exited Properly")
 		return s.echo.Server.Shutdown(ctx)
 	}
+}
+
+func (s *server) ConfigLayers() {
+
 }

@@ -1,6 +1,9 @@
 package server
 
 import (
+	authHttp "github.com/AleksK1NG/api-mc/internal/auth/delivery/http"
+	authRepository "github.com/AleksK1NG/api-mc/internal/auth/repository"
+	authUseCase "github.com/AleksK1NG/api-mc/internal/auth/usecase"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 )
@@ -18,7 +21,6 @@ func (s *server) MapRoutes(e *echo.Echo) {
 		DisablePrintStack: true,
 		DisableStackAll:   true,
 	}))
-
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"https://labstack.com", "https://labstack.net"},
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
@@ -29,7 +31,6 @@ func (s *server) MapRoutes(e *echo.Echo) {
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: loggerFormat,
 	}))
-	// Request ID middleware generates a unique id for a request.
 	// echo.Use(middleware.CSRF())
 	e.Use(middleware.Secure())
 	e.Use(middleware.BodyLimit("2M"))
@@ -37,10 +38,21 @@ func (s *server) MapRoutes(e *echo.Echo) {
 	v1 := e.Group("/api/v1")
 
 	health := v1.Group("/health")
-	// auth := v1.Group("/auth")
+	auth := v1.Group("/auth")
 	// post := v1.Group("/posts")
 	// comment := v1.Group("/comments")
+
+	// Init repositories
+	authRepo := authRepository.NewAuthRepository(s.l, nil)
+
+	// Init useCases
+	authUC := authUseCase.NewAuthUseCase(s.l, s.config, authRepo)
+
+	// Init handlers
+	authHandlers := authHttp.NewAuthHandlers(s.config, authUC, s.l)
+
 	{
+		authHttp.MapAuthRoutes(auth, authHandlers, authUC, s.config, s.l)
 		// auth_routes.MapAuthRoutes(auth, s.h, s.useCases, s.config, s.logger)
 		// post_routes.MapPostRoutes(post, s.h, s.useCases, s.config, s.logger)
 		// comment_routes.MapCommentRoutes(comment, s.h, s.useCases, s.config, s.logger)
