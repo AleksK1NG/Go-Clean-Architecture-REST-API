@@ -1,10 +1,12 @@
 package server
 
 import (
+	"fmt"
 	authHttp "github.com/AleksK1NG/api-mc/internal/auth/delivery/http"
 	authRepository "github.com/AleksK1NG/api-mc/internal/auth/repository"
 	authUseCase "github.com/AleksK1NG/api-mc/internal/auth/usecase"
 	"github.com/AleksK1NG/api-mc/internal/db/postgres"
+	"github.com/AleksK1NG/api-mc/internal/db/redis"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"go.uber.org/zap"
@@ -16,6 +18,15 @@ const (
 
 // Map Server Routes
 func (s *server) MapRoutes(e *echo.Echo) error {
+	psqlDB, err := postgres.NewPsqlDB(s.config)
+	if err != nil {
+		s.l.Error("", zap.String("init psql", err.Error()))
+		return err
+	}
+	s.l.Info("Postgres connected", zap.String("DB Status: %#v", fmt.Sprintf("%#v", psqlDB.Stats())))
+	redisConn := redis.NewRedisClient(s.config)
+	s.l.Info("Redis connected", zap.String("port", fmt.Sprintf("%s", s.config.Redis.RedisAddr)))
+
 	// echo.Pre(middleware.HTTPSRedirect())
 	e.Use(middleware.RequestID())
 	e.Use(middleware.RecoverWithConfig(middleware.RecoverConfig{
@@ -44,17 +55,11 @@ func (s *server) MapRoutes(e *echo.Echo) error {
 	// post := v1.Group("/posts")
 	// comment := v1.Group("/comments")
 
-	psqlDB, err := postgres.NewPsqlDB(s.config)
-	if err != nil {
-		s.l.Error("", zap.String("init psql", err.Error()))
-		return err
-	}
-
 	// Init repositories
 	aRepo := authRepository.NewAuthRepository(s.l, psqlDB)
 
 	// Init useCases
-	aUseCase := authUseCase.NewAuthUseCase(s.l, s.config, aRepo)
+	aUseCase := authUseCase.NewAuthUseCase(s.l, s.config, aRepo, redisConn)
 
 	// Init handlers
 	aHandlers := authHttp.NewAuthHandlers(s.config, aUseCase, s.l)
