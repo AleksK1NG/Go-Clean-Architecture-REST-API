@@ -4,8 +4,10 @@ import (
 	authHttp "github.com/AleksK1NG/api-mc/internal/auth/delivery/http"
 	authRepository "github.com/AleksK1NG/api-mc/internal/auth/repository"
 	authUseCase "github.com/AleksK1NG/api-mc/internal/auth/usecase"
+	"github.com/AleksK1NG/api-mc/internal/db/postgres"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+	"go.uber.org/zap"
 )
 
 const (
@@ -13,7 +15,7 @@ const (
 )
 
 // Map Server Routes
-func (s *server) MapRoutes(e *echo.Echo) {
+func (s *server) MapRoutes(e *echo.Echo) error {
 	// echo.Pre(middleware.HTTPSRedirect())
 	e.Use(middleware.RequestID())
 	e.Use(middleware.RecoverWithConfig(middleware.RecoverConfig{
@@ -42,17 +44,23 @@ func (s *server) MapRoutes(e *echo.Echo) {
 	// post := v1.Group("/posts")
 	// comment := v1.Group("/comments")
 
+	psqlDB, err := postgres.NewPsqlDB(s.config)
+	if err != nil {
+		s.l.Error("", zap.String("init psql", err.Error()))
+		return err
+	}
+
 	// Init repositories
-	authRepo := authRepository.NewAuthRepository(s.l, nil)
+	aRepo := authRepository.NewAuthRepository(s.l, psqlDB)
 
 	// Init useCases
-	authUC := authUseCase.NewAuthUseCase(s.l, s.config, authRepo)
+	aUseCase := authUseCase.NewAuthUseCase(s.l, s.config, aRepo)
 
 	// Init handlers
-	authHandlers := authHttp.NewAuthHandlers(s.config, authUC, s.l)
+	aHandlers := authHttp.NewAuthHandlers(s.config, aUseCase, s.l)
 
 	{
-		authHttp.MapAuthRoutes(auth, authHandlers, authUC, s.config, s.l)
+		authHttp.MapAuthRoutes(auth, aHandlers, s.config, s.l)
 		// auth_routes.MapAuthRoutes(auth, s.h, s.useCases, s.config, s.logger)
 		// post_routes.MapPostRoutes(post, s.h, s.useCases, s.config, s.logger)
 		// comment_routes.MapCommentRoutes(comment, s.h, s.useCases, s.config, s.logger)
@@ -60,4 +68,6 @@ func (s *server) MapRoutes(e *echo.Echo) {
 			return c.JSON(200, map[string]string{"status": "OK"})
 		})
 	}
+
+	return nil
 }
