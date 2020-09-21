@@ -12,18 +12,6 @@ import (
 	"time"
 )
 
-// type deliveries struct {
-// 	auth auth.Delivery
-// }
-//
-// type useCases struct {
-// 	auth auth.UseCase
-// }
-//
-// type repositories struct {
-// 	auth auth.Repository
-// }
-
 // Server struct
 type server struct {
 	echo   *echo.Echo
@@ -44,7 +32,9 @@ func (s *server) Run() error {
 		certFile := "ssl/server.crt"
 		keyFile := "ssl/server.pem"
 
-		s.MapRoutes(s.echo)
+		if err := s.MapRoutes(s.echo); err != nil {
+			return err
+		}
 
 		s.echo.Server.ReadTimeout = time.Second * s.config.Server.ReadTimeout
 		s.echo.Server.WriteTimeout = time.Second * s.config.Server.WriteTimeout
