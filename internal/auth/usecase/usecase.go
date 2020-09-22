@@ -9,10 +9,10 @@ import (
 
 // Auth useCase
 type UseCase struct {
-	l  *logger.Logger
-	c  *config.Config
-	ar auth.Repository
-	r  *redis.RedisClient
+	logger   *logger.Logger
+	cfg      *config.Config
+	authRepo auth.Repository
+	redis    *redis.RedisClient
 }
 
 // Auth useCase constructor
@@ -22,5 +22,5 @@ func NewAuthUseCase(l *logger.Logger, c *config.Config, ar auth.Repository, r *r
 
 // Create new user
 func (u *UseCase) Create() error {
-	return u.ar.Create()
+	return u.authRepo.Create()
 }
