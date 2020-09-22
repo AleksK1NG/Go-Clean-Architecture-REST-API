@@ -16,7 +16,7 @@ import (
 type server struct {
 	echo   *echo.Echo
 	config *config.Config
-	l      *logger.Logger
+	logger *logger.Logger
 }
 
 // New server constructor
@@ -40,17 +40,17 @@ func (s *server) Run() error {
 		s.echo.Server.WriteTimeout = time.Second * s.config.Server.WriteTimeout
 
 		go func() {
-			s.l.Info("Server is listening on port: %v", zap.String("PORT", s.config.Server.Port))
+			s.logger.Info("Server is listening", zap.String("PORT", s.config.Server.Port))
 			if err := s.echo.StartTLS(s.config.Server.Port, certFile, keyFile); err != nil {
-				s.l.Fatal("error starting TLS server %v", zap.String("echo.StartTLS", err.Error()))
+				s.logger.Fatal("error starting TLS server", zap.String("echo.StartTLS", err.Error()))
 			}
 
 		}()
 
 		go func() {
-			s.l.Info("Starting Debug server on port: %v", zap.String("PORT", s.config.Server.PprofPort))
+			s.logger.Info("Starting Debug server", zap.String("PORT", s.config.Server.PprofPort))
 			if err := http.ListenAndServe(s.config.Server.PprofPort, http.DefaultServeMux); err != nil {
-				s.l.Error("PPROF", zap.String("PPROF ListenAndServe", err.Error()))
+				s.logger.Error("PPROF", zap.String("PPROF ListenAndServe", err.Error()))
 			}
 		}()
 
@@ -62,7 +62,7 @@ func (s *server) Run() error {
 		ctx, shutdown := context.WithTimeout(context.Background(), 5*time.Second)
 		defer shutdown()
 
-		s.l.Info("Server Exited Properly")
+		s.logger.Info("Server Exited Properly")
 		return s.echo.Server.Shutdown(ctx)
 
 	} else {
@@ -77,16 +77,16 @@ func (s *server) Run() error {
 		}
 
 		go func() {
-			s.l.Info("Server is listening on port: %v", zap.String("PORT", s.config.Server.Port))
+			s.logger.Info("Server is listening", zap.String("PORT", s.config.Server.Port))
 			if err := e.StartServer(server); err != nil {
-				s.l.Fatal("error starting TLS server %v", zap.String("StartServer", err.Error()))
+				s.logger.Fatal("error starting TLS server", zap.String("StartServer", err.Error()))
 			}
 		}()
 
 		go func() {
-			s.l.Info("Starting Debug server on port: %v", zap.String("PORT", s.config.Server.PprofPort))
+			s.logger.Info("Starting Debug server", zap.String("PORT", s.config.Server.PprofPort))
 			if err := http.ListenAndServe(s.config.Server.PprofPort, http.DefaultServeMux); err != nil {
-				s.l.Error("PPROF", zap.String("PPROF ListenAndServe", err.Error()))
+				s.logger.Error("PPROF", zap.String("PPROF ListenAndServe", err.Error()))
 			}
 		}()
 
@@ -98,7 +98,7 @@ func (s *server) Run() error {
 		ctx, shutdown := context.WithTimeout(context.Background(), 5*time.Second)
 		defer shutdown()
 
-		s.l.Info("Server Exited Properly")
+		s.logger.Info("Server Exited Properly")
 		return s.echo.Server.Shutdown(ctx)
 	}
 }

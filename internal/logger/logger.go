@@ -26,10 +26,11 @@ func NewLogger() (*Logger, error) {
 		DisableStacktrace: false,
 		Encoding:          "console",
 		EncoderConfig: zapcore.EncoderConfig{
+			MessageKey:   "MESSAGE",
 			CallerKey:    "CALLER",
 			LevelKey:     "LEVEL",
 			TimeKey:      "TIME",
-			NameKey:      "MESSAGE",
+			NameKey:      "NAME_KEY",
 			EncodeLevel:  zapcore.CapitalColorLevelEncoder,
 			EncodeTime:   zapcore.RFC3339TimeEncoder,
 			EncodeCaller: zapcore.FullCallerEncoder,

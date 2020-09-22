@@ -20,12 +20,12 @@ const (
 func (s *server) MapRoutes(e *echo.Echo) error {
 	psqlDB, err := postgres.NewPsqlDB(s.config)
 	if err != nil {
-		s.l.Error("", zap.String("init psql", err.Error()))
+		s.logger.Error("", zap.String("init psql", err.Error()))
 		return err
 	}
-	s.l.Info("Postgres connected", zap.String("DB Status: %#v", fmt.Sprintf("%#v", psqlDB.Stats())))
+	s.logger.Info("Postgres connected", zap.String("DB Status: %#v", fmt.Sprintf("%#v", psqlDB.Stats())))
 	redisConn := redis.NewRedisClient(s.config)
-	s.l.Info("Redis connected", zap.String("port", fmt.Sprintf("%s", s.config.Redis.RedisAddr)))
+	s.logger.Info("Redis connected")
 
 	// echo.Pre(middleware.HTTPSRedirect())
 	e.Use(middleware.RequestID())
@@ -56,16 +56,16 @@ func (s *server) MapRoutes(e *echo.Echo) error {
 	// comment := v1.Group("/comments")
 
 	// Init repositories
-	aRepo := authRepository.NewAuthRepository(s.l, psqlDB)
+	aRepo := authRepository.NewAuthRepository(s.logger, psqlDB)
 
 	// Init useCases
-	aUseCase := authUseCase.NewAuthUseCase(s.l, s.config, aRepo, redisConn)
+	aUseCase := authUseCase.NewAuthUseCase(s.logger, s.config, aRepo, redisConn)
 
 	// Init handlers
-	aHandlers := authHttp.NewAuthHandlers(s.config, aUseCase, s.l)
+	aHandlers := authHttp.NewAuthHandlers(s.config, aUseCase, s.logger)
 
 	{
-		authHttp.MapAuthRoutes(auth, aHandlers, s.config, s.l)
+		authHttp.MapAuthRoutes(auth, aHandlers, s.config, s.logger)
 		// auth_routes.MapAuthRoutes(auth, s.h, s.useCases, s.config, s.logger)
 		// post_routes.MapPostRoutes(post, s.h, s.useCases, s.config, s.logger)
 		// comment_routes.MapCommentRoutes(comment, s.h, s.useCases, s.config, s.logger)
