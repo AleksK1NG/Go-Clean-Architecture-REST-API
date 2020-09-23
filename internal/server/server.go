@@ -32,7 +32,7 @@ func (s *server) Run() error {
 		certFile := "ssl/server.crt"
 		keyFile := "ssl/server.pem"
 
-		if err := s.MapRoutes(s.echo); err != nil {
+		if err := s.MapHandlers(s.echo); err != nil {
 			return err
 		}
 
@@ -67,7 +67,7 @@ func (s *server) Run() error {
 
 	} else {
 		e := echo.New()
-		s.MapRoutes(e)
+		s.MapHandlers(e)
 
 		server := &http.Server{
 			Addr:           s.config.Server.Port,

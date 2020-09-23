@@ -7,6 +7,7 @@ import (
 	authUseCase "github.com/AleksK1NG/api-mc/internal/auth/usecase"
 	"github.com/AleksK1NG/api-mc/internal/db/postgres"
 	"github.com/AleksK1NG/api-mc/internal/db/redis"
+	"github.com/AleksK1NG/api-mc/internal/utils"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"go.uber.org/zap"
@@ -16,8 +17,8 @@ const (
 	loggerFormat = "${time_rfc3339}: ${method} ${uri}, STATUS: ${status} latency: ${latency_human}, bytes_in: ${bytes_in} \n"
 )
 
-// Map Server Routes
-func (s *server) MapRoutes(e *echo.Echo) error {
+// Map Server Handlers
+func (s *server) MapHandlers(e *echo.Echo) error {
 	psqlDB, err := postgres.NewPsqlDB(s.config)
 	if err != nil {
 		s.logger.Error("", zap.String("init psql", err.Error()))
@@ -70,6 +71,7 @@ func (s *server) MapRoutes(e *echo.Echo) error {
 		// post_routes.MapPostRoutes(post, s.h, s.useCases, s.config, s.logger)
 		// comment_routes.MapCommentRoutes(comment, s.h, s.useCases, s.config, s.logger)
 		health.GET("", func(c echo.Context) error {
+			s.logger.Info("Health check", zap.String("RequestID", utils.GetRequestID(c)))
 			return c.JSON(200, map[string]string{"status": "OK"})
 		})
 	}

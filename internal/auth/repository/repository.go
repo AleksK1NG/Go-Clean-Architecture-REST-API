@@ -6,17 +6,17 @@ import (
 )
 
 // Auth Repository
-type AuthRepository struct {
+type repository struct {
 	l  *logger.Logger
 	db *sqlx.DB
 }
 
 // Auth Repository constructor
-func NewAuthRepository(l *logger.Logger, db *sqlx.DB) *AuthRepository {
-	return &AuthRepository{l: l, db: db}
+func NewAuthRepository(l *logger.Logger, db *sqlx.DB) *repository {
+	return &repository{l: l, db: db}
 }
 
 // Create user
-func (r *AuthRepository) Create() error {
+func (r *repository) Create() error {
 	return nil
 }
