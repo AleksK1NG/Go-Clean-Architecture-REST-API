@@ -1,4 +1,4 @@
-package error
+package errors
 
 import (
 	"encoding/json"
@@ -46,7 +46,7 @@ type restErr struct {
 }
 
 func (e restErr) Error() string {
-	return fmt.Sprintf("message: %s - status: %d - error: %s - causes: %v",
+	return fmt.Sprintf("message: %s - status: %d - errors: %s - causes: %v",
 		e.ErrMessage, e.ErrStatus, e.ErrError, e.ErrCauses)
 }
 
@@ -116,7 +116,6 @@ func NewInternalServerError(message string, err error) RestErr {
 }
 
 func ParseErrors(err error) RestErr {
-
 	if err != nil {
 		switch err {
 		case BadRequest:
