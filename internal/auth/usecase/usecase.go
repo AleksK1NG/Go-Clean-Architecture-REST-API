@@ -4,6 +4,7 @@ import (
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/auth"
 	"github.com/AleksK1NG/api-mc/internal/db/redis"
+	"github.com/AleksK1NG/api-mc/internal/errors"
 	"github.com/AleksK1NG/api-mc/internal/logger"
 )
 
@@ -22,5 +23,5 @@ func NewAuthUseCase(l *logger.Logger, c *config.Config, ar auth.Repository, r *r
 
 // Create new user
 func (u *useCase) Create() error {
-	return u.authRepo.Create()
+	return errors.BadRequest
 }
