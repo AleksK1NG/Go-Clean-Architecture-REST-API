@@ -5,24 +5,25 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/auth"
 	"github.com/AleksK1NG/api-mc/internal/errors"
 	"github.com/AleksK1NG/api-mc/internal/logger"
+	"github.com/AleksK1NG/api-mc/internal/utils"
 	"github.com/labstack/echo"
 	"net/http"
 )
 
 // Auth handlers
-type Handlers struct {
+type handlers struct {
 	cfg    *config.Config
 	authUC auth.UseCase
 	log    *logger.Logger
 }
 
 // Auth handlers constructor
-func NewAuthHandlers(cfg *config.Config, authUC auth.UseCase, log *logger.Logger) *Handlers {
-	return &Handlers{cfg, authUC, log}
+func NewAuthHandlers(cfg *config.Config, authUC auth.UseCase, log *logger.Logger) *handlers {
+	return &handlers{cfg, authUC, log}
 }
 
 // Crate new user
-func (h *Handlers) Create() echo.HandlerFunc {
+func (h *handlers) Create() echo.HandlerFunc {
 	return func(c echo.Context) error {
 
 		if err := h.authUC.Create(); err != nil {
@@ -34,8 +35,13 @@ func (h *Handlers) Create() echo.HandlerFunc {
 }
 
 // Fet user by id
-func (h *Handlers) GetUserByID() echo.HandlerFunc {
+func (h *handlers) GetUserByID() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.JSON(http.StatusOK, "Ok")
+
+		paginationQuery, err := utils.GetPaginationFromCtx(c)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, errors.BadQueryParams)
+		}
+		return c.JSON(http.StatusOK, paginationQuery)
 	}
 }
