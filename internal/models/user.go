@@ -14,9 +14,13 @@ type User struct {
 	LastName    string    `json:"last_name" db:"last_name"`
 	Email       string    `json:"email" db:"email"`
 	PhoneNumber *string   `json:"phone_number" db:"phone_number"`
-	Role        string    `json:"role" db:"role"`
+	Role        *string   `json:"role" db:"role"`
 	Address     *string   `json:"address" db:"address"`
 	City        *string   `json:"city" db:"city"`
+	Country     *string   `json:"country" db:"country"`
+	Postcode    *int      `json:"postcode" db:"postcode"`
+	Balance     float64   `json:"balance" db:"postcode"`
+	Avatar      *string   `json:"avatar" db:"avatar"`
 	Password    string    `json:"-" db:"password"`
 	CreatedAt   time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
@@ -46,13 +50,20 @@ func (u *User) SanitizePassword() {
 }
 
 // Prepare user struct for register
-func (u *User) Prepare() error {
+func (u *User) PrepareCreate() error {
 	u.Email = strings.ToLower(strings.TrimSpace(u.Email))
 	u.Password = strings.TrimSpace(u.Password)
+
+	if err := u.HashPassword(); err != nil {
+		return err
+	}
+
 	if u.PhoneNumber != nil {
 		*u.PhoneNumber = strings.TrimSpace(*u.PhoneNumber)
 	}
-	u.Role = strings.ToLower(strings.TrimSpace(u.Role))
+	if u.Role != nil {
+		*u.Role = strings.ToLower(strings.TrimSpace(*u.Role))
+	}
 
 	return nil
 }
