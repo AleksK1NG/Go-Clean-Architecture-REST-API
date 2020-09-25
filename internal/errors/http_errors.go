@@ -83,7 +83,7 @@ func NewBadRequestError(message string) RestErr {
 	return restErr{
 		ErrMessage: message,
 		ErrStatus:  http.StatusBadRequest,
-		ErrError:   "bad_request",
+		ErrError:   "Bad Request",
 	}
 }
 
@@ -91,7 +91,7 @@ func NewNotFoundError(message string) RestErr {
 	return restErr{
 		ErrMessage: message,
 		ErrStatus:  http.StatusNotFound,
-		ErrError:   "not_found",
+		ErrError:   "Not found",
 	}
 }
 
@@ -99,7 +99,7 @@ func NewUnauthorizedError(message string) RestErr {
 	return restErr{
 		ErrMessage: message,
 		ErrStatus:  http.StatusUnauthorized,
-		ErrError:   "unauthorized",
+		ErrError:   "Unauthorized",
 	}
 }
 
@@ -107,7 +107,7 @@ func NewInternalServerError(message string, err error) RestErr {
 	result := restErr{
 		ErrMessage: message,
 		ErrStatus:  http.StatusInternalServerError,
-		ErrError:   "internal_server_error",
+		ErrError:   "Internal server error",
 	}
 	if err != nil {
 		result.ErrCauses = append(result.ErrCauses, err.Error())
@@ -119,7 +119,7 @@ func ParseErrors(err error) RestErr {
 	if err != nil {
 		switch err {
 		case BadRequest:
-			return NewBadRequestError(err.Error())
+			return NewBadRequestError("")
 		case NotFound:
 			return NewNotFoundError(err.Error())
 		case NoSuchUser:
