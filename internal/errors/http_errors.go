@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 var (
@@ -116,6 +117,10 @@ func NewInternalServerError(message string, err error) RestErr {
 }
 
 func ParseErrors(err error) RestErr {
+	if strings.Contains(err.Error(), "SQLSTATE") {
+		return NewBadRequestError("")
+	}
+
 	if err != nil {
 		switch err {
 		case BadRequest:
@@ -159,8 +164,8 @@ func ParseErrors(err error) RestErr {
 		case ApiResponseStatusNotOK:
 			return NewInternalServerError("", nil)
 		default:
-			return NewInternalServerError(InternalServerError.Error(), err)
+			return NewInternalServerError("", nil)
 		}
 	}
-	return NewInternalServerError(InternalServerError.Error(), err)
+	return NewInternalServerError("", nil)
 }

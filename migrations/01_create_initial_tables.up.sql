@@ -13,7 +13,7 @@ CREATE TABLE users
     user_id      UUID PRIMARY KEY                     DEFAULT uuid_generate_v4(),
     first_name   VARCHAR(32)                 NOT NULL check ( first_name <> '' ),
     last_name    VARCHAR(32)                 NOT NULL check ( last_name <> '' ),
-    email        VARCHAR(64)                 NOT NULL check ( email <> '' ),
+    email        VARCHAR(64) UNIQUE          NOT NULL check ( email <> '' ),
     password     VARCHAR(250)                NOT NULL CHECK ( octet_length(password) <> 0 ),
     role         VARCHAR(10)                 NOT NULL DEFAULT 'user',
     about        VARCHAR(1024)                        DEFAULT '',

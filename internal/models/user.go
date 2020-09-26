@@ -7,13 +7,6 @@ import (
 	"time"
 )
 
-// Gender types
-const (
-	Male = iota
-	Female
-	Other
-)
-
 // User full model
 type User struct {
 	ID          uuid.UUID  `json:"user_id" db:"user_id"`
@@ -23,15 +16,15 @@ type User struct {
 	Password    string     `json:"-" db:"password"`
 	Role        *string    `json:"role,omitempty" db:"role"`
 	About       *string    `json:"about,omitempty" db:"about"`
-	Avatar      *string    `json:"avatar,omitempty" db:"about"`
+	Avatar      *string    `json:"avatar,omitempty" db:"avatar"`
 	PhoneNumber *string    `json:"phone_number,omitempty" db:"phone_number"`
 	Address     *string    `json:"address,omitempty" db:"address"`
 	City        *string    `json:"city,omitempty" db:"city"`
 	Country     *string    `json:"country,omitempty" db:"country"`
-	Gender      *int       `json:"gender,omitempty"`
+	Gender      *string    `json:"gender,omitempty" db:"gender"`
 	Postcode    *int       `json:"postcode,omitempty" db:"postcode"`
-	Balance     float64    `json:"balance" db:"postcode"`
-	Birthday    *time.Time `json:"birthday,omitempty" db:"postcode"`
+	Balance     float64    `json:"balance" db:"balance"`
+	Birthday    *time.Time `json:"birthday,omitempty" db:"birthday"`
 	CreatedAt   time.Time  `json:"created_at" db:"created_at"`
 	UpdatedAt   time.Time  `json:"updated_at" db:"updated_at"`
 	LoginDate   time.Time  `json:"login_date" db:"login_date"`
