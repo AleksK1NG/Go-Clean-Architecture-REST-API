@@ -5,8 +5,10 @@ import (
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/auth"
 	"github.com/AleksK1NG/api-mc/internal/db/redis"
+	"github.com/AleksK1NG/api-mc/internal/errors"
 	"github.com/AleksK1NG/api-mc/internal/logger"
 	"github.com/AleksK1NG/api-mc/internal/models"
+	"github.com/AleksK1NG/api-mc/internal/utils"
 )
 
 // Auth useCase
@@ -25,6 +27,10 @@ func NewAuthUseCase(l *logger.Logger, c *config.Config, ar auth.Repository, r *r
 // Create new user
 func (u *useCase) Create(ctx context.Context, user *models.User) (*models.User, error) {
 	if err := user.PrepareCreate(); err != nil {
+		return nil, errors.NewBadRequestError(err.Error())
+	}
+
+	if err := utils.ValidateStruct(ctx, user); err != nil {
 		return nil, err
 	}
 
