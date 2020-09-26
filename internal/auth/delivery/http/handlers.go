@@ -35,13 +35,13 @@ func (h *handlers) Create() echo.HandlerFunc {
 		var user models.User
 		if err := c.Bind(&user); err != nil {
 			h.log.Error("Create c.Bind", zap.String("ReqID", utils.GetRequestID(c)), zap.String("Error:", err.Error()))
-			return c.JSON(http.StatusBadRequest, err.Error())
+			return c.JSON(http.StatusBadRequest, errors.BadRequest)
 		}
 
 		createdUser, err := h.authUC.Create(ctx, &user)
 		if err != nil {
 			h.log.Error("auth repo create", zap.String("reqID", utils.GetRequestID(c)), zap.String("Error:", err.Error()))
-			return c.JSON(errors.ParseErrors(err).Status(), errors.ParseErrors(err))
+			return c.JSON(errors.ErrorResponse(err))
 		}
 
 		h.log.Info("Created user", zap.String("reqID", utils.GetRequestID(c)), zap.String("ID", createdUser.ID.String()))

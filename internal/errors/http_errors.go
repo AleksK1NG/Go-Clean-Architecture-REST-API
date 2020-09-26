@@ -121,6 +121,10 @@ func ParseErrors(err error) RestErr {
 		return NewBadRequestError("")
 	}
 
+	if strings.Contains(err.Error(), "Field validation") {
+		return NewBadRequestError(err.Error())
+	}
+
 	if err != nil {
 		switch err {
 		case BadRequest:
@@ -168,4 +172,9 @@ func ParseErrors(err error) RestErr {
 		}
 	}
 	return NewInternalServerError("", nil)
+}
+
+// Error response
+func ErrorResponse(err error) (int, interface{}) {
+	return ParseErrors(err).Status(), ParseErrors(err)
 }
