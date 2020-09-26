@@ -11,6 +11,7 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"go.uber.org/zap"
+	"net/http"
 )
 
 const (
@@ -21,7 +22,7 @@ const (
 func (s *server) MapHandlers(e *echo.Echo) error {
 	psqlDB, err := postgres.NewPsqlDB(s.config)
 	if err != nil {
-		s.logger.Error("", zap.String("init psql", err.Error()))
+		s.logger.Fatal("", zap.String("init psql", err.Error()))
 		return err
 	}
 	s.logger.Info("Postgres connected", zap.String("DB Status: %#v", fmt.Sprintf("%#v", psqlDB.Stats())))
@@ -64,7 +65,6 @@ func (s *server) MapHandlers(e *echo.Echo) error {
 
 	// Init handlers
 	aHandlers := authHttp.NewAuthHandlers(s.config, aUseCase, s.logger)
-
 	{
 		authHttp.MapAuthRoutes(auth, aHandlers, s.config, s.logger)
 		// auth_routes.MapAuthRoutes(auth, s.h, s.useCases, s.config, s.logger)
@@ -72,7 +72,7 @@ func (s *server) MapHandlers(e *echo.Echo) error {
 		// comment_routes.MapCommentRoutes(comment, s.h, s.useCases, s.config, s.logger)
 		health.GET("", func(c echo.Context) error {
 			s.logger.Info("Health check", zap.String("RequestID", utils.GetRequestID(c)))
-			return c.JSON(200, map[string]string{"status": "OK"})
+			return c.JSON(http.StatusOK, map[string]string{"status": "OK"})
 		})
 	}
 

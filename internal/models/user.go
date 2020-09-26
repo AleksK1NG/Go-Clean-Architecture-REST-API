@@ -7,23 +7,34 @@ import (
 	"time"
 )
 
-// User model
+// Gender types
+const (
+	Male = iota
+	Female
+	Other
+)
+
+// User full model
 type User struct {
-	ID          uuid.UUID `json:"user_id" db:"user_id"`
-	FirstName   string    `json:"first_name" db:"first_name"`
-	LastName    string    `json:"last_name" db:"last_name"`
-	Email       string    `json:"email" db:"email"`
-	PhoneNumber *string   `json:"phone_number" db:"phone_number"`
-	Role        *string   `json:"role" db:"role"`
-	Address     *string   `json:"address" db:"address"`
-	City        *string   `json:"city" db:"city"`
-	Country     *string   `json:"country" db:"country"`
-	Postcode    *int      `json:"postcode" db:"postcode"`
-	Balance     float64   `json:"balance" db:"postcode"`
-	Avatar      *string   `json:"avatar" db:"avatar"`
-	Password    string    `json:"-" db:"password"`
-	CreatedAt   time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
+	ID          uuid.UUID  `json:"user_id" db:"user_id"`
+	FirstName   string     `json:"first_name" db:"first_name"`
+	LastName    string     `json:"last_name" db:"last_name"`
+	Email       string     `json:"email" db:"email"`
+	Password    string     `json:"-" db:"password"`
+	Role        *string    `json:"role" db:"role"`
+	About       *string    `json:"about,omitempty" db:"about"`
+	Avatar      *string    `json:"avatar,omitempty" db:"about"`
+	PhoneNumber *string    `json:"phone_number,omitempty" db:"phone_number"`
+	Address     *string    `json:"address,omitempty" db:"address"`
+	City        *string    `json:"city,omitempty" db:"city"`
+	Country     *string    `json:"country,omitempty" db:"country"`
+	Gender      *int       `json:"gender,omitempty"`
+	Postcode    *int       `json:"postcode,omitempty" db:"postcode"`
+	Balance     float64    `json:"balance" db:"postcode"`
+	Birthday    *time.Time `json:"birthday" db:"postcode"`
+	CreatedAt   time.Time  `json:"created_at" db:"created_at"`
+	UpdatedAt   time.Time  `json:"updated_at" db:"updated_at"`
+	LoginDate   time.Time  `json:"login_date" db:"login_date"`
 }
 
 // Hash user password with bcrypt
@@ -49,7 +60,7 @@ func (u *User) SanitizePassword() {
 	u.Password = ""
 }
 
-// Prepare user struct for register
+// Prepare user for register
 func (u *User) PrepareCreate() error {
 	u.Email = strings.ToLower(strings.TrimSpace(u.Email))
 	u.Password = strings.TrimSpace(u.Password)
