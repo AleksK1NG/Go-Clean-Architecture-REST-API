@@ -5,8 +5,10 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/auth"
 	"github.com/AleksK1NG/api-mc/internal/errors"
 	"github.com/AleksK1NG/api-mc/internal/logger"
+	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/utils"
 	"github.com/labstack/echo"
+	"go.uber.org/zap"
 	"net/http"
 )
 
@@ -25,12 +27,26 @@ func NewAuthHandlers(cfg *config.Config, authUC auth.UseCase, log *logger.Logger
 // Crate new user
 func (h *handlers) Create() echo.HandlerFunc {
 	return func(c echo.Context) error {
+		ctx, cancel := utils.GetCtxWithReqID(c)
+		defer cancel()
 
-		if err := h.authUC.Create(); err != nil {
+		h.log.Info("Create user", zap.String("ReqID", utils.GetRequestID(c)))
+
+		var user models.User
+		if err := c.Bind(&user); err != nil {
+			h.log.Error("Create c.Bind", zap.String("ReqID", utils.GetRequestID(c)), zap.String("Error:", err.Error()))
+			return c.JSON(http.StatusBadRequest, err.Error())
+		}
+
+		createdUser, err := h.authUC.Create(ctx, &user)
+		if err != nil {
+			h.log.Error("auth repo create", zap.String("reqID", utils.GetRequestID(c)), zap.String("Error:", err.Error()))
 			return c.JSON(errors.ParseErrors(err).Status(), errors.ParseErrors(err))
 		}
 
-		return c.JSON(http.StatusCreated, "Ok")
+		h.log.Info("Created user", zap.String("reqID", utils.GetRequestID(c)), zap.String("ID", createdUser.ID.String()))
+
+		return c.JSON(http.StatusCreated, createdUser)
 	}
 }
 

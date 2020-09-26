@@ -16,7 +16,7 @@ CREATE TABLE users
     email        VARCHAR(64)                 NOT NULL check ( email <> '' ),
     password     VARCHAR(250)                NOT NULL CHECK ( octet_length(password) <> 0 ),
     role         VARCHAR(10)                 NOT NULL DEFAULT 'user',
-    about        VARCHAR(1024)                         DEFAULT '',
+    about        VARCHAR(1024)                        DEFAULT '',
     avatar       VARCHAR(512),
     phone_number VARCHAR(20),
     address      VARCHAR(250),
@@ -25,6 +25,7 @@ CREATE TABLE users
     gender       SEX_T,
     postcode     SMALLINT,
     birthday     DATE                                 DEFAULT NULL,
+    balance      NUMERIC                     NOT NULL DEFAULT 0,
     created_at   TIMESTAMP                   NOT NULL DEFAULT now(),
     updated_at   TIMESTAMP                            DEFAULT current_timestamp,
     login_date   TIMESTAMP(0) WITH TIME ZONE NOT NULL DEFAULT current_timestamp
