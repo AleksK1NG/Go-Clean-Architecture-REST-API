@@ -1,10 +1,12 @@
 package usecase
 
 import (
+	"context"
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/auth"
 	"github.com/AleksK1NG/api-mc/internal/db/redis"
 	"github.com/AleksK1NG/api-mc/internal/logger"
+	"github.com/AleksK1NG/api-mc/internal/models"
 )
 
 // Auth useCase
@@ -21,6 +23,15 @@ func NewAuthUseCase(l *logger.Logger, c *config.Config, ar auth.Repository, r *r
 }
 
 // Create new user
-func (u *useCase) Create() error {
-	return u.authRepo.Create()
+func (u *useCase) Create(ctx context.Context, user *models.User) (*models.User, error) {
+	if err := user.PrepareCreate(); err != nil {
+		return nil, err
+	}
+
+	createdUser, err := u.authRepo.Create(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+
+	return createdUser, nil
 }

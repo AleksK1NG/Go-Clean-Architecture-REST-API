@@ -21,7 +21,7 @@ type User struct {
 	LastName    string     `json:"last_name" db:"last_name"`
 	Email       string     `json:"email" db:"email"`
 	Password    string     `json:"-" db:"password"`
-	Role        *string    `json:"role" db:"role"`
+	Role        *string    `json:"role,omitempty" db:"role"`
 	About       *string    `json:"about,omitempty" db:"about"`
 	Avatar      *string    `json:"avatar,omitempty" db:"about"`
 	PhoneNumber *string    `json:"phone_number,omitempty" db:"phone_number"`
@@ -31,7 +31,7 @@ type User struct {
 	Gender      *int       `json:"gender,omitempty"`
 	Postcode    *int       `json:"postcode,omitempty" db:"postcode"`
 	Balance     float64    `json:"balance" db:"postcode"`
-	Birthday    *time.Time `json:"birthday" db:"postcode"`
+	Birthday    *time.Time `json:"birthday,omitempty" db:"postcode"`
 	CreatedAt   time.Time  `json:"created_at" db:"created_at"`
 	UpdatedAt   time.Time  `json:"updated_at" db:"updated_at"`
 	LoginDate   time.Time  `json:"login_date" db:"login_date"`
