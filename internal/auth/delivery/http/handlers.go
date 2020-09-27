@@ -119,7 +119,7 @@ func (h *handlers) Delete() echo.HandlerFunc {
 		uID, err := uuid.Parse(c.Param("user_id"))
 		if err != nil {
 			h.log.Error("Update uuid.Parse", zap.String("ReqID", utils.GetRequestID(c)), zap.String("Error:", err.Error()))
-			return c.JSON(http.StatusBadRequest, errors.NewBadRequestError(err.Error()))
+			return c.JSON(http.StatusBadRequest, errors.ParseErrors(err))
 		}
 
 		if err := h.authUC.Delete(ctx, uID); err != nil {

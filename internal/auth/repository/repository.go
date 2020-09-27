@@ -3,14 +3,11 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"github.com/AleksK1NG/api-mc/internal/auth"
-	"github.com/AleksK1NG/api-mc/internal/errors"
 	"github.com/AleksK1NG/api-mc/internal/logger"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	"go.uber.org/zap"
 )
 
 // Auth Repository
@@ -35,11 +32,8 @@ func (r *repository) Create(ctx context.Context, user *models.User) (*models.Use
 	if err := r.db.QueryRowxContext(ctx, createUserQuery, &user.FirstName, &user.LastName, &user.Email, &user.Password, &user.Role,
 		&user.About, &user.Avatar, &user.PhoneNumber, &user.Address, &user.City, &user.Gender, &user.Postcode, &user.Birthday,
 	).StructScan(&u); err != nil {
-		r.logger.Error("QueryRowxContext", zap.String("ERROR", err.Error()))
 		return nil, err
 	}
-
-	r.logger.Info("USER", zap.String("USER", fmt.Sprintf("%#v", u)))
 
 	return &u, nil
 
@@ -69,11 +63,9 @@ func (r *repository) Update(ctx context.Context, user *models.UserUpdate) (*mode
 	if err := r.db.GetContext(ctx, &u, updateUserQuery, &user.FirstName, &user.LastName, &user.Email, &user.Role, &user.About, &user.Avatar, &user.PhoneNumber,
 		&user.Address, &user.City, &user.Gender, &user.Postcode, &user.Birthday, &user.ID,
 	); err != nil {
-		r.logger.Error("Get", zap.String("ERROR", err.Error()))
 		return nil, err
 	}
 
-	r.logger.Info("USER", zap.String("USER", fmt.Sprintf("%#v", u)))
 	return &u, nil
 }
 
@@ -83,20 +75,16 @@ func (r *repository) Delete(ctx context.Context, userID uuid.UUID) error {
 
 	result, err := r.db.ExecContext(ctx, deleteUserQuery, userID)
 	if err != nil {
-		r.logger.Error("Get", zap.String("ERROR", err.Error()))
 		return err
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		r.logger.Error("Get", zap.String("ERROR", err.Error()))
 		return err
 	}
 	if rowsAffected == 0 {
-		r.logger.Error("rowsAffected == 0")
-		return errors.NotFound
+		return sql.ErrNoRows
 	}
 
-	r.logger.Info("RESULT", zap.String("USER", fmt.Sprintf("%#v", result)), zap.Int64("rowsAffected", rowsAffected))
 	return nil
 }
 
@@ -107,13 +95,8 @@ func (r *repository) GetByID(ctx context.Context, userID uuid.UUID) (*models.Use
 
 	var user models.User
 	if err := r.db.GetContext(ctx, &user, getUserQuery, userID); err != nil {
-		r.logger.Error("GetContext", zap.String("ERROR", err.Error()))
-		if err == sql.ErrNoRows {
-			return nil, errors.NotFound
-		}
 		return nil, err
 	}
 
-	r.logger.Info("USER", zap.String("USER", fmt.Sprintf("%#v", user)))
 	return &user, nil
 }
