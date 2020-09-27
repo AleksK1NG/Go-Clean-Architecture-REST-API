@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"github.com/AleksK1NG/api-mc/internal/auth"
+	"github.com/AleksK1NG/api-mc/internal/errors"
 	"github.com/AleksK1NG/api-mc/internal/logger"
 	"github.com/AleksK1NG/api-mc/internal/models"
+	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"go.uber.org/zap"
 )
@@ -69,6 +71,30 @@ func (r *repository) Update(ctx context.Context, user *models.UserUpdate) (*mode
 		r.logger.Error("Get", zap.String("ERROR", err.Error()))
 		return nil, err
 	}
+
 	r.logger.Info("USER", zap.String("USER", fmt.Sprintf("%#v", u)))
 	return &u, nil
+}
+
+// Delete existing user
+func (r *repository) Delete(ctx context.Context, userID uuid.UUID) error {
+	deleteUserQuery := `DELETE FROM users WHERE user_id = $1`
+
+	result, err := r.db.ExecContext(ctx, deleteUserQuery, userID)
+	if err != nil {
+		r.logger.Error("Get", zap.String("ERROR", err.Error()))
+		return err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		r.logger.Error("Get", zap.String("ERROR", err.Error()))
+		return err
+	}
+	if rowsAffected == 0 {
+		r.logger.Error("rowsAffected == 0")
+		return errors.NotFound
+	}
+
+	r.logger.Info("RESULT", zap.String("USER", fmt.Sprintf("%#v", result)), zap.Int64("rowsAffected", rowsAffected))
+	return nil
 }

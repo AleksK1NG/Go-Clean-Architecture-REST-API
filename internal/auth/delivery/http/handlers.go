@@ -95,3 +95,26 @@ func (h *handlers) GetUserByID() echo.HandlerFunc {
 		return c.JSON(http.StatusOK, paginationQuery)
 	}
 }
+
+// Delete user handler
+func (h *handlers) Delete() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		ctx, cancel := utils.GetCtxWithReqID(c)
+		defer cancel()
+
+		h.log.Info("Update user", zap.String("ReqID", utils.GetRequestID(c)))
+
+		uID, err := uuid.Parse(c.Param("user_id"))
+		if err != nil {
+			h.log.Error("Update uuid.Parse", zap.String("ReqID", utils.GetRequestID(c)), zap.String("Error:", err.Error()))
+			return c.JSON(http.StatusBadRequest, errors.NewBadRequestError(err.Error()))
+		}
+
+		if err := h.authUC.Delete(ctx, uID); err != nil {
+			h.log.Error("auth repo delete", zap.String("reqID", utils.GetRequestID(c)), zap.String("Error:", err.Error()))
+			return c.JSON(errors.ErrorResponse(err))
+		}
+
+		return c.NoContent(http.StatusOK)
+	}
+}
