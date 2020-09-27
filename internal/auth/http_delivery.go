@@ -6,5 +6,6 @@ import "github.com/labstack/echo"
 type Handlers interface {
 	Create() echo.HandlerFunc
 	Update() echo.HandlerFunc
+	Delete() echo.HandlerFunc
 	GetUserByID() echo.HandlerFunc
 }

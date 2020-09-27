@@ -9,6 +9,7 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/logger"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/utils"
+	"github.com/google/uuid"
 )
 
 // Auth useCase
@@ -58,4 +59,12 @@ func (u *useCase) Update(ctx context.Context, user *models.UserUpdate) (*models.
 	}
 
 	return updatedUser, nil
+}
+
+// Delete new user
+func (u *useCase) Delete(ctx context.Context, userID uuid.UUID) error {
+	if err := u.authRepo.Delete(ctx, userID); err != nil {
+		return err
+	}
+	return nil
 }
