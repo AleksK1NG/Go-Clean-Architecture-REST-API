@@ -5,8 +5,8 @@ CREATE EXTENSION IF NOT EXISTS CITEXT;
 -- CREATE EXTENSION IF NOT EXISTS postgis;
 -- CREATE EXTENSION IF NOT EXISTS postgis_topology;
 
-DROP TYPE IF EXISTS SEX_T;
-CREATE TYPE SEX_T AS ENUM ('male', 'female', 'other');
+DROP TYPE IF EXISTS SEX_T CASCADE;
+-- CREATE TYPE SEX_T AS ENUM ('male', 'female', 'other');
 
 CREATE TABLE users
 (
@@ -22,10 +22,9 @@ CREATE TABLE users
     address      VARCHAR(250),
     city         VARCHAR(30),
     country      VARCHAR(30),
-    gender       SEX_T,
-    postcode     SMALLINT,
+    gender       VARCHAR(20)                 NOT NULL DEFAULT 'male',
+    postcode     INTEGER,
     birthday     DATE                                 DEFAULT NULL,
-    balance      NUMERIC                     NOT NULL DEFAULT 0,
     created_at   TIMESTAMP                   NOT NULL DEFAULT now(),
     updated_at   TIMESTAMP                            DEFAULT current_timestamp,
     login_date   TIMESTAMP(0) WITH TIME ZONE NOT NULL DEFAULT current_timestamp

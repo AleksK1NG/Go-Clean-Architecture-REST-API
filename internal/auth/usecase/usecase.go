@@ -20,7 +20,7 @@ type useCase struct {
 }
 
 // Auth useCase constructor
-func NewAuthUseCase(l *logger.Logger, c *config.Config, ar auth.Repository, r *redis.RedisClient) *useCase {
+func NewAuthUseCase(l *logger.Logger, c *config.Config, ar auth.Repository, r *redis.RedisClient) auth.UseCase {
 	return &useCase{l, c, ar, r}
 }
 
@@ -40,4 +40,22 @@ func (u *useCase) Create(ctx context.Context, user *models.User) (*models.User, 
 	}
 
 	return createdUser, nil
+}
+
+// Update existing user
+func (u *useCase) Update(ctx context.Context, user *models.UserUpdate) (*models.User, error) {
+	if err := utils.ValidateStruct(ctx, user); err != nil {
+		return nil, err
+	}
+
+	if err := user.PrepareUpdate(); err != nil {
+		return nil, err
+	}
+
+	updatedUser, err := u.authRepo.Update(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+
+	return updatedUser, nil
 }
