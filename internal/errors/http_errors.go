@@ -1,9 +1,11 @@
 package errors
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/hashicorp/go.net/context"
 	"net/http"
 	"strings"
 )
@@ -30,20 +32,21 @@ var (
 	ApiResponseStatusNotOK  = errors.New("Ошибка овтета внешнего API")
 	ApiAnswerEmptyResult    = errors.New("Некорректный ответ внешнего API")
 	InternalServerError     = errors.New("Internal Server Error")
+	RequestTimeoutError     = errors.New("Request Timeout")
 )
 
 type RestErr interface {
 	Message() string
 	Status() int
 	Error() string
-	Causes() []interface{}
+	Causes() interface{}
 }
 
 type restErr struct {
-	ErrMessage string        `json:"message,omitempty"`
-	ErrStatus  int           `json:"status,omitempty"`
-	ErrError   string        `json:"error,omitempty"`
-	ErrCauses  []interface{} `json:"causes,omitempty"`
+	ErrMessage string      `json:"message,omitempty"`
+	ErrStatus  int         `json:"status,omitempty"`
+	ErrError   string      `json:"error,omitempty"`
+	ErrCauses  interface{} `json:"-"`
 }
 
 func (e restErr) Error() string {
@@ -59,11 +62,11 @@ func (e restErr) Status() int {
 	return e.ErrStatus
 }
 
-func (e restErr) Causes() []interface{} {
+func (e restErr) Causes() interface{} {
 	return e.ErrCauses
 }
 
-func NewRestError(message string, status int, err string, causes []interface{}) RestErr {
+func NewRestError(message string, status int, err string, causes interface{}) RestErr {
 	return restErr{
 		ErrMessage: message,
 		ErrStatus:  status,
@@ -111,12 +114,13 @@ func NewInternalServerError(message string, err error) RestErr {
 		ErrError:   "Internal server error",
 	}
 	if err != nil {
-		result.ErrCauses = append(result.ErrCauses, err.Error())
+		result.ErrCauses = err
 	}
 	return result
 }
 
 func ParseErrors(err error) RestErr {
+
 	if strings.Contains(err.Error(), "SQLSTATE") {
 		return NewBadRequestError("")
 	}
@@ -125,6 +129,23 @@ func ParseErrors(err error) RestErr {
 		return NewBadRequestError(err.Error())
 	}
 
+	if err == sql.ErrNoRows {
+		return NewRestError("", http.StatusNotFound, NotFound.Error(), err)
+	}
+
+	if err == context.DeadlineExceeded {
+		return NewRestError("", http.StatusRequestTimeout, RequestTimeoutError.Error(), nil)
+	}
+
+	restErr, ok := err.(RestErr)
+	if ok {
+		return ParseRestErrors(restErr)
+	}
+
+	return NewInternalServerError("", err)
+}
+
+func ParseRestErrors(err RestErr) RestErr {
 	if err != nil {
 		switch err {
 		case BadRequest:
