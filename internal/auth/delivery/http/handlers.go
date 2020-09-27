@@ -84,15 +84,27 @@ func (h *handlers) Update() echo.HandlerFunc {
 	}
 }
 
-// Fet user by id
+// Get user by id
 func (h *handlers) GetUserByID() echo.HandlerFunc {
 	return func(c echo.Context) error {
+		ctx, cancel := utils.GetCtxWithReqID(c)
+		defer cancel()
 
-		paginationQuery, err := utils.GetPaginationFromCtx(c)
+		h.log.Info("Update user", zap.String("ReqID", utils.GetRequestID(c)))
+
+		uID, err := uuid.Parse(c.Param("user_id"))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, errors.BadQueryParams)
+			h.log.Error("Update uuid.Parse", zap.String("ReqID", utils.GetRequestID(c)), zap.String("Error:", err.Error()))
+			return c.JSON(http.StatusBadRequest, errors.NewBadRequestError(err.Error()))
 		}
-		return c.JSON(http.StatusOK, paginationQuery)
+
+		user, err := h.authUC.GetByID(ctx, uID)
+		if err != nil {
+			h.log.Error("auth repo get by id", zap.String("reqID", utils.GetRequestID(c)), zap.String("Error:", err.Error()))
+			return c.JSON(errors.ErrorResponse(err))
+		}
+
+		return c.JSON(http.StatusOK, user)
 	}
 }
 

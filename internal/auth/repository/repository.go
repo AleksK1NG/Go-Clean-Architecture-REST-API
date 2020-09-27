@@ -98,3 +98,18 @@ func (r *repository) Delete(ctx context.Context, userID uuid.UUID) error {
 	r.logger.Info("RESULT", zap.String("USER", fmt.Sprintf("%#v", result)), zap.Int64("rowsAffected", rowsAffected))
 	return nil
 }
+
+// Get user by id
+func (r *repository) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, error) {
+	getUserQuery := `SELECT user_id, first_name, last_name, email, role, about, avatar, phone_number, address,
+	               	city, gender, postcode, birthday, created_at, updated_at, login_date  FROM users WHERE user_id = $1`
+
+	var user models.User
+	if err := r.db.GetContext(ctx, &user, getUserQuery, userID); err != nil {
+		r.logger.Error("GetContext", zap.String("ERROR", err.Error()))
+		return nil, err
+	}
+
+	r.logger.Info("USER", zap.String("USER", fmt.Sprintf("%#v", user)))
+	return &user, nil
+}
