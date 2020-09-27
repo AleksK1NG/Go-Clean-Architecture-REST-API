@@ -7,6 +7,7 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/logger"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/utils"
+	"github.com/google/uuid"
 	"github.com/labstack/echo"
 	"go.uber.org/zap"
 	"net/http"
@@ -20,7 +21,7 @@ type handlers struct {
 }
 
 // Auth handlers constructor
-func NewAuthHandlers(cfg *config.Config, authUC auth.UseCase, log *logger.Logger) *handlers {
+func NewAuthHandlers(cfg *config.Config, authUC auth.UseCase, log *logger.Logger) auth.Handlers {
 	return &handlers{cfg, authUC, log}
 }
 
@@ -47,6 +48,39 @@ func (h *handlers) Create() echo.HandlerFunc {
 		h.log.Info("Created user", zap.String("reqID", utils.GetRequestID(c)), zap.String("ID", createdUser.ID.String()))
 
 		return c.JSON(http.StatusCreated, createdUser)
+	}
+}
+
+// Update existing user
+func (h *handlers) Update() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		ctx, cancel := utils.GetCtxWithReqID(c)
+		defer cancel()
+
+		h.log.Info("Update user", zap.String("ReqID", utils.GetRequestID(c)))
+
+		var user models.UserUpdate
+		uID, err := uuid.Parse(c.Param("user_id"))
+		if err != nil {
+			h.log.Error("Update uuid.Parse", zap.String("ReqID", utils.GetRequestID(c)), zap.String("Error:", err.Error()))
+			return c.JSON(http.StatusBadRequest, errors.NewBadRequestError(err.Error()))
+		}
+		user.ID = uID
+
+		if err := c.Bind(&user); err != nil {
+			h.log.Error("Update c.Bind", zap.String("ReqID", utils.GetRequestID(c)), zap.String("Error:", err.Error()))
+			return c.JSON(http.StatusBadRequest, errors.BadRequest)
+		}
+
+		updatedUser, err := h.authUC.Update(ctx, &user)
+		if err != nil {
+			h.log.Error("auth repo update", zap.String("reqID", utils.GetRequestID(c)), zap.String("Error:", err.Error()))
+			return c.JSON(errors.ErrorResponse(err))
+		}
+
+		h.log.Info("Update user", zap.String("reqID", utils.GetRequestID(c)), zap.String("ID", updatedUser.ID.String()))
+
+		return c.JSON(http.StatusCreated, updatedUser)
 	}
 }
 
