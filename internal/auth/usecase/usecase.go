@@ -10,7 +10,6 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/utils"
 	"github.com/google/uuid"
-	"go.uber.org/zap"
 )
 
 // Auth useCase
@@ -29,7 +28,6 @@ func NewAuthUseCase(l *logger.Logger, c *config.Config, ar auth.Repository, r *r
 // Create new user
 func (u *useCase) Create(ctx context.Context, user *models.User) (*models.User, error) {
 	if err := utils.ValidateStruct(ctx, user); err != nil {
-		u.logger.Info("PASSWORD", zap.String("PWD", user.Password))
 		return nil, err
 	}
 
@@ -82,4 +80,14 @@ func (u *useCase) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, 
 	user.SanitizePassword()
 
 	return user, nil
+}
+
+// Find users by name
+func (u *useCase) FindByName(ctx context.Context, name string) ([]*models.User, error) {
+	users, err := u.authRepo.FindByName(ctx, name)
+	if err != nil {
+		return nil, err
+	}
+
+	return users, nil
 }

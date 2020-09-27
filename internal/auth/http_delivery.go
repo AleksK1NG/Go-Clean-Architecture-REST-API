@@ -8,4 +8,5 @@ type Handlers interface {
 	Update() echo.HandlerFunc
 	Delete() echo.HandlerFunc
 	GetUserByID() echo.HandlerFunc
+	FindByName() echo.HandlerFunc
 }

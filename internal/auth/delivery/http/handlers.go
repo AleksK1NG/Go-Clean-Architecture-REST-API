@@ -130,3 +130,27 @@ func (h *handlers) Delete() echo.HandlerFunc {
 		return c.NoContent(http.StatusOK)
 	}
 }
+
+// Find users by name
+func (h *handlers) FindByName() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		ctx, cancel := utils.GetCtxWithReqID(c)
+		defer cancel()
+
+		h.log.Info("FindByName", zap.String("ReqID", utils.GetRequestID(c)), zap.String("name", c.QueryParam("name")))
+
+		if c.QueryParam("name") == "" {
+			return c.JSON(http.StatusBadRequest, errors.NewBadRequestError("name query param is required"))
+		}
+
+		users, err := h.authUC.FindByName(ctx, c.QueryParam("name"))
+		if err != nil {
+			h.log.Error("auth repo find by name", zap.String("reqID", utils.GetRequestID(c)), zap.String("Error:", err.Error()))
+			return c.JSON(errors.ErrorResponse(err))
+		}
+
+		h.log.Info("FindByName", zap.String("ReqID", utils.GetRequestID(c)), zap.Int("Found", len(users)))
+
+		return c.JSON(http.StatusOK, users)
+	}
+}

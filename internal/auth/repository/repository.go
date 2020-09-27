@@ -26,7 +26,8 @@ func (r *repository) Create(ctx context.Context, user *models.User) (*models.Use
 
 	createUserQuery := `INSERT INTO users (first_name, last_name, email, password, role, about, avatar, phone_number, address,
 	               		city, gender, postcode, birthday, created_at, updated_at, login_date)
-						VALUES ($1, $2, $3, $4, COALESCE(NULLIF($5, ''), 'user'), $6, $7, $8, $9, $10, $11, $12, $13, now(), now(), now()) RETURNING *`
+						VALUES ($1, $2, $3, $4, COALESCE(NULLIF($5, ''), 'user'), $6, $7, $8, $9, $10, $11, $12, $13, now(), now(), now()) 
+						RETURNING *`
 
 	var u models.User
 	if err := r.db.QueryRowxContext(ctx, createUserQuery, &user.FirstName, &user.LastName, &user.Email, &user.Password, &user.Role,
@@ -99,4 +100,34 @@ func (r *repository) GetByID(ctx context.Context, userID uuid.UUID) (*models.Use
 	}
 
 	return &user, nil
+}
+
+// Find users by name
+func (r *repository) FindByName(ctx context.Context, name string) ([]*models.User, error) {
+
+	findUsers := `SELECT user_id, first_name, last_name, email, role, about, avatar, phone_number, address,
+	            	city, gender, postcode, birthday, created_at, updated_at, login_date  FROM users 
+					WHERE first_name ILIKE '%' || $1 || '%' or last_name ILIKE '%' || $1 || '%'
+					ORDER BY first_name, last_name`
+
+	rows, err := r.db.QueryxContext(ctx, findUsers, name)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []*models.User
+	for rows.Next() {
+		var user models.User
+		if err := rows.StructScan(&user); err != nil {
+			return nil, err
+		}
+		users = append(users, &user)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return users, nil
 }
