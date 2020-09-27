@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"github.com/AleksK1NG/api-mc/internal/auth"
 	"github.com/AleksK1NG/api-mc/internal/errors"
@@ -107,6 +108,9 @@ func (r *repository) GetByID(ctx context.Context, userID uuid.UUID) (*models.Use
 	var user models.User
 	if err := r.db.GetContext(ctx, &user, getUserQuery, userID); err != nil {
 		r.logger.Error("GetContext", zap.String("ERROR", err.Error()))
+		if err == sql.ErrNoRows {
+			return nil, errors.NotFound
+		}
 		return nil, err
 	}
 
