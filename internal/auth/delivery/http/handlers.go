@@ -36,7 +36,7 @@ func (h *handlers) Create() echo.HandlerFunc {
 		var user models.User
 		if err := c.Bind(&user); err != nil {
 			h.log.Error("Create c.Bind", zap.String("ReqID", utils.GetRequestID(c)), zap.String("Error:", err.Error()))
-			return c.JSON(http.StatusBadRequest, errors.BadRequest)
+			return c.JSON(errors.ErrorResponse(err))
 		}
 
 		createdUser, err := h.authUC.Create(ctx, &user)
@@ -63,13 +63,13 @@ func (h *handlers) Update() echo.HandlerFunc {
 		uID, err := uuid.Parse(c.Param("user_id"))
 		if err != nil {
 			h.log.Error("Update uuid.Parse", zap.String("ReqID", utils.GetRequestID(c)), zap.String("Error:", err.Error()))
-			return c.JSON(http.StatusBadRequest, errors.NewBadRequestError(err.Error()))
+			return c.JSON(errors.ErrorResponse(err))
 		}
 		user.ID = uID
 
 		if err := c.Bind(&user); err != nil {
 			h.log.Error("Update c.Bind", zap.String("ReqID", utils.GetRequestID(c)), zap.String("Error:", err.Error()))
-			return c.JSON(http.StatusBadRequest, errors.BadRequest)
+			return c.JSON(errors.ErrorResponse(err))
 		}
 
 		updatedUser, err := h.authUC.Update(ctx, &user)
@@ -95,7 +95,7 @@ func (h *handlers) GetUserByID() echo.HandlerFunc {
 		uID, err := uuid.Parse(c.Param("user_id"))
 		if err != nil {
 			h.log.Error("Update uuid.Parse", zap.String("ReqID", utils.GetRequestID(c)), zap.String("Error:", err.Error()))
-			return c.JSON(http.StatusBadRequest, errors.NewBadRequestError(err.Error()))
+			return c.JSON(errors.ErrorResponse(err))
 		}
 
 		user, err := h.authUC.GetByID(ctx, uID)
@@ -119,7 +119,7 @@ func (h *handlers) Delete() echo.HandlerFunc {
 		uID, err := uuid.Parse(c.Param("user_id"))
 		if err != nil {
 			h.log.Error("Update uuid.Parse", zap.String("ReqID", utils.GetRequestID(c)), zap.String("Error:", err.Error()))
-			return c.JSON(http.StatusBadRequest, errors.ParseErrors(err))
+			return c.JSON(errors.ErrorResponse(err))
 		}
 
 		if err := h.authUC.Delete(ctx, uID); err != nil {

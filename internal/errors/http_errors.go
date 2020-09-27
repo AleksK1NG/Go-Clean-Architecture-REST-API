@@ -12,9 +12,9 @@ import (
 
 var (
 	BadRequest              = errors.New("Bad request")
-	NoSuchUser              = errors.New("Пользователь с данным именем не существует")
+	NoSuchUser              = errors.New("User not found")
 	WrongCredentials        = errors.New("Wrong Credentials")
-	NotFound                = errors.New("Не найдено")
+	NotFound                = errors.New("Not Found")
 	SessionStoreError       = errors.New("Store session error")
 	NoSuchSession           = errors.New("Session cookie not found")
 	DeleteSessionError      = errors.New("Error while deleting session")
@@ -33,29 +33,23 @@ var (
 	ApiAnswerEmptyResult    = errors.New("Некорректный ответ внешнего API")
 	InternalServerError     = errors.New("Internal Server Error")
 	RequestTimeoutError     = errors.New("Request Timeout")
+	ExistsEmailError        = errors.New("User with given email already exists")
 )
 
 type RestErr interface {
-	Message() string
 	Status() int
 	Error() string
 	Causes() interface{}
 }
 
 type restErr struct {
-	ErrMessage string      `json:"message,omitempty"`
-	ErrStatus  int         `json:"status,omitempty"`
-	ErrError   string      `json:"error,omitempty"`
-	ErrCauses  interface{} `json:"-"`
+	ErrStatus int         `json:"status,omitempty"`
+	ErrError  string      `json:"error,omitempty"`
+	ErrCauses interface{} `json:"-"`
 }
 
 func (e restErr) Error() string {
-	return fmt.Sprintf("message: %s - status: %d - errors: %s - causes: %v",
-		e.ErrMessage, e.ErrStatus, e.ErrError, e.ErrCauses)
-}
-
-func (e restErr) Message() string {
-	return e.ErrMessage
+	return fmt.Sprintf("status: %d - errors: %s - causes: %v", e.ErrStatus, e.ErrError, e.ErrCauses)
 }
 
 func (e restErr) Status() int {
@@ -66,12 +60,11 @@ func (e restErr) Causes() interface{} {
 	return e.ErrCauses
 }
 
-func NewRestError(message string, status int, err string, causes interface{}) RestErr {
+func NewRestError(status int, err string, causes interface{}) RestErr {
 	return restErr{
-		ErrMessage: message,
-		ErrStatus:  status,
-		ErrError:   err,
-		ErrCauses:  causes,
+		ErrStatus: status,
+		ErrError:  err,
+		ErrCauses: causes,
 	}
 }
 
@@ -83,58 +76,64 @@ func NewRestErrorFromBytes(bytes []byte) (RestErr, error) {
 	return apiErr, nil
 }
 
-func NewBadRequestError(message string) RestErr {
+func NewBadRequestError(causes interface{}) RestErr {
 	return restErr{
-		ErrMessage: message,
-		ErrStatus:  http.StatusBadRequest,
-		ErrError:   "Bad Request",
+		ErrStatus: http.StatusBadRequest,
+		ErrError:  BadRequest.Error(),
+		ErrCauses: causes,
 	}
 }
 
-func NewNotFoundError(message string) RestErr {
+func NewNotFoundError(causes interface{}) RestErr {
 	return restErr{
-		ErrMessage: message,
-		ErrStatus:  http.StatusNotFound,
-		ErrError:   "Not found",
+		ErrStatus: http.StatusNotFound,
+		ErrError:  NotFound.Error(),
+		ErrCauses: causes,
 	}
 }
 
-func NewUnauthorizedError(message string) RestErr {
+func NewUnauthorizedError(causes interface{}) RestErr {
 	return restErr{
-		ErrMessage: message,
-		ErrStatus:  http.StatusUnauthorized,
-		ErrError:   "Unauthorized",
+		ErrStatus: http.StatusUnauthorized,
+		ErrError:  Unauthorized.Error(),
+		ErrCauses: causes,
 	}
 }
 
-func NewInternalServerError(message string, err error) RestErr {
+func NewInternalServerError(causes interface{}) RestErr {
 	result := restErr{
-		ErrMessage: message,
-		ErrStatus:  http.StatusInternalServerError,
-		ErrError:   "Internal server error",
+		ErrStatus: http.StatusInternalServerError,
+		ErrError:  InternalServerError.Error(),
+		ErrCauses: causes,
 	}
-	if err != nil {
-		result.ErrCauses = err
-	}
+
 	return result
 }
 
 func ParseErrors(err error) RestErr {
 
 	if strings.Contains(err.Error(), "SQLSTATE") {
-		return NewBadRequestError("")
+		return parseSqlErrors(err)
 	}
 
 	if strings.Contains(err.Error(), "Field validation") {
-		return NewBadRequestError(err.Error())
+		return parseValidatorError(err)
 	}
 
 	if err == sql.ErrNoRows {
-		return NewRestError("", http.StatusNotFound, NotFound.Error(), err)
+		return NewRestError(http.StatusNotFound, NotFound.Error(), err)
 	}
 
 	if err == context.DeadlineExceeded {
-		return NewRestError("", http.StatusRequestTimeout, RequestTimeoutError.Error(), nil)
+		return NewRestError(http.StatusRequestTimeout, RequestTimeoutError.Error(), err)
+	}
+
+	if strings.Contains(err.Error(), "Unmarshal") {
+		return NewRestError(http.StatusBadRequest, BadRequest.Error(), err)
+	}
+
+	if strings.Contains(err.Error(), "UUID") {
+		return NewRestError(http.StatusBadRequest, err.Error(), err)
 	}
 
 	restErr, ok := err.(RestErr)
@@ -142,57 +141,77 @@ func ParseErrors(err error) RestErr {
 		return ParseRestErrors(restErr)
 	}
 
-	return NewInternalServerError("", err)
+	return NewInternalServerError(err)
+}
+
+func parseSqlErrors(err error) RestErr {
+	if strings.Contains(err.Error(), "23505") {
+		return NewRestError(http.StatusBadRequest, ExistsEmailError.Error(), err)
+	}
+
+	return NewRestError(http.StatusBadRequest, BadRequest.Error(), err)
+}
+
+func parseValidatorError(err error) RestErr {
+	if strings.Contains(err.Error(), "Password") {
+		return NewRestError(http.StatusBadRequest, "Invalid password, min length 6", err)
+	}
+
+	if strings.Contains(err.Error(), "Email") {
+		return NewRestError(http.StatusBadRequest, "Invalid email", err)
+	}
+
+	return NewRestError(http.StatusBadRequest, BadRequest.Error(), err)
 }
 
 func ParseRestErrors(err RestErr) RestErr {
 	if err != nil {
 		switch err {
 		case BadRequest:
-			return NewBadRequestError("")
+			return NewBadRequestError(err)
 		case NotFound:
-			return NewNotFoundError(err.Error())
+			return NewNotFoundError(err)
 		case NoSuchUser:
-			return NewBadRequestError(err.Error())
+			return NewBadRequestError(err)
 		case WrongCredentials:
-			return NewBadRequestError(err.Error())
+			return NewBadRequestError(err)
 		case Unauthorized:
-			return NewUnauthorizedError(err.Error())
+			return NewUnauthorizedError(err)
 		case NotRequiredFields:
-			return NewBadRequestError(err.Error())
+			return NewBadRequestError(err)
 		case BadQueryParams:
-			return NewBadRequestError(err.Error())
+			return NewBadRequestError(err)
 		case SessionStoreError:
-			return NewBadRequestError("")
+			return NewBadRequestError(err)
 		case NoSuchSession:
-			return NewUnauthorizedError(Unauthorized.Error())
+			return NewUnauthorizedError(err)
 		case DeleteSessionError:
-			return NewUnauthorizedError(Unauthorized.Error())
+			return NewUnauthorizedError(err)
 		case SessionTypeAssertionErr:
-			return NewUnauthorizedError(Unauthorized.Error())
+			return NewUnauthorizedError(err)
 		case PermissionsError:
-			return NewUnauthorizedError(err.Error())
+			return NewUnauthorizedError(err)
 		case UserTypeAssertionErr:
-			return NewInternalServerError("", nil)
+			return NewInternalServerError(err)
 		case ExpiredCSRFError:
-			return NewUnauthorizedError(Unauthorized.Error())
+			return NewUnauthorizedError(err)
 		case WrongCSRFtoken:
-			return NewUnauthorizedError(Unauthorized.Error())
+			return NewUnauthorizedError(err)
 		case CSRFNotPresented:
-			return NewUnauthorizedError(Unauthorized.Error())
+			return NewUnauthorizedError(err)
 		case HashingError:
-			return NewInternalServerError("", nil)
+			return NewInternalServerError(err)
 		case ErrorRequestValidation:
-			return NewBadRequestError(BadRequest.Error())
+			return NewBadRequestError(err)
 		case ApiAnswerEmptyResult:
-			return NewInternalServerError("", nil)
+			return NewInternalServerError(err)
 		case ApiResponseStatusNotOK:
-			return NewInternalServerError("", nil)
+			return NewInternalServerError(err)
 		default:
-			return NewInternalServerError("", nil)
+			return NewInternalServerError(err)
 		}
 	}
-	return NewInternalServerError("", nil)
+	return NewInternalServerError(err)
 }
 
 // Error response
