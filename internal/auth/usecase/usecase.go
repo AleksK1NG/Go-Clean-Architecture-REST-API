@@ -10,6 +10,7 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/utils"
 	"github.com/google/uuid"
+	"go.uber.org/zap"
 )
 
 // Auth useCase
@@ -27,18 +28,20 @@ func NewAuthUseCase(l *logger.Logger, c *config.Config, ar auth.Repository, r *r
 
 // Create new user
 func (u *useCase) Create(ctx context.Context, user *models.User) (*models.User, error) {
-	if err := user.PrepareCreate(); err != nil {
-		return nil, errors.NewBadRequestError(err.Error())
+	if err := utils.ValidateStruct(ctx, user); err != nil {
+		u.logger.Info("PASSWORD", zap.String("PWD", user.Password))
+		return nil, err
 	}
 
-	if err := utils.ValidateStruct(ctx, user); err != nil {
-		return nil, err
+	if err := user.PrepareCreate(); err != nil {
+		return nil, errors.NewBadRequestError(err.Error())
 	}
 
 	createdUser, err := u.authRepo.Create(ctx, user)
 	if err != nil {
 		return nil, err
 	}
+	createdUser.SanitizePassword()
 
 	return createdUser, nil
 }
@@ -57,6 +60,7 @@ func (u *useCase) Update(ctx context.Context, user *models.UserUpdate) (*models.
 	if err != nil {
 		return nil, err
 	}
+	updatedUser.SanitizePassword()
 
 	return updatedUser, nil
 }
@@ -75,5 +79,7 @@ func (u *useCase) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, 
 	if err != nil {
 		return nil, err
 	}
+	user.SanitizePassword()
+
 	return user, nil
 }
