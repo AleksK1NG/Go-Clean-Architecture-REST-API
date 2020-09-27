@@ -68,3 +68,12 @@ func (u *useCase) Delete(ctx context.Context, userID uuid.UUID) error {
 	}
 	return nil
 }
+
+// Get user by id
+func (u *useCase) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, error) {
+	user, err := u.authRepo.GetByID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
