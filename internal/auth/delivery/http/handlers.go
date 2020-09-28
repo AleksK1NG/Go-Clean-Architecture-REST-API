@@ -182,7 +182,7 @@ func (h *handlers) GetUsers() echo.HandlerFunc {
 			return c.JSON(errors.ErrorResponse(err))
 		}
 
-		users, err := h.authUC.GetUsers(ctx, paginationQuery)
+		usersList, err := h.authUC.GetUsers(ctx, paginationQuery)
 		if err != nil {
 			h.log.Error("GetUsers", zap.String("reqID", utils.GetRequestID(c)), zap.String("Error:", err.Error()))
 			return c.JSON(errors.ErrorResponse(err))
@@ -191,10 +191,10 @@ func (h *handlers) GetUsers() echo.HandlerFunc {
 		h.log.Info(
 			"GetUsers",
 			zap.String("ReqID", utils.GetRequestID(c)),
-			zap.Int("Found", len(users)),
+			zap.Int("Found", len(usersList.Users)),
 			zap.String("Query", fmt.Sprintf("%#v", paginationQuery)),
 		)
 
-		return c.JSON(http.StatusOK, users)
+		return c.JSON(http.StatusOK, usersList)
 	}
 }

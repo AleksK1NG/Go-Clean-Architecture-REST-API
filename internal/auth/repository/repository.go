@@ -136,7 +136,14 @@ func (r *repository) FindByName(ctx context.Context, name string) ([]*models.Use
 }
 
 // Get users with pagination
-func (r *repository) GetUsers(ctx context.Context, pq *utils.PaginationQuery) ([]*models.User, error) {
+func (r *repository) GetUsers(ctx context.Context, pq *utils.PaginationQuery) (*models.UsersList, error) {
+	getTotal := `SELECT COUNT(user_id) FROM users`
+
+	var totalCount int
+	if err := r.db.GetContext(ctx, &totalCount, getTotal); err != nil {
+		return nil, err
+	}
+
 	getUsers := `SELECT user_id, first_name, last_name, email, role, about, avatar, phone_number, address,
 	            	city, gender, postcode, birthday, created_at, updated_at, login_date
 				 FROM users 
@@ -150,5 +157,12 @@ func (r *repository) GetUsers(ctx context.Context, pq *utils.PaginationQuery) ([
 		return nil, err
 	}
 
-	return users, nil
+	return &models.UsersList{
+		TotalCount: totalCount,
+		TotalPages: utils.GetTotalPages(totalCount, pq.GetSize()),
+		Page:       pq.GetPage(),
+		Size:       pq.GetSize(),
+		HasMore:    utils.GetHasMore(pq.GetPage(), totalCount, pq.GetSize()),
+		Users:      users,
+	}, nil
 }
