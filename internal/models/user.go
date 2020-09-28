@@ -1,6 +1,7 @@
 package models
 
 import (
+	"github.com/AleksK1NG/api-mc/internal/utils"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"strings"
@@ -112,4 +113,10 @@ type UsersList struct {
 	Size       int     `json:"size"`
 	HasMore    bool    `json:"has_more"`
 	Users      []*User `json:"users"`
+}
+
+// Find user query DTO
+type FindUserQuery struct {
+	Name string
+	PQ   utils.PaginationQuery
 }

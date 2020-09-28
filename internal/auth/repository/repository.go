@@ -3,14 +3,12 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"github.com/AleksK1NG/api-mc/internal/auth"
 	"github.com/AleksK1NG/api-mc/internal/logger"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/utils"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	"go.uber.org/zap"
 )
 
 // Auth Repository
@@ -94,8 +92,10 @@ func (r *repository) Delete(ctx context.Context, userID uuid.UUID) error {
 
 // Get user by id
 func (r *repository) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, error) {
-	getUserQuery := `SELECT user_id, first_name, last_name, email, role, about, avatar, phone_number, address,
-	               	city, gender, postcode, birthday, created_at, updated_at, login_date  FROM users WHERE user_id = $1`
+	getUserQuery := `SELECT user_id, first_name, last_name, email, role, about, avatar, phone_number, 
+       				 address, city, gender, postcode, birthday, created_at, updated_at, login_date  
+					 FROM users 
+					 WHERE user_id = $1`
 
 	var user models.User
 	if err := r.db.GetContext(ctx, &user, getUserQuery, userID); err != nil {
@@ -109,9 +109,10 @@ func (r *repository) GetByID(ctx context.Context, userID uuid.UUID) (*models.Use
 func (r *repository) FindByName(ctx context.Context, name string) ([]*models.User, error) {
 
 	findUsers := `SELECT user_id, first_name, last_name, email, role, about, avatar, phone_number, address,
-	            	city, gender, postcode, birthday, created_at, updated_at, login_date  FROM users 
-					WHERE first_name ILIKE '%' || $1 || '%' or last_name ILIKE '%' || $1 || '%'
-					ORDER BY first_name, last_name`
+	              city, gender, postcode, birthday, created_at, updated_at, login_date 
+				  FROM users 
+				  WHERE first_name ILIKE '%' || $1 || '%' or last_name ILIKE '%' || $1 || '%'
+				  ORDER BY first_name, last_name`
 
 	rows, err := r.db.QueryxContext(ctx, findUsers, name)
 	if err != nil {
@@ -144,16 +145,20 @@ func (r *repository) GetUsers(ctx context.Context, pq *utils.PaginationQuery) (*
 		return nil, err
 	}
 
-	getUsers := `SELECT user_id, first_name, last_name, email, role, about, avatar, phone_number, address,
-	            	city, gender, postcode, birthday, created_at, updated_at, login_date
+	getUsers := `SELECT user_id, first_name, last_name, email, role, about, avatar, phone_number, 
+       			 address, city, gender, postcode, birthday, created_at, updated_at, login_date
 				 FROM users 
 				 ORDER BY COALESCE(NULLIF($1, ''), first_name) OFFSET $2 LIMIT $3`
 
-	r.logger.Info("QUERY", zap.String("PARAMS", fmt.Sprintf("%#v", pq)), zap.Int("OFFSET", pq.GetOffset()))
-
-	// users := make([]*models.User, pq.GetSize())
 	var users []*models.User
-	if err := r.db.SelectContext(ctx, &users, getUsers, pq.GetOrderBy(), pq.GetOffset(), pq.GetLimit()); err != nil {
+	if err := r.db.SelectContext(
+		ctx,
+		&users,
+		getUsers,
+		pq.GetOrderBy(),
+		pq.GetOffset(),
+		pq.GetLimit(),
+	); err != nil {
 		return nil, err
 	}
 
