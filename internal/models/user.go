@@ -103,3 +103,13 @@ func (u *UserUpdate) PrepareUpdate() error {
 	}
 	return nil
 }
+
+// All Users response
+type UsersList struct {
+	TotalCount int     `json:"total_count"`
+	TotalPages int     `json:"total_pages"`
+	Page       int     `json:"page"`
+	Size       int     `json:"size"`
+	HasMore    bool    `json:"has_more"`
+	Users      []*User `json:"users"`
+}
