@@ -1,6 +1,7 @@
 package http
 
 import (
+	"fmt"
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/auth"
 	"github.com/AleksK1NG/api-mc/internal/errors"
@@ -137,7 +138,11 @@ func (h *handlers) FindByName() echo.HandlerFunc {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
 
-		h.log.Info("FindByName", zap.String("ReqID", utils.GetRequestID(c)), zap.String("name", c.QueryParam("name")))
+		h.log.Info(
+			"FindByName",
+			zap.String("ReqID", utils.GetRequestID(c)),
+			zap.String("name", c.QueryParam("name")),
+		)
 
 		if c.QueryParam("name") == "" {
 			return c.JSON(http.StatusBadRequest, errors.NewBadRequestError("name query param is required"))
@@ -145,11 +150,50 @@ func (h *handlers) FindByName() echo.HandlerFunc {
 
 		users, err := h.authUC.FindByName(ctx, c.QueryParam("name"))
 		if err != nil {
-			h.log.Error("auth repo find by name", zap.String("reqID", utils.GetRequestID(c)), zap.String("Error:", err.Error()))
+			h.log.Error(
+				"auth repo find by name",
+				zap.String("reqID", utils.GetRequestID(c)),
+				zap.String("Error:", err.Error()),
+			)
 			return c.JSON(errors.ErrorResponse(err))
 		}
 
 		h.log.Info("FindByName", zap.String("ReqID", utils.GetRequestID(c)), zap.Int("Found", len(users)))
+
+		return c.JSON(http.StatusOK, users)
+	}
+}
+
+// Gat all users with pagination page and size query params
+func (h *handlers) GetUsers() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		ctx, cancel := utils.GetCtxWithReqID(c)
+		defer cancel()
+
+		h.log.Info("Create user", zap.String("ReqID", utils.GetRequestID(c)))
+
+		paginationQuery, err := utils.GetPaginationFromCtx(c)
+		if err != nil {
+			h.log.Error(
+				"GetPaginationFromCtx",
+				zap.String("reqID", utils.GetRequestID(c)),
+				zap.String("Error:", err.Error()),
+			)
+			return c.JSON(errors.ErrorResponse(err))
+		}
+
+		users, err := h.authUC.GetUsers(ctx, paginationQuery)
+		if err != nil {
+			h.log.Error("GetUsers", zap.String("reqID", utils.GetRequestID(c)), zap.String("Error:", err.Error()))
+			return c.JSON(errors.ErrorResponse(err))
+		}
+
+		h.log.Info(
+			"GetUsers",
+			zap.String("ReqID", utils.GetRequestID(c)),
+			zap.Int("Found", len(users)),
+			zap.String("Query", fmt.Sprintf("%#v", paginationQuery)),
+		)
 
 		return c.JSON(http.StatusOK, users)
 	}
