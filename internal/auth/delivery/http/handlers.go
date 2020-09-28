@@ -148,7 +148,20 @@ func (h *handlers) FindByName() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, errors.NewBadRequestError("name query param is required"))
 		}
 
-		users, err := h.authUC.FindByName(ctx, c.QueryParam("name"))
+		paginationQuery, err := utils.GetPaginationFromCtx(c)
+		if err != nil {
+			h.log.Error(
+				"GetPaginationFromCtx",
+				zap.String("reqID", utils.GetRequestID(c)),
+				zap.String("Error:", err.Error()),
+			)
+			return c.JSON(errors.ErrorResponse(err))
+		}
+
+		response, err := h.authUC.FindByName(ctx, &models.FindUserQuery{
+			Name: c.QueryParam("name"),
+			PQ:   *paginationQuery,
+		})
 		if err != nil {
 			h.log.Error(
 				"auth repo find by name",
@@ -158,9 +171,9 @@ func (h *handlers) FindByName() echo.HandlerFunc {
 			return c.JSON(errors.ErrorResponse(err))
 		}
 
-		h.log.Info("FindByName", zap.String("ReqID", utils.GetRequestID(c)), zap.Int("Found", len(users)))
+		h.log.Info("FindByName", zap.String("ReqID", utils.GetRequestID(c)), zap.Int("Found", len(response.Users)))
 
-		return c.JSON(http.StatusOK, users)
+		return c.JSON(http.StatusOK, response)
 	}
 }
 
