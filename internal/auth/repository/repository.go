@@ -3,11 +3,14 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"github.com/AleksK1NG/api-mc/internal/auth"
 	"github.com/AleksK1NG/api-mc/internal/logger"
 	"github.com/AleksK1NG/api-mc/internal/models"
+	"github.com/AleksK1NG/api-mc/internal/utils"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"go.uber.org/zap"
 )
 
 // Auth Repository
@@ -126,6 +129,24 @@ func (r *repository) FindByName(ctx context.Context, name string) ([]*models.Use
 	}
 
 	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}
+
+// Get users with pagination
+func (r *repository) GetUsers(ctx context.Context, pq *utils.PaginationQuery) ([]*models.User, error) {
+	getUsers := `SELECT user_id, first_name, last_name, email, role, about, avatar, phone_number, address,
+	            	city, gender, postcode, birthday, created_at, updated_at, login_date
+				 FROM users 
+				 ORDER BY COALESCE(NULLIF($1, ''), first_name) OFFSET $2 LIMIT $3`
+
+	r.logger.Info("QUERY", zap.String("PARAMS", fmt.Sprintf("%#v", pq)), zap.Int("OFFSET", pq.GetOffset()))
+
+	// users := make([]*models.User, pq.GetSize())
+	var users []*models.User
+	if err := r.db.SelectContext(ctx, &users, getUsers, pq.GetOrderBy(), pq.GetOffset(), pq.GetLimit()); err != nil {
 		return nil, err
 	}
 

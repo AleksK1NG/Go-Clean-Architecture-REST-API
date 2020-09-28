@@ -7,6 +7,10 @@ import (
 	"strconv"
 )
 
+const (
+	defaultSize = 10
+)
+
 // Pagination query params
 type PaginationQuery struct {
 	Size    int    `json:"size,omitempty"`
@@ -17,7 +21,7 @@ type PaginationQuery struct {
 // Set page size
 func (q *PaginationQuery) SetSize(sizeQuery string) error {
 	if sizeQuery == "" {
-		q.Size = 10
+		q.Size = defaultSize
 		return nil
 	}
 	n, err := strconv.Atoi(sizeQuery)
@@ -32,7 +36,7 @@ func (q *PaginationQuery) SetSize(sizeQuery string) error {
 // Set page number
 func (q *PaginationQuery) SetPage(pageQuery string) error {
 	if pageQuery == "" {
-		q.Size = 1
+		q.Size = 0
 		return nil
 	}
 	n, err := strconv.Atoi(pageQuery)
@@ -51,6 +55,9 @@ func (q *PaginationQuery) SetOrderBy(orderByQuery string) {
 
 // Get offset
 func (q *PaginationQuery) GetOffset() int {
+	if q.Page == 0 {
+		return 0
+	}
 	return (q.Page - 1) * q.Size
 }
 

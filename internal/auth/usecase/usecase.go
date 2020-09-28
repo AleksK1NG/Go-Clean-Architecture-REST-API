@@ -91,3 +91,12 @@ func (u *useCase) FindByName(ctx context.Context, name string) ([]*models.User, 
 
 	return users, nil
 }
+
+// Get users with pagination
+func (u *useCase) GetUsers(ctx context.Context, pq *utils.PaginationQuery) ([]*models.User, error) {
+	users, err := u.authRepo.GetUsers(ctx, pq)
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
+}
