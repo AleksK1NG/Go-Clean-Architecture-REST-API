@@ -83,8 +83,8 @@ func (u *useCase) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, 
 }
 
 // Find users by name
-func (u *useCase) FindByName(ctx context.Context, name string) ([]*models.User, error) {
-	users, err := u.authRepo.FindByName(ctx, name)
+func (u *useCase) FindByName(ctx context.Context, query *models.FindUserQuery) (*models.UsersList, error) {
+	users, err := u.authRepo.FindByName(ctx, query)
 	if err != nil {
 		return nil, err
 	}

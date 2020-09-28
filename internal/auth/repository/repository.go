@@ -106,7 +106,13 @@ func (r *repository) GetByID(ctx context.Context, userID uuid.UUID) (*models.Use
 }
 
 // Find users by name
-func (r *repository) FindByName(ctx context.Context, name string) ([]*models.User, error) {
+func (r *repository) FindByName(ctx context.Context, query *models.FindUserQuery) (*models.UsersList, error) {
+	getTotalCount := `SELECT COUNT(user_id) FROM users WHERE first_name ILIKE '%' || $1 || '%' or last_name ILIKE '%' || $1 || '%'`
+
+	var totalCount int
+	if err := r.db.GetContext(ctx, &totalCount, getTotalCount, query.Name); err != nil {
+		return nil, err
+	}
 
 	findUsers := `SELECT user_id, first_name, last_name, email, role, about, avatar, phone_number, address,
 	              city, gender, postcode, birthday, created_at, updated_at, login_date 
@@ -114,7 +120,7 @@ func (r *repository) FindByName(ctx context.Context, name string) ([]*models.Use
 				  WHERE first_name ILIKE '%' || $1 || '%' or last_name ILIKE '%' || $1 || '%'
 				  ORDER BY first_name, last_name`
 
-	rows, err := r.db.QueryxContext(ctx, findUsers, name)
+	rows, err := r.db.QueryxContext(ctx, findUsers, query.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +139,14 @@ func (r *repository) FindByName(ctx context.Context, name string) ([]*models.Use
 		return nil, err
 	}
 
-	return users, nil
+	return &models.UsersList{
+		TotalCount: totalCount,
+		TotalPages: utils.GetTotalPages(totalCount, query.PQ.GetSize()),
+		Page:       query.PQ.GetPage(),
+		Size:       query.PQ.GetSize(),
+		HasMore:    utils.GetHasMore(query.PQ.GetPage(), totalCount, query.PQ.GetSize()),
+		Users:      users,
+	}, nil
 }
 
 // Get users with pagination
