@@ -28,26 +28,28 @@ func NewAuthHandlers(cfg *config.Config, authUC auth.UseCase, log *logger.Logger
 }
 
 // Crate new user
-func (h *handlers) Create() echo.HandlerFunc {
+func (h *handlers) Register() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
 
-		h.log.Info("Create user", zap.String("ReqID", utils.GetRequestID(c)))
+		h.log.Info("Register user", zap.String("ReqID", utils.GetRequestID(c)))
 
 		var user models.User
 		if err := c.Bind(&user); err != nil {
-			h.log.Error("Create c.Bind", zap.String("ReqID", utils.GetRequestID(c)), zap.String("Error:", err.Error()))
+			h.log.Error("Register c.Bind", zap.String("ReqID", utils.GetRequestID(c)), zap.String("Error:", err.Error()))
 			return c.JSON(errors.ErrorResponse(err))
 		}
 
-		createdUser, err := h.authUC.Create(ctx, &user)
+		createdUser, err := h.authUC.Register(ctx, &user)
 		if err != nil {
 			h.log.Error("auth repo create", zap.String("reqID", utils.GetRequestID(c)), zap.String("Error:", err.Error()))
 			return c.JSON(errors.ErrorResponse(err))
 		}
 
-		h.log.Info("Created user", zap.String("reqID", utils.GetRequestID(c)), zap.String("ID", createdUser.ID.String()))
+		h.log.Info("Created user", zap.String("reqID", utils.GetRequestID(c)), zap.String("ID", createdUser.User.ID.String()))
+
+		c.SetCookie(utils.ConfigureJWTCookie(h.cfg, createdUser.Token))
 
 		return c.JSON(http.StatusCreated, createdUser)
 	}
@@ -184,7 +186,7 @@ func (h *handlers) GetUsers() echo.HandlerFunc {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
 
-		h.log.Info("Create user", zap.String("ReqID", utils.GetRequestID(c)))
+		h.log.Info("Register user", zap.String("ReqID", utils.GetRequestID(c)))
 
 		paginationQuery, err := utils.GetPaginationFromCtx(c)
 		if err != nil {
