@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"github.com/AleksK1NG/api-mc/internal/auth"
+	"github.com/AleksK1NG/api-mc/internal/auth/dto"
 	"github.com/AleksK1NG/api-mc/internal/logger"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/utils"
@@ -106,7 +107,7 @@ func (r *repository) GetByID(ctx context.Context, userID uuid.UUID) (*models.Use
 }
 
 // Find users by name
-func (r *repository) FindByName(ctx context.Context, query *models.FindUserQuery) (*models.UsersList, error) {
+func (r *repository) FindByName(ctx context.Context, query *dto.FindUserQuery) (*models.UsersList, error) {
 	getTotalCount := `SELECT COUNT(user_id) FROM users WHERE first_name ILIKE '%' || $1 || '%' or last_name ILIKE '%' || $1 || '%'`
 
 	var totalCount int
