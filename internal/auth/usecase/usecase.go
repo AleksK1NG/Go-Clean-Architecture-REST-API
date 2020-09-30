@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/auth"
+	"github.com/AleksK1NG/api-mc/internal/auth/dto"
 	"github.com/AleksK1NG/api-mc/internal/db/redis"
 	"github.com/AleksK1NG/api-mc/internal/errors"
 	"github.com/AleksK1NG/api-mc/internal/logger"
@@ -83,7 +84,7 @@ func (u *useCase) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, 
 }
 
 // Find users by name
-func (u *useCase) FindByName(ctx context.Context, query *models.FindUserQuery) (*models.UsersList, error) {
+func (u *useCase) FindByName(ctx context.Context, query *dto.FindUserQuery) (*models.UsersList, error) {
 	users, err := u.authRepo.FindByName(ctx, query)
 	if err != nil {
 		return nil, err
