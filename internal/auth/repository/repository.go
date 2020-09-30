@@ -24,7 +24,7 @@ func NewAuthRepository(logger *logger.Logger, db *sqlx.DB) auth.Repository {
 }
 
 // Create new user
-func (r *repository) Create(ctx context.Context, user *models.User) (*models.User, error) {
+func (r *repository) Register(ctx context.Context, user *models.User) (*models.User, error) {
 
 	createUserQuery := `INSERT INTO users (first_name, last_name, email, password, role, about, avatar, phone_number, address,
 	               		city, gender, postcode, birthday, created_at, updated_at, login_date)

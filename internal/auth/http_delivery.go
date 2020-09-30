@@ -4,7 +4,7 @@ import "github.com/labstack/echo"
 
 // Auth Delivery interface
 type Handlers interface {
-	Create() echo.HandlerFunc
+	Register() echo.HandlerFunc
 	Update() echo.HandlerFunc
 	Delete() echo.HandlerFunc
 	GetUserByID() echo.HandlerFunc

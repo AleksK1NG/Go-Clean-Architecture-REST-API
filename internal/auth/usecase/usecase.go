@@ -27,7 +27,7 @@ func NewAuthUseCase(l *logger.Logger, c *config.Config, ar auth.Repository, r *r
 }
 
 // Create new user
-func (u *useCase) Create(ctx context.Context, user *models.User) (*models.User, error) {
+func (u *useCase) Register(ctx context.Context, user *models.User) (*dto.UserWithToken, error) {
 	if err := utils.ValidateStruct(ctx, user); err != nil {
 		return nil, err
 	}
@@ -36,13 +36,21 @@ func (u *useCase) Create(ctx context.Context, user *models.User) (*models.User, 
 		return nil, errors.NewBadRequestError(err.Error())
 	}
 
-	createdUser, err := u.authRepo.Create(ctx, user)
+	createdUser, err := u.authRepo.Register(ctx, user)
 	if err != nil {
 		return nil, err
 	}
 	createdUser.SanitizePassword()
 
-	return createdUser, nil
+	token, err := utils.GenerateJWTToken(createdUser, u.cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.UserWithToken{
+		User:  createdUser,
+		Token: token,
+	}, nil
 }
 
 // Update existing user
