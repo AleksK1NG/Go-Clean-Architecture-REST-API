@@ -34,6 +34,9 @@ var (
 	InternalServerError     = errors.New("Internal Server Error")
 	RequestTimeoutError     = errors.New("Request Timeout")
 	ExistsEmailError        = errors.New("User with given email already exists")
+	InvalidJWTToken         = errors.New("Invalid JWT token")
+	InvalidJWTClaims        = errors.New("Invalid JWT claims")
+	InvalidJWTSignMethod    = errors.New("Invalid JWT sign method")
 )
 
 type RestErr interface {
@@ -134,6 +137,14 @@ func ParseErrors(err error) RestErr {
 
 	if strings.Contains(err.Error(), "UUID") {
 		return NewRestError(http.StatusBadRequest, err.Error(), err)
+	}
+
+	if strings.Contains(strings.ToLower(err.Error()), "cookie") {
+		return NewRestError(http.StatusUnauthorized, Unauthorized.Error(), err)
+	}
+
+	if strings.Contains(strings.ToLower(err.Error()), "token") {
+		return NewRestError(http.StatusUnauthorized, Unauthorized.Error(), err)
 	}
 
 	restErr, ok := err.(RestErr)
