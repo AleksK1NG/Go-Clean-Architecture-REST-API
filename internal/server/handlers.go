@@ -66,7 +66,7 @@ func (s *server) MapHandlers(e *echo.Echo) error {
 	// Init handlers
 	aHandlers := authHttp.NewAuthHandlers(s.config, authUC, s.logger)
 	{
-		authHttp.MapAuthRoutes(auth, aHandlers, authUC, s.config)
+		authHttp.MapAuthRoutes(auth, aHandlers, authUC, s.config, s.logger)
 		// auth_routes.MapAuthRoutes(auth, s.h, s.useCases, s.config, s.logger)
 		// post_routes.MapPostRoutes(post, s.h, s.useCases, s.config, s.logger)
 		// comment_routes.MapCommentRoutes(comment, s.h, s.useCases, s.config, s.logger)
