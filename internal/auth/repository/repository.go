@@ -185,3 +185,18 @@ func (r *repository) GetUsers(ctx context.Context, pq *utils.PaginationQuery) (*
 		Users:      users,
 	}, nil
 }
+
+// Find user by email
+func (r *repository) FindByEmail(ctx context.Context, loginDTO *dto.LoginDTO) (*models.User, error) {
+	findUserByEmail := `SELECT user_id, first_name, last_name, email, role, about, avatar, phone_number, 
+       			 		address, city, gender, postcode, birthday, created_at, updated_at, login_date, password
+				 		FROM users 
+				 		WHERE email = $1`
+
+	var user models.User
+	if err := r.db.GetContext(ctx, &user, findUserByEmail, loginDTO.Email); err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}

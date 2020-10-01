@@ -98,13 +98,21 @@ func (h *handlers) GetUserByID() echo.HandlerFunc {
 
 		uID, err := uuid.Parse(c.Param("user_id"))
 		if err != nil {
-			h.log.Error("Update uuid.Parse", zap.String("ReqID", utils.GetRequestID(c)), zap.String("Error:", err.Error()))
+			h.log.Error(
+				"Update uuid.Parse",
+				zap.String("ReqID", utils.GetRequestID(c)),
+				zap.String("Error:", err.Error()),
+			)
 			return c.JSON(errors.ErrorResponse(err))
 		}
 
 		user, err := h.authUC.GetByID(ctx, uID)
 		if err != nil {
-			h.log.Error("auth repo get by id", zap.String("reqID", utils.GetRequestID(c)), zap.String("Error:", err.Error()))
+			h.log.Error(
+				"auth repo get by id",
+				zap.String("reqID", utils.GetRequestID(c)),
+				zap.String("Error:", err.Error()),
+			)
 			return c.JSON(errors.ErrorResponse(err))
 		}
 
@@ -122,12 +130,20 @@ func (h *handlers) Delete() echo.HandlerFunc {
 
 		uID, err := uuid.Parse(c.Param("user_id"))
 		if err != nil {
-			h.log.Error("Update uuid.Parse", zap.String("ReqID", utils.GetRequestID(c)), zap.String("Error:", err.Error()))
+			h.log.Error(
+				"Update uuid.Parse",
+				zap.String("ReqID", utils.GetRequestID(c)),
+				zap.String("Error:", err.Error()),
+			)
 			return c.JSON(errors.ErrorResponse(err))
 		}
 
 		if err := h.authUC.Delete(ctx, uID); err != nil {
-			h.log.Error("auth repo delete", zap.String("reqID", utils.GetRequestID(c)), zap.String("Error:", err.Error()))
+			h.log.Error(
+				"auth repo delete",
+				zap.String("reqID", utils.GetRequestID(c)),
+				zap.String("Error:", err.Error()),
+			)
 			return c.JSON(errors.ErrorResponse(err))
 		}
 
@@ -216,5 +232,45 @@ func (h *handlers) GetUsers() echo.HandlerFunc {
 		)
 
 		return c.JSON(http.StatusOK, usersList)
+	}
+}
+
+// Login user
+func (h *handlers) Login() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		ctx, cancel := utils.GetCtxWithReqID(c)
+		defer cancel()
+
+		h.log.Info("Register user", zap.String("ReqID", utils.GetRequestID(c)))
+
+		var loginDTO dto.LoginDTO
+		if err := c.Bind(&loginDTO); err != nil {
+			h.log.Error(
+				"Login",
+				zap.String("reqID", utils.GetRequestID(c)),
+				zap.String("Error:", err.Error()),
+			)
+			return c.JSON(errors.ErrorResponse(err))
+		}
+
+		userWithToken, err := h.authUC.Login(ctx, &loginDTO)
+		if err != nil {
+			h.log.Error(
+				"authUC.Login",
+				zap.String("reqID", utils.GetRequestID(c)),
+				zap.String("Error:", err.Error()),
+			)
+			return c.JSON(errors.ErrorResponse(err))
+		}
+
+		h.log.Info(
+			"Login",
+			zap.String("ReqID", utils.GetRequestID(c)),
+			zap.String("User ID", userWithToken.User.ID.String()),
+		)
+
+		c.SetCookie(utils.ConfigureJWTCookie(h.cfg, userWithToken.Token))
+
+		return c.JSON(http.StatusOK, userWithToken)
 	}
 }

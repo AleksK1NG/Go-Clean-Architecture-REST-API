@@ -109,3 +109,27 @@ func (u *useCase) GetUsers(ctx context.Context, pq *utils.PaginationQuery) (*mod
 	}
 	return users, nil
 }
+
+// Login user, returns user model with jwt token
+func (u *useCase) Login(ctx context.Context, loginDTO *dto.LoginDTO) (*dto.UserWithToken, error) {
+	user, err := u.authRepo.FindByEmail(ctx, loginDTO)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := user.ComparePasswords(loginDTO.Password); err != nil {
+		return nil, err
+	}
+
+	user.SanitizePassword()
+
+	token, err := utils.GenerateJWTToken(user, u.cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.UserWithToken{
+		User:  user,
+		Token: token,
+	}, nil
+}
