@@ -147,6 +147,10 @@ func ParseErrors(err error) RestErr {
 		return NewRestError(http.StatusUnauthorized, Unauthorized.Error(), err)
 	}
 
+	if strings.Contains(strings.ToLower(err.Error()), "bcrypt") {
+		return NewRestError(http.StatusBadRequest, BadRequest.Error(), err)
+	}
+
 	restErr, ok := err.(RestErr)
 	if ok {
 		return ParseRestErrors(restErr)

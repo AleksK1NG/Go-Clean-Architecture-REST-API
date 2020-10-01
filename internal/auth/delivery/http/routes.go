@@ -10,7 +10,8 @@ import (
 
 // Map auth routes
 func MapAuthRoutes(ag *echo.Group, h auth.Handlers, authUC auth.UseCase, cfg *config.Config, logger *logger.Logger) {
-	ag.POST("/create", h.Register())
+	ag.POST("/register", h.Register())
+	ag.POST("/login", h.Login())
 	ag.GET("/find", h.FindByName())
 	ag.GET("/all", h.GetUsers())
 	ag.GET("/:user_id", h.GetUserByID())

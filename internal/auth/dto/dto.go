@@ -16,3 +16,9 @@ type UserWithToken struct {
 	User  *models.User `json:"user"`
 	Token string       `json:"token"`
 }
+
+// Login DTO
+type LoginDTO struct {
+	Email    string `json:"email" db:"email" validate:"omitempty,lte=60,email"`
+	Password string `json:"password,omitempty" db:"password" validate:"required,gte=6"`
+}
