@@ -3,7 +3,9 @@ package server
 import (
 	"context"
 	"github.com/AleksK1NG/api-mc/config"
+	"github.com/AleksK1NG/api-mc/internal/db/redis"
 	"github.com/AleksK1NG/api-mc/internal/logger"
+	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo"
 	"go.uber.org/zap"
 	"net/http"
@@ -17,13 +19,15 @@ type server struct {
 	echo   *echo.Echo
 	config *config.Config
 	logger *logger.Logger
+	db     *sqlx.DB
+	redis  *redis.RedisClient
 }
 
 // New server constructor
-func NewServer(config *config.Config, logger *logger.Logger) *server {
+func NewServer(config *config.Config, logger *logger.Logger, db *sqlx.DB, redis *redis.RedisClient) *server {
 	e := echo.New()
 
-	return &server{e, config, logger}
+	return &server{e, config, logger, db, redis}
 }
 
 // Run server depends on config SSL option
@@ -67,7 +71,9 @@ func (s *server) Run() error {
 
 	} else {
 		e := echo.New()
-		s.MapHandlers(e)
+		if err := s.MapHandlers(s.echo); err != nil {
+			return err
+		}
 
 		server := &http.Server{
 			Addr:           s.config.Server.Port,
