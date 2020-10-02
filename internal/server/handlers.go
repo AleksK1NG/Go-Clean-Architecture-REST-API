@@ -1,12 +1,9 @@
 package server
 
 import (
-	"fmt"
 	authHttp "github.com/AleksK1NG/api-mc/internal/auth/delivery/http"
 	authRepository "github.com/AleksK1NG/api-mc/internal/auth/repository"
 	authUseCase "github.com/AleksK1NG/api-mc/internal/auth/usecase"
-	"github.com/AleksK1NG/api-mc/internal/db/postgres"
-	"github.com/AleksK1NG/api-mc/internal/db/redis"
 	"github.com/AleksK1NG/api-mc/internal/utils"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
@@ -20,14 +17,6 @@ const (
 
 // Map Server Handlers
 func (s *server) MapHandlers(e *echo.Echo) error {
-	psqlDB, err := postgres.NewPsqlDB(s.config)
-	if err != nil {
-		s.logger.Fatal("", zap.String("init psql", err.Error()))
-		return err
-	}
-	s.logger.Info("Postgres connected", zap.String("DB Status: %#v", fmt.Sprintf("%#v", psqlDB.Stats())))
-	redisConn := redis.NewRedisClient(s.config)
-	s.logger.Info("Redis connected")
 
 	// echo.Pre(middleware.HTTPSRedirect())
 	e.Use(middleware.RequestID())
@@ -58,10 +47,10 @@ func (s *server) MapHandlers(e *echo.Echo) error {
 	// comment := v1.Group("/comments")
 
 	// Init repositories
-	aRepo := authRepository.NewAuthRepository(s.logger, psqlDB)
+	aRepo := authRepository.NewAuthRepository(s.logger, s.db)
 
 	// Init useCases
-	authUC := authUseCase.NewAuthUseCase(s.logger, s.config, aRepo, redisConn)
+	authUC := authUseCase.NewAuthUseCase(s.logger, s.config, aRepo, s.redis)
 
 	// Init handlers
 	aHandlers := authHttp.NewAuthHandlers(s.config, authUC, s.logger)
