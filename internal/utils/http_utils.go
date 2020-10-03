@@ -20,10 +20,10 @@ func GetCtxWithReqID(c echo.Context) (context.Context, context.CancelFunc) {
 
 func ConfigureJWTCookie(cfg *config.Config, jwtToken string) *http.Cookie {
 	return &http.Cookie{
-		Name:   cfg.Cookie.Name,
-		Value:  jwtToken,
-		Path:   "/",
-		Domain: "/",
+		Name:  cfg.Cookie.Name,
+		Value: jwtToken,
+		Path:  "/",
+		// Domain: "/",
 		// Expires:    time.Now().Add(1 * time.Minute),
 		RawExpires: "",
 		MaxAge:     cfg.Cookie.MaxAge,
