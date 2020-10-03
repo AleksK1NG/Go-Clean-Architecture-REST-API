@@ -13,7 +13,7 @@ migrate_down:
 	migrate -database postgres://postgres:postgres@localhost:5432/auth_db?sslmode=disable -path migrations down 1
 
 compose_hot__reload:
-	 docker-compose -f docker-compose.hot-reload.yml up --build
+	 docker-compose -f docker-compose.HotReload.yml up --build
 
 compose_debug:
 	 docker-compose -f docker-compose.debug.yml up --build

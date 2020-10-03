@@ -7,7 +7,7 @@ import (
 
 // Find user query DTO
 type FindUserQuery struct {
-	Name string
+	Name string `json:"name" validate:"required"`
 	PQ   utils.PaginationQuery
 }
 
