@@ -68,6 +68,46 @@ func AdminMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 }
 
 // Role based auth middleware, using ctx user
+func OwnerOrAdminMiddleware(logger *logger.Logger) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+
+			user, ok := c.Get("user").(*models.User)
+			if !ok {
+				logger.Error(
+					"OwnerOrAdminMiddleware",
+					zap.String("reqID", utils.GetRequestID(c)),
+					zap.String("ERROR", "invalid user ctx"),
+				)
+				return c.JSON(http.StatusUnauthorized, errors.NewUnauthorizedError(errors.Unauthorized))
+			}
+
+			logger.Info(
+				"OwnerOrAdminMiddleware",
+				zap.String("reqID", utils.GetRequestID(c)),
+				zap.String("userID", user.ID.String()),
+			)
+
+			if *user.Role == "admin" {
+				return next(c)
+			}
+
+			if user.ID.String() != c.Param("user_id") {
+				logger.Error(
+					"OwnerOrAdminMiddleware",
+					zap.String("reqID", utils.GetRequestID(c)),
+					zap.String("userID", user.ID.String()),
+					zap.String("ERROR", "ctx userID != param /:user_id"),
+				)
+				return c.JSON(http.StatusForbidden, errors.NewForbiddenError(errors.Forbidden))
+			}
+
+			return next(c)
+		}
+	}
+}
+
+// Role based auth middleware, using ctx user
 func RoleBasedAuthMiddleware(roles []string, logger *logger.Logger) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {

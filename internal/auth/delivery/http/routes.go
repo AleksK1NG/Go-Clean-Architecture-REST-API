@@ -16,8 +16,7 @@ func MapAuthRoutes(ag *echo.Group, h auth.Handlers, authUC auth.UseCase, cfg *co
 	ag.GET("/all", h.GetUsers())
 	ag.GET("/:user_id", h.GetUserByID())
 	ag.Use(middleware.AuthJWTMiddleware(authUC, cfg, logger))
-	ag.PUT("/:user_id", h.Update())
+	ag.PUT("/:user_id", h.Update(), middleware.OwnerOrAdminMiddleware(logger))
 	ag.DELETE("/:user_id", h.Delete(), middleware.RoleBasedAuthMiddleware([]string{"admin"}, logger))
-	ag.GET("/me", h.GetMe(), middleware.RoleBasedAuthMiddleware([]string{"admin"}, logger))
-	// ag.GET("/me", h.GetMe())
+	ag.GET("/me", h.GetMe())
 }
