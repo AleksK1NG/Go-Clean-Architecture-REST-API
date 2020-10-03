@@ -11,4 +11,5 @@ type Handlers interface {
 	GetUserByID() echo.HandlerFunc
 	FindByName() echo.HandlerFunc
 	GetUsers() echo.HandlerFunc
+	GetMe() echo.HandlerFunc
 }

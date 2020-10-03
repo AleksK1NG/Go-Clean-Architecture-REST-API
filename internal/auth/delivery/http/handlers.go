@@ -274,3 +274,21 @@ func (h *handlers) Login() echo.HandlerFunc {
 		return c.JSON(http.StatusOK, userWithToken)
 	}
 }
+
+// Load current user from ctx with auth middleware
+func (h *handlers) GetMe() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		user, ok := c.Get("user").(*models.User)
+		if !ok {
+			h.log.Info(
+				"GetMe",
+				zap.String("ReqID", utils.GetRequestID(c)),
+				zap.String("ERROR", "no user ctx"),
+			)
+		}
+
+		h.log.Info("GET ME", zap.String("ReqID", utils.GetRequestID(c)), zap.String("USER ID", user.ID.String()))
+
+		return c.JSON(http.StatusOK, c.Get("user"))
+	}
+}
