@@ -8,16 +8,19 @@ import (
 	"time"
 )
 
+// Get request id from echo context
 func GetRequestID(c echo.Context) string {
 	return c.Response().Header().Get(echo.HeaderXRequestID)
 }
 
+// Get ctx with timeout and request id from echo context
 func GetCtxWithReqID(c echo.Context) (context.Context, context.CancelFunc) {
 	ctx, cancel := context.WithTimeout(c.Request().Context(), time.Second*5)
 	ctx = context.WithValue(ctx, "ReqID", GetRequestID(c))
 	return ctx, cancel
 }
 
+// Configure jwt cookie
 func ConfigureJWTCookie(cfg *config.Config, jwtToken string) *http.Cookie {
 	return &http.Cookie{
 		Name:  cfg.Cookie.Name,
