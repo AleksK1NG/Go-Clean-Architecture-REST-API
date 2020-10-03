@@ -1,0 +1,55 @@
+version: "3.8"
+
+services:
+  web:
+    container_name: api_auth
+    build:
+      context: ./
+      dockerfile: Dockerfile.DelveHotReload
+    ports:
+      - "5000:5000"
+      - "5555:5555"
+      - "40000:40000"
+    environment:
+      - PORT=5000
+    security_opt:
+      - "seccomp:unconfined"
+    cap_add:
+      - SYS_PTRACE
+    depends_on:
+      - postgesql
+      - redis
+    restart: always
+    volumes:
+      - ./:/app
+    networks:
+      - web_api
+
+  redis:
+    image: redis:6-alpine
+    container_name: api_redis
+    ports:
+      - "6379:6379"
+    restart: always
+    networks:
+      - web_api
+
+  postgesql:
+    image: postgres:12-alpine
+    container_name: api_postgesql
+    ports:
+      - "5432:5432"
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=auth_db
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    networks:
+      - web_api
+
+networks:
+  web_api:
+    driver: bridge
+#    command: /dlv --headless --listen=:40000 --api-version=2 exec /server
