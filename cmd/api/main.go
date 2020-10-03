@@ -39,7 +39,11 @@ func main() {
 	}
 	defer psqlDB.Close()
 
-	l.Info("Postgres connected", zap.String("DB Status: %#v", fmt.Sprintf("%#v", psqlDB.Stats())))
+	if psqlDB != nil {
+		l.Info("Postgres connected", zap.String("DB Status: %#v", fmt.Sprintf("%#v", psqlDB.Stats())))
+
+	}
+
 	redisConn := redis.NewRedisClient(cfg)
 	l.Info("Redis connected")
 

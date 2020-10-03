@@ -11,7 +11,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo"
 	"go.uber.org/zap"
-	"log"
 	"strings"
 )
 
@@ -56,7 +55,6 @@ func AuthJWTMiddleware(authUC auth.UseCase, config *config.Config, logger *logge
 
 func validateJWTToken(tokenString string, authUC auth.UseCase, c echo.Context, config *config.Config) error {
 	if tokenString == "" {
-		log.Println(6666666)
 		return errors.InvalidJWTToken
 	}
 
@@ -68,7 +66,6 @@ func validateJWTToken(tokenString string, authUC auth.UseCase, c echo.Context, c
 		return secret, nil
 	})
 	if err != nil {
-		log.Println(1111111)
 		return err
 	}
 
@@ -79,21 +76,20 @@ func validateJWTToken(tokenString string, authUC auth.UseCase, c echo.Context, c
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		userID, ok := claims["id"].(string)
 		if !ok {
-			log.Println(5555555)
 			return errors.InvalidJWTClaims
 		}
 
 		userUUID, err := uuid.Parse(userID)
 		if err != nil {
-			log.Println(2222222222)
 			return err
 		}
 
 		u, err := authUC.GetByID(c.Request().Context(), userUUID)
 		if err != nil {
-			log.Println(3333333333)
 			return err
 		}
+
+		c.Set("user", u)
 
 		ctx := context.WithValue(c.Request().Context(), "user", u)
 		c.Request().WithContext(ctx)
