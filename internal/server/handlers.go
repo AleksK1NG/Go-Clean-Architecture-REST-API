@@ -18,7 +18,7 @@ const (
 // Map Server Handlers
 func (s *server) MapHandlers(e *echo.Echo) error {
 
-	// echo.Pre(middleware.HTTPSRedirect())
+	e.Pre(middleware.HTTPSRedirect())
 	e.Use(middleware.RequestID())
 	e.Use(middleware.RecoverWithConfig(middleware.RecoverConfig{
 		StackSize:         1 << 10, // 1 KB
@@ -35,7 +35,7 @@ func (s *server) MapHandlers(e *echo.Echo) error {
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: loggerFormat,
 	}))
-	// echo.Use(middleware.CSRF())
+	// e.Use(middleware.CSRF())
 	e.Use(middleware.Secure())
 	e.Use(middleware.BodyLimit("2M"))
 
