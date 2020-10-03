@@ -5,7 +5,7 @@ services:
     container_name: api_auth
     build:
       context: ./
-      dockerfile: Dockerfile.hot-reload
+      dockerfile: Dockerfile.HotReload
     ports:
       - "5000:5000"
       - "5555:5555"

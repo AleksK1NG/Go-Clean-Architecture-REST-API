@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// User repo interface
+// User repository interface
 type UseCase interface {
 	Register(ctx context.Context, user *models.User) (*dto.UserWithToken, error)
 	Login(ctx context.Context, loginDTO *dto.LoginDTO) (*dto.UserWithToken, error)
