@@ -7,10 +7,13 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/auth"
 	"github.com/AleksK1NG/api-mc/internal/errors"
 	"github.com/AleksK1NG/api-mc/internal/logger"
+	"github.com/AleksK1NG/api-mc/internal/models"
+	"github.com/AleksK1NG/api-mc/internal/utils"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
 	"github.com/labstack/echo"
 	"go.uber.org/zap"
+	"net/http"
 	"strings"
 )
 
@@ -25,14 +28,14 @@ func AuthJWTMiddleware(authUC auth.UseCase, config *config.Config, logger *logge
 				headerParts := strings.Split(bearerHeader, " ")
 				if len(headerParts) != 2 {
 					logger.Error("auth middleware", zap.String("headerParts", "len(headerParts) != 2"))
-					return c.JSON(errors.ErrorResponse(errors.Unauthorized))
+					return c.JSON(http.StatusUnauthorized, errors.NewUnauthorizedError(errors.Unauthorized))
 				}
 
 				tokenString := headerParts[1]
 
 				if err := validateJWTToken(tokenString, authUC, c, config); err != nil {
 					logger.Error("middleware validateJWTToken", zap.String("headerJWT", err.Error()))
-					return c.JSON(errors.ErrorResponse(err))
+					return c.JSON(http.StatusUnauthorized, errors.NewUnauthorizedError(errors.Unauthorized))
 				}
 
 				return next(c)
@@ -40,15 +43,61 @@ func AuthJWTMiddleware(authUC auth.UseCase, config *config.Config, logger *logge
 				cookie, err := c.Cookie("jwt-token")
 				if err != nil {
 					logger.Error("middleware cookie", zap.String("cookieJWT", err.Error()))
-					return c.JSON(errors.ErrorResponse(err))
+					return c.JSON(http.StatusUnauthorized, errors.NewUnauthorizedError(errors.Unauthorized))
 				}
 
 				if err = validateJWTToken(cookie.Value, authUC, c, config); err != nil {
 					logger.Error("cookie JWT validate", zap.String("cookieJWT", err.Error()))
-					return c.JSON(errors.ErrorResponse(err))
+					return c.JSON(http.StatusUnauthorized, errors.NewUnauthorizedError(errors.Unauthorized))
 				}
 				return next(c)
 			}
+		}
+	}
+}
+
+// Admin role
+func AdminMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		user, ok := c.Get("user").(*models.User)
+		if !ok || *user.Role != "admin" {
+			return c.JSON(http.StatusForbidden, errors.NewUnauthorizedError(errors.PermissionDenied))
+		}
+		return next(c)
+	}
+}
+
+// Role based auth middleware, using ctx user
+func RoleBasedAuthMiddleware(roles []string, logger *logger.Logger) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+
+			logger.Info("RoleBasedAuthMiddleware", zap.String("reqID", utils.GetRequestID(c)))
+
+			user, ok := c.Get("user").(*models.User)
+			if !ok {
+				logger.Error(
+					"RoleBasedAuthMiddleware",
+					zap.String("reqID", utils.GetRequestID(c)),
+					zap.String("ERROR", "invalid user ctx"),
+				)
+				return c.JSON(http.StatusUnauthorized, errors.NewUnauthorizedError(errors.Unauthorized))
+			}
+
+			for _, role := range roles {
+				if role == *user.Role {
+					return next(c)
+				}
+			}
+
+			logger.Error(
+				"not allowed user role",
+				zap.String("reqID", utils.GetRequestID(c)),
+				zap.String("userID", user.ID.String()),
+				zap.String("ERROR", "not allowed role"),
+			)
+
+			return c.JSON(http.StatusForbidden, errors.NewForbiddenError(errors.PermissionDenied))
 		}
 	}
 }

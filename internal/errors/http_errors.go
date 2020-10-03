@@ -19,9 +19,11 @@ var (
 	NoSuchSession           = errors.New("Session cookie not found")
 	DeleteSessionError      = errors.New("Error while deleting session")
 	Unauthorized            = errors.New("Unauthorized")
+	Forbidden               = errors.New("Forbidden")
 	SessionTypeAssertionErr = errors.New("Error assert to session type")
 	UserTypeAssertionErr    = errors.New("Error assert to user type")
 	PermissionsError        = errors.New("У вас недостаточно прав")
+	PermissionDenied        = errors.New("Permission Denied")
 	ExpiredCSRFError        = errors.New("Expired CSRF token")
 	WrongCSRFtoken          = errors.New("Wrong CSRF token")
 	CSRFNotPresented        = errors.New("CSRF not presented")
@@ -99,6 +101,14 @@ func NewUnauthorizedError(causes interface{}) RestErr {
 	return restErr{
 		ErrStatus: http.StatusUnauthorized,
 		ErrError:  Unauthorized.Error(),
+		ErrCauses: causes,
+	}
+}
+
+func NewForbiddenError(causes interface{}) RestErr {
+	return restErr{
+		ErrStatus: http.StatusForbidden,
+		ErrError:  Forbidden.Error(),
 		ErrCauses: causes,
 	}
 }
@@ -182,6 +192,8 @@ func parseValidatorError(err error) RestErr {
 func ParseRestErrors(err RestErr) RestErr {
 	if err != nil {
 		switch err {
+		case PermissionDenied:
+			return NewUnauthorizedError(err)
 		case BadRequest:
 			return NewBadRequestError(err)
 		case NotFound:
