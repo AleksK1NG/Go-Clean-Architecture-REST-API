@@ -199,7 +199,7 @@ func (r *RedisClient) GetKeys(pattern string) ([]string, error) {
 	defer conn.Close()
 
 	iter := 0
-	keys := []string{}
+	var keys []string
 	for {
 		arr, err := redis.Values(conn.Do("SCAN", iter, "MATCH", pattern))
 		if err != nil {
