@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"syscall"
 	"time"
 )
 
@@ -63,7 +64,7 @@ func (s *server) Run() error {
 		}()
 
 		quit := make(chan os.Signal, 1)
-		signal.Notify(quit, os.Interrupt)
+		signal.Notify(quit, os.Interrupt, syscall.SIGTERM, syscall.SIGKILL)
 
 		<-quit
 
@@ -101,7 +102,7 @@ func (s *server) Run() error {
 		}()
 
 		quit := make(chan os.Signal, 1)
-		signal.Notify(quit, os.Interrupt)
+		signal.Notify(quit, os.Interrupt, syscall.SIGTERM, syscall.SIGKILL)
 
 		<-quit
 

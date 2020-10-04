@@ -11,6 +11,7 @@ import (
 	"github.com/AleksK1NG/api-mc/pkg/errors"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/google/uuid"
+	"go.uber.org/zap"
 )
 
 // Auth useCase
@@ -82,11 +83,36 @@ func (u *useCase) Delete(ctx context.Context, userID uuid.UUID) error {
 
 // Get user by id
 func (u *useCase) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, error) {
+	// exists, err := u.redis.Exists(userID.String())
+	// if err != nil {
+	// 	u.logger.Error("REDIS Exists", zap.String("ERROR", err.Error()))
+	// }
+	// if exists {
+	// 	var cachedUser models.User
+	// 	if err := u.redis.GetJSONValue(userID.String(), &cachedUser); err != nil {
+	// 		u.logger.Error("REDIS GetJSONValue", zap.String("ERROR", err.Error()))
+	// 	}
+	// 	return &cachedUser, nil
+	// }
+
+	json, err := u.redis.GetIfExistsJSON(userID.String(), &models.User{})
+	if err != nil {
+		u.logger.Error("REDIS GetIfExistsJSON", zap.String("ERROR", err.Error()))
+	}
+	if usr, ok := json.(*models.User); ok {
+		return usr, nil
+	}
+
 	user, err := u.authRepo.GetByID(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
 	user.SanitizePassword()
+
+	if err := u.redis.SetJSONValue(userID.String(), 50, &user); err != nil {
+		u.logger.Error("REDIS SetJSONValue", zap.String("ERROR", err.Error()))
+		return nil, err
+	}
 
 	return user, nil
 }

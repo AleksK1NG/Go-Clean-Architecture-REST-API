@@ -2,6 +2,7 @@ package redis
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/gomodule/redigo/redis"
@@ -68,9 +69,8 @@ func newPool(server string) *redis.Pool {
 func cleanupHook() {
 
 	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
-	signal.Notify(c, syscall.SIGTERM)
-	signal.Notify(c, syscall.SIGKILL)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM, syscall.SIGKILL)
+
 	go func() {
 		<-c
 		Pool.Close()
@@ -224,4 +224,64 @@ func (r *RedisClient) Incr(counterKey string) (int, error) {
 	defer conn.Close()
 
 	return redis.Int(conn.Do("INCR", counterKey))
+}
+
+// Set JSON value
+func (r *RedisClient) SetJSONValue(key string, seconds int, value interface{}) error {
+	conn := Pool.Get()
+	defer conn.Close()
+
+	bytes, err := json.Marshal(&value)
+	if err != nil {
+		return err
+	}
+
+	_, err = redis.String(conn.Do("SETEX", key, seconds, bytes))
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Get JSON value
+func (r *RedisClient) GetJSONValue(key string, model interface{}) error {
+	conn := Pool.Get()
+	defer conn.Close()
+
+	bytes, err := redis.Bytes(conn.Do("GET", key))
+	if err != nil {
+		return err
+	}
+
+	if err := json.Unmarshal(bytes, &model); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Get JSON value
+func (r *RedisClient) GetIfExistsJSON(key string, model interface{}) (interface{}, error) {
+	conn := Pool.Get()
+	defer conn.Close()
+
+	ok, err := redis.Bool(conn.Do("EXISTS", key))
+	if err != nil {
+		return nil, err
+	}
+	if !ok {
+		return nil, errors.New("Not exists")
+	}
+
+	bytes, err := redis.Bytes(conn.Do("GET", key))
+	if err != nil {
+		return nil, err
+	}
+
+	if err := json.Unmarshal(bytes, &model); err != nil {
+		return nil, err
+	}
+
+	return model, nil
 }
