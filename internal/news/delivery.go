@@ -3,6 +3,6 @@ package news
 import "github.com/labstack/echo"
 
 // News Http Delivery
-type Delivery interface {
+type Handlers interface {
 	Create() echo.HandlerFunc
 }
