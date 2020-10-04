@@ -43,8 +43,6 @@ func (s *server) MapHandlers(e *echo.Echo) error {
 
 	health := v1.Group("/health")
 	auth := v1.Group("/auth")
-	// post := v1.Group("/posts")
-	// comment := v1.Group("/comments")
 
 	// Init repositories
 	aRepo := authRepository.NewAuthRepository(s.logger, s.db)
@@ -56,9 +54,6 @@ func (s *server) MapHandlers(e *echo.Echo) error {
 	aHandlers := authHttp.NewAuthHandlers(s.config, authUC, s.logger)
 	{
 		authHttp.MapAuthRoutes(auth, aHandlers, authUC, s.config, s.logger)
-		// auth_routes.MapAuthRoutes(auth, s.h, s.useCases, s.config, s.logger)
-		// post_routes.MapPostRoutes(post, s.h, s.useCases, s.config, s.logger)
-		// comment_routes.MapCommentRoutes(comment, s.h, s.useCases, s.config, s.logger)
 		health.GET("", func(c echo.Context) error {
 			s.logger.Info("Health check", zap.String("RequestID", utils.GetRequestID(c)))
 			return c.JSON(http.StatusOK, map[string]string{"status": "OK"})
