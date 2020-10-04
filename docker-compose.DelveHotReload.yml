@@ -5,7 +5,7 @@ services:
     container_name: api_auth
     build:
       context: ./
-      dockerfile: Dockerfile.DelveHotReload
+      dockerfile: docker/Dockerfile.DelveHotReload
     ports:
       - "5000:5000"
       - "5555:5555"
