@@ -14,6 +14,12 @@ import (
 	"time"
 )
 
+const (
+	certFile       = "ssl/server.crt"
+	keyFile        = "ssl/server.pem"
+	maxHeaderBytes = 1 << 20
+)
+
 // Server struct
 type server struct {
 	echo   *echo.Echo
@@ -33,8 +39,6 @@ func NewServer(config *config.Config, logger *logger.Logger, db *sqlx.DB, redis 
 // Run server depends on config SSL option
 func (s *server) Run() error {
 	if s.config.Server.SSL {
-		certFile := "ssl/server.crt"
-		keyFile := "ssl/server.pem"
 
 		if err := s.MapHandlers(s.echo); err != nil {
 			return err
@@ -79,7 +83,7 @@ func (s *server) Run() error {
 			Addr:           s.config.Server.Port,
 			ReadTimeout:    time.Second * s.config.Server.ReadTimeout,
 			WriteTimeout:   time.Second * s.config.Server.WriteTimeout,
-			MaxHeaderBytes: 1 << 20,
+			MaxHeaderBytes: maxHeaderBytes,
 		}
 
 		go func() {
