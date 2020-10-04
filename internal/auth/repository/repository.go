@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"github.com/AleksK1NG/api-mc/internal/auth"
-	"github.com/AleksK1NG/api-mc/internal/auth/dto"
+	"github.com/AleksK1NG/api-mc/internal/dto"
 	"github.com/AleksK1NG/api-mc/internal/logger"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/utils"
