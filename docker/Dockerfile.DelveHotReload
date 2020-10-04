@@ -11,4 +11,4 @@ RUN go mod download
 
 EXPOSE 5000 40000
 
-ENTRYPOINT CompileDaemon --build="go build cmd/auth/main.go" --command="dlv debug --headless --listen=:40000 --api-version=2 --accept-multiclient cmd/auth/main.go"
+ENTRYPOINT CompileDaemon --build="go build cmd/api/main.go" --command="dlv debug --headless --listen=:40000 --api-version=2 --accept-multiclient cmd/api/main.go"

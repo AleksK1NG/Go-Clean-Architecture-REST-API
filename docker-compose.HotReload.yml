@@ -2,10 +2,10 @@ version: "3.8"
 
 services:
   web:
-    container_name: auth
+    container_name: api
     build:
       context: ./
-      dockerfile: docker/Dockerfile.Auth.HotReload
+      dockerfile: docker/Dockerfile.HotReload
     ports:
       - "5000:5000"
       - "5555:5555"
