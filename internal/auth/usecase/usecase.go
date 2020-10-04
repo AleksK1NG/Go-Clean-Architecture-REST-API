@@ -4,12 +4,12 @@ import (
 	"context"
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/auth"
-	"github.com/AleksK1NG/api-mc/internal/db/redis"
 	"github.com/AleksK1NG/api-mc/internal/dto"
-	"github.com/AleksK1NG/api-mc/internal/errors"
-	"github.com/AleksK1NG/api-mc/internal/logger"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/utils"
+	"github.com/AleksK1NG/api-mc/pkg/db/redis"
+	"github.com/AleksK1NG/api-mc/pkg/errors"
+	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/google/uuid"
 )
 
