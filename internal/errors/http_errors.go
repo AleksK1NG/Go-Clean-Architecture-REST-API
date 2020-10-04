@@ -125,48 +125,31 @@ func NewInternalServerError(causes interface{}) RestErr {
 
 func ParseErrors(err error) RestErr {
 
-	if strings.Contains(err.Error(), "SQLSTATE") {
+	switch {
+	case strings.Contains(err.Error(), "SQLSTATE"):
 		return parseSqlErrors(err)
-	}
-
-	if strings.Contains(err.Error(), "Field validation") {
+	case strings.Contains(err.Error(), "Field validation"):
 		return parseValidatorError(err)
-	}
-
-	if err == sql.ErrNoRows {
+	case err == sql.ErrNoRows:
 		return NewRestError(http.StatusNotFound, NotFound.Error(), err)
-	}
-
-	if err == context.DeadlineExceeded {
+	case err == context.DeadlineExceeded:
 		return NewRestError(http.StatusRequestTimeout, RequestTimeoutError.Error(), err)
-	}
-
-	if strings.Contains(err.Error(), "Unmarshal") {
+	case strings.Contains(err.Error(), "Unmarshal"):
 		return NewRestError(http.StatusBadRequest, BadRequest.Error(), err)
-	}
-
-	if strings.Contains(err.Error(), "UUID") {
+	case strings.Contains(err.Error(), "UUID"):
 		return NewRestError(http.StatusBadRequest, err.Error(), err)
-	}
-
-	if strings.Contains(strings.ToLower(err.Error()), "cookie") {
+	case strings.Contains(strings.ToLower(err.Error()), "cookie"):
 		return NewRestError(http.StatusUnauthorized, Unauthorized.Error(), err)
-	}
-
-	if strings.Contains(strings.ToLower(err.Error()), "token") {
+	case strings.Contains(strings.ToLower(err.Error()), "token"):
 		return NewRestError(http.StatusUnauthorized, Unauthorized.Error(), err)
-	}
-
-	if strings.Contains(strings.ToLower(err.Error()), "bcrypt") {
+	case strings.Contains(strings.ToLower(err.Error()), "bcrypt"):
 		return NewRestError(http.StatusBadRequest, BadRequest.Error(), err)
+	default:
+		if restErr, ok := err.(RestErr); ok {
+			return ParseRestErrors(restErr)
+		}
+		return NewInternalServerError(err)
 	}
-
-	restErr, ok := err.(RestErr)
-	if ok {
-		return ParseRestErrors(restErr)
-	}
-
-	return NewInternalServerError(err)
 }
 
 func parseSqlErrors(err error) RestErr {

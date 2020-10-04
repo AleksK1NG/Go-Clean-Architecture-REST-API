@@ -2,7 +2,7 @@ package auth
 
 import (
 	"context"
-	"github.com/AleksK1NG/api-mc/internal/auth/dto"
+	"github.com/AleksK1NG/api-mc/internal/dto"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/utils"
 	"github.com/google/uuid"
