@@ -312,7 +312,7 @@ func (h *handlers) GetMe() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		user, ok := c.Get("user").(*models.User)
 		if !ok {
-			h.log.Info(
+			h.log.Error(
 				"GetMe",
 				zap.String("ReqID", utils.GetRequestID(c)),
 				zap.String("ERROR", "no user ctx"),
@@ -322,5 +322,22 @@ func (h *handlers) GetMe() echo.HandlerFunc {
 		h.log.Info("GET ME", zap.String("ReqID", utils.GetRequestID(c)), zap.String("USER ID", user.ID.String()))
 
 		return c.JSON(http.StatusOK, c.Get("user"))
+	}
+}
+
+// Logout user
+func (h *handlers) Logout() echo.HandlerFunc {
+	return func(c echo.Context) error {
+
+		h.log.Info("Logout user", zap.String("ReqID", utils.GetRequestID(c)))
+
+		c.SetCookie(&http.Cookie{
+			Name:   h.cfg.Cookie.Name,
+			Value:  "",
+			Path:   "/",
+			MaxAge: -1,
+		})
+
+		return c.NoContent(http.StatusOK)
 	}
 }

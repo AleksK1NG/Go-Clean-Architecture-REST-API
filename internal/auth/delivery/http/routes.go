@@ -19,4 +19,5 @@ func MapAuthRoutes(ag *echo.Group, h auth.Handlers, authUC auth.UseCase, cfg *co
 	ag.PUT("/:user_id", h.Update(), middleware.OwnerOrAdminMiddleware(logger))
 	ag.DELETE("/:user_id", h.Delete(), middleware.RoleBasedAuthMiddleware([]string{"admin"}, logger))
 	ag.GET("/me", h.GetMe())
+	ag.POST("/logout", h.Logout())
 }
