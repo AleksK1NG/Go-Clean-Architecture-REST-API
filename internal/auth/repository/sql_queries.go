@@ -37,7 +37,9 @@ const (
 	              city, gender, postcode, birthday, created_at, updated_at, login_date 
 				  FROM users 
 				  WHERE first_name ILIKE '%' || $1 || '%' or last_name ILIKE '%' || $1 || '%'
-				  ORDER BY first_name, last_name`
+				  ORDER BY first_name, last_name
+				  OFFSET $2 LIMIT $3
+				  `
 
 	getTotal = `SELECT COUNT(user_id) FROM users`
 

@@ -87,13 +87,13 @@ func (r *repository) FindByName(ctx context.Context, query *dto.FindUserQuery) (
 		return nil, err
 	}
 
-	rows, err := r.db.QueryxContext(ctx, findUsers, query.Name)
+	rows, err := r.db.QueryxContext(ctx, findUsers, query.Name, query.PQ.GetOffset(), query.PQ.GetLimit())
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var users []*models.User
+	var users = make([]*models.User, 0, query.PQ.GetSize())
 	for rows.Next() {
 		var user models.User
 		if err := rows.StructScan(&user); err != nil {
@@ -124,7 +124,7 @@ func (r *repository) GetUsers(ctx context.Context, pq *utils.PaginationQuery) (*
 		return nil, err
 	}
 
-	var users []*models.User
+	var users = make([]*models.User, 0, pq.GetSize())
 	if err := r.db.SelectContext(
 		ctx,
 		&users,

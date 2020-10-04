@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	configPath = "./config/config-docker"
+	configPath = "./config/config"
 )
 
 func main() {
