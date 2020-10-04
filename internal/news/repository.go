@@ -1,8 +1,11 @@
 package news
 
-import "github.com/AleksK1NG/api-mc/internal/models"
+import (
+	"context"
+	"github.com/AleksK1NG/api-mc/internal/models"
+)
 
 // News Repository
 type Repository interface {
-	Create(news *models.News) (*models.News, error)
+	Create(ctx context.Context, news *models.News) (*models.News, error)
 }
