@@ -12,6 +12,7 @@ import (
 func MapAuthRoutes(ag *echo.Group, h auth.Handlers, authUC auth.UseCase, cfg *config.Config, logger *logger.Logger) {
 	ag.POST("/register", h.Register())
 	ag.POST("/login", h.Login())
+	ag.POST("/logout", h.Logout())
 	ag.GET("/find", h.FindByName())
 	ag.GET("/all", h.GetUsers())
 	ag.GET("/:user_id", h.GetUserByID())
@@ -19,5 +20,4 @@ func MapAuthRoutes(ag *echo.Group, h auth.Handlers, authUC auth.UseCase, cfg *co
 	ag.PUT("/:user_id", h.Update(), middleware.OwnerOrAdminMiddleware(logger))
 	ag.DELETE("/:user_id", h.Delete(), middleware.RoleBasedAuthMiddleware([]string{"admin"}, logger))
 	ag.GET("/me", h.GetMe())
-	ag.POST("/logout", h.Logout())
 }

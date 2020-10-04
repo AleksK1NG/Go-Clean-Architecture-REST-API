@@ -4,7 +4,7 @@ RUN go get github.com/githubnemo/CompileDaemon && \
   go get github.com/go-delve/delve/cmd/dlv
 WORKDIR /app
 
-COPY ./ /app
+COPY .. /app
 
 RUN go mod download
 
