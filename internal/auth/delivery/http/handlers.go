@@ -128,7 +128,11 @@ func (h *handlers) Update() echo.HandlerFunc {
 		user.ID = uID
 
 		if err := c.Bind(&user); err != nil {
-			h.log.Error("Update c.Bind", zap.String("ReqID", utils.GetRequestID(c)), zap.String("Error:", err.Error()))
+			h.log.Error(
+				"Update c.Bind",
+				zap.String("ReqID", utils.GetRequestID(c)),
+				zap.String("Error:", err.Error()),
+			)
 			return c.JSON(errors.ErrorResponse(err))
 		}
 
