@@ -3,8 +3,8 @@ package server
 import (
 	"context"
 	"github.com/AleksK1NG/api-mc/config"
-	"github.com/AleksK1NG/api-mc/internal/db/redis"
-	"github.com/AleksK1NG/api-mc/internal/logger"
+	"github.com/AleksK1NG/api-mc/pkg/db/redis"
+	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo"
 	"go.uber.org/zap"

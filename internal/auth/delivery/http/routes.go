@@ -3,8 +3,8 @@ package http
 import (
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/auth"
-	"github.com/AleksK1NG/api-mc/internal/logger"
 	"github.com/AleksK1NG/api-mc/internal/middleware"
+	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/labstack/echo"
 )
 

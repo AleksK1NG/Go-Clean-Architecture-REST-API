@@ -3,16 +3,16 @@ package main
 import (
 	"fmt"
 	"github.com/AleksK1NG/api-mc/config"
-	"github.com/AleksK1NG/api-mc/internal/db/postgres"
-	"github.com/AleksK1NG/api-mc/internal/db/redis"
-	"github.com/AleksK1NG/api-mc/internal/logger"
 	"github.com/AleksK1NG/api-mc/internal/server"
+	"github.com/AleksK1NG/api-mc/pkg/db/postgres"
+	"github.com/AleksK1NG/api-mc/pkg/db/redis"
+	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"go.uber.org/zap"
 	"log"
 )
 
 const (
-	configPath = "./config/config-docker"
+	configPath = "./config/config"
 )
 
 func main() {
