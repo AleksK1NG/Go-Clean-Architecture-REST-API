@@ -1,12 +1,11 @@
 DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS news CASCADE;
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS CITEXT;
 -- CREATE EXTENSION IF NOT EXISTS postgis;
 -- CREATE EXTENSION IF NOT EXISTS postgis_topology;
 
-DROP TYPE IF EXISTS SEX_T CASCADE;
--- CREATE TYPE SEX_T AS ENUM ('male', 'female', 'other');
 
 CREATE TABLE users
 (
@@ -28,4 +27,16 @@ CREATE TABLE users
     created_at   TIMESTAMP                   NOT NULL DEFAULT now(),
     updated_at   TIMESTAMP                            DEFAULT current_timestamp,
     login_date   TIMESTAMP(0) WITH TIME ZONE NOT NULL DEFAULT current_timestamp
+);
+
+CREATE TABLE news
+(
+    news_id    UUID PRIMARY KEY      DEFAULT uuid_generate_v4(),
+    author_id  UUID         NOT NULL REFERENCES users (user_id),
+    title      VARCHAR(250) NOT NULL check ( title <> '' ),
+    content    TEXT         NOT NULL check ( content <> '' ),
+    image_url  VARCHAR(1024) check ( image_url <> '' ),
+    category   VARCHAR(250),
+    created_at TIMESTAMP    NOT NULL DEFAULT now(),
+    updated_at TIMESTAMP             DEFAULT current_timestamp
 );
