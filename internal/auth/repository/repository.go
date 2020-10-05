@@ -3,24 +3,28 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"github.com/AleksK1NG/api-mc/internal/auth"
 	"github.com/AleksK1NG/api-mc/internal/dto"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/utils"
+	"github.com/AleksK1NG/api-mc/pkg/db/redis"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"go.uber.org/zap"
 )
 
 // Auth Repository
 type repository struct {
 	logger *logger.Logger
 	db     *sqlx.DB
+	redis  *redis.RedisClient
 }
 
 // Auth Repository constructor
-func NewAuthRepository(logger *logger.Logger, db *sqlx.DB) auth.Repository {
-	return &repository{logger, db}
+func NewAuthRepository(logger *logger.Logger, db *sqlx.DB, redis *redis.RedisClient) auth.Repository {
+	return &repository{logger, db, redis}
 }
 
 // Create new user
@@ -70,10 +74,23 @@ func (r *repository) Delete(ctx context.Context, userID uuid.UUID) error {
 
 // Get user by id
 func (r *repository) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, error) {
-
 	var user models.User
+
+	json, err := r.redis.GetIfExistsJSON(userID.String(), &user)
+	if err != nil {
+		r.logger.Error("REDIS GetIfExistsJSON", zap.String("ERROR", err.Error()))
+	}
+	if usr, ok := json.(*models.User); ok {
+		r.logger.Info("REDIS CACHE", zap.String("USER", fmt.Sprintf("%#v", usr)))
+		return usr, nil
+	}
+
 	if err := r.db.GetContext(ctx, &user, getUserQuery, userID); err != nil {
 		return nil, err
+	}
+
+	if err := r.redis.SetJSONValue(userID.String(), 50, &user); err != nil {
+		r.logger.Error("REDIS SetJSONValue", zap.String("ERROR", err.Error()))
 	}
 
 	return &user, nil

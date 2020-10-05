@@ -49,11 +49,11 @@ func (s *server) MapHandlers(e *echo.Echo) error {
 	newsGroup := v1.Group("/news")
 
 	// Init repositories
-	aRepo := authRepository.NewAuthRepository(s.logger, s.db)
+	aRepo := authRepository.NewAuthRepository(s.logger, s.db, s.redis)
 	nRepo := newsRepository.NewNewsRepository(s.logger, s.db)
 
 	// Init useCases
-	authUC := authUseCase.NewAuthUseCase(s.logger, s.config, aRepo, s.redis)
+	authUC := authUseCase.NewAuthUseCase(s.logger, s.config, aRepo)
 	newsUC := newsUseCase.NewNewsUseCase(s.logger, s.config, nRepo, s.redis)
 
 	// Init handlers
