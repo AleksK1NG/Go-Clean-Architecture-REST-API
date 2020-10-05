@@ -76,13 +76,11 @@ func (r *repository) Delete(ctx context.Context, userID uuid.UUID) error {
 func (r *repository) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, error) {
 	var user models.User
 
-	json, err := r.redis.GetIfExistsJSON(userID.String(), &user)
-	if err != nil {
+	if err := r.redis.GetIfExistsJSON(userID.String(), &user); err != nil {
 		r.logger.Error("REDIS GetIfExistsJSON", zap.String("ERROR", err.Error()))
-	}
-	if usr, ok := json.(*models.User); ok {
-		r.logger.Info("REDIS CACHE", zap.String("USER", fmt.Sprintf("%#v", usr)))
-		return usr, nil
+	} else {
+		r.logger.Info("REDIS CACHE", zap.String("USER", fmt.Sprintf("%#v", user)))
+		return &user, nil
 	}
 
 	if err := r.db.GetContext(ctx, &user, getUserQuery, userID); err != nil {

@@ -262,26 +262,26 @@ func (r *RedisClient) GetJSONValue(key string, model interface{}) error {
 }
 
 // Get JSON value
-func (r *RedisClient) GetIfExistsJSON(key string, model interface{}) (interface{}, error) {
+func (r *RedisClient) GetIfExistsJSON(key string, model interface{}) error {
 	conn := Pool.Get()
 	defer conn.Close()
 
 	ok, err := redis.Bool(conn.Do("EXISTS", key))
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if !ok {
-		return nil, errors.New("Not exists")
+		return errors.New("Not exists")
 	}
 
 	bytes, err := redis.Bytes(conn.Do("GET", key))
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if err := json.Unmarshal(bytes, &model); err != nil {
-		return nil, err
+		return err
 	}
 
-	return model, nil
+	return nil
 }
