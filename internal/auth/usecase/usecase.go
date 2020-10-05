@@ -7,11 +7,9 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/dto"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/utils"
-	"github.com/AleksK1NG/api-mc/pkg/db/redis"
 	"github.com/AleksK1NG/api-mc/pkg/errors"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/google/uuid"
-	"go.uber.org/zap"
 )
 
 // Auth useCase
@@ -19,12 +17,11 @@ type useCase struct {
 	logger   *logger.Logger
 	cfg      *config.Config
 	authRepo auth.Repository
-	redis    *redis.RedisClient
 }
 
 // Auth useCase constructor
-func NewAuthUseCase(l *logger.Logger, c *config.Config, ar auth.Repository, r *redis.RedisClient) auth.UseCase {
-	return &useCase{l, c, ar, r}
+func NewAuthUseCase(l *logger.Logger, c *config.Config, ar auth.Repository) auth.UseCase {
+	return &useCase{l, c, ar}
 }
 
 // Create new user
@@ -83,36 +80,12 @@ func (u *useCase) Delete(ctx context.Context, userID uuid.UUID) error {
 
 // Get user by id
 func (u *useCase) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, error) {
-	// exists, err := u.redis.Exists(userID.String())
-	// if err != nil {
-	// 	u.logger.Error("REDIS Exists", zap.String("ERROR", err.Error()))
-	// }
-	// if exists {
-	// 	var cachedUser models.User
-	// 	if err := u.redis.GetJSONValue(userID.String(), &cachedUser); err != nil {
-	// 		u.logger.Error("REDIS GetJSONValue", zap.String("ERROR", err.Error()))
-	// 	}
-	// 	return &cachedUser, nil
-	// }
-
-	json, err := u.redis.GetIfExistsJSON(userID.String(), &models.User{})
-	if err != nil {
-		u.logger.Error("REDIS GetIfExistsJSON", zap.String("ERROR", err.Error()))
-	}
-	if usr, ok := json.(*models.User); ok {
-		return usr, nil
-	}
 
 	user, err := u.authRepo.GetByID(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
 	user.SanitizePassword()
-
-	if err := u.redis.SetJSONValue(userID.String(), 50, &user); err != nil {
-		u.logger.Error("REDIS SetJSONValue", zap.String("ERROR", err.Error()))
-		return nil, err
-	}
 
 	return user, nil
 }
