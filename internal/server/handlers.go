@@ -50,11 +50,11 @@ func (s *server) MapHandlers(e *echo.Echo) error {
 
 	// Init repositories
 	aRepo := authRepository.NewAuthRepository(s.logger, s.db, s.redis)
-	nRepo := newsRepository.NewNewsRepository(s.logger, s.db)
+	nRepo := newsRepository.NewNewsRepository(s.logger, s.db, s.redis)
 
 	// Init useCases
 	authUC := authUseCase.NewAuthUseCase(s.logger, s.config, aRepo)
-	newsUC := newsUseCase.NewNewsUseCase(s.logger, s.config, nRepo, s.redis)
+	newsUC := newsUseCase.NewNewsUseCase(s.logger, s.config, nRepo)
 
 	// Init handlers
 	aHandlers := authHttp.NewAuthHandlers(s.config, authUC, s.logger)

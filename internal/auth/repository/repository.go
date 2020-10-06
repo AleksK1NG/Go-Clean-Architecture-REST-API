@@ -93,8 +93,8 @@ func (r *repository) GetByID(ctx context.Context, userID uuid.UUID) (*models.Use
 		return nil, err
 	}
 
-	if err := r.redis.SetJSONValue(userID.String(), 3600, &user); err != nil {
-		r.logger.Error("REDIS SetJSONValue", zap.String("ERROR", err.Error()))
+	if err := r.redis.SetEXJSON(userID.String(), 3600, &user); err != nil {
+		r.logger.Error("REDIS SetEXJSON", zap.String("ERROR", err.Error()))
 	}
 
 	return &user, nil
@@ -182,8 +182,8 @@ func (r *repository) FindByEmail(ctx context.Context, loginDTO *dto.LoginDTO) (*
 		return nil, err
 	}
 
-	if err := r.redis.SetJSONValue(loginDTO.Email, 3600, &user); err != nil {
-		r.logger.Error("REDIS SetJSONValue", zap.String("ERROR", err.Error()))
+	if err := r.redis.SetEXJSON(loginDTO.Email, 3600, &user); err != nil {
+		r.logger.Error("REDIS SetEXJSON", zap.String("ERROR", err.Error()))
 	}
 
 	return &user, nil

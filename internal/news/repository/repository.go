@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"github.com/AleksK1NG/api-mc/internal/models"
+	"github.com/AleksK1NG/api-mc/pkg/db/redis"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/jmoiron/sqlx"
 )
@@ -11,11 +12,12 @@ import (
 type repository struct {
 	logger *logger.Logger
 	db     *sqlx.DB
+	redis  *redis.RedisClient
 }
 
 // News repository constructor
-func NewNewsRepository(logger *logger.Logger, db *sqlx.DB) *repository {
-	return &repository{logger, db}
+func NewNewsRepository(logger *logger.Logger, db *sqlx.DB, redis *redis.RedisClient) *repository {
+	return &repository{logger, db, redis}
 }
 
 // Create news

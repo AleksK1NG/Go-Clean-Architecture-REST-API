@@ -5,7 +5,6 @@ import (
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/news"
-	"github.com/AleksK1NG/api-mc/pkg/db/redis"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 )
 
@@ -14,12 +13,11 @@ type useCase struct {
 	logger   *logger.Logger
 	cfg      *config.Config
 	newsRepo news.Repository
-	redis    *redis.RedisClient
 }
 
 // News use case constructor
-func NewNewsUseCase(logger *logger.Logger, cfg *config.Config, newsRepo news.Repository, redis *redis.RedisClient) *useCase {
-	return &useCase{logger, cfg, newsRepo, redis}
+func NewNewsUseCase(logger *logger.Logger, cfg *config.Config, newsRepo news.Repository) *useCase {
+	return &useCase{logger, cfg, newsRepo}
 }
 
 // Create news
