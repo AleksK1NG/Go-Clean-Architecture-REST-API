@@ -6,6 +6,7 @@ import (
 	"github.com/AleksK1NG/api-mc/pkg/db/redis"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/jmoiron/sqlx"
+	"go.uber.org/zap"
 )
 
 // News Repository
@@ -22,5 +23,19 @@ func NewNewsRepository(logger *logger.Logger, db *sqlx.DB, redis *redis.RedisCli
 
 // Create news
 func (r repository) Create(ctx context.Context, news *models.News) (*models.News, error) {
-	return &models.News{}, nil
+	var n models.News
+
+	if err := r.db.QueryRowxContext(
+		ctx,
+		createUser,
+		&news.AuthorID,
+		&news.Title,
+		&news.Content,
+		&news.Category,
+	).StructScan(&n); err != nil {
+		r.logger.Error("QueryRowxContext", zap.String("ERROR", err.Error()))
+		return nil, err
+	}
+
+	return &n, nil
 }

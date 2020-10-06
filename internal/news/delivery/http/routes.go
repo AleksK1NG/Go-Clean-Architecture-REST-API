@@ -11,5 +11,5 @@ import (
 
 // Map news routes
 func MapNewsRoutes(newsGroup *echo.Group, h news.Handlers, authUC auth.UseCase, cfg *config.Config, logger *logger.Logger) {
-	newsGroup.POST("", h.Create(), middleware.AuthJWTMiddleware(authUC, cfg, logger))
+	newsGroup.POST("/create", h.Create(), middleware.AuthJWTMiddleware(authUC, cfg, logger))
 }

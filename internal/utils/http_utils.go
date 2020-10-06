@@ -3,6 +3,8 @@ package utils
 import (
 	"context"
 	"github.com/AleksK1NG/api-mc/config"
+	"github.com/AleksK1NG/api-mc/internal/models"
+	"github.com/AleksK1NG/api-mc/pkg/errors"
 	"github.com/labstack/echo"
 	"net/http"
 	"time"
@@ -34,4 +36,14 @@ func ConfigureJWTCookie(cfg *config.Config, jwtToken string) *http.Cookie {
 		HttpOnly:   cfg.Cookie.HttpOnly,
 		SameSite:   0,
 	}
+}
+
+// Get user from context
+func GetUserFromCtx(ctx context.Context) (*models.User, error) {
+	user, ok := ctx.Value("user").(*models.User)
+	if !ok {
+		return nil, errors.Unauthorized
+	}
+
+	return user, nil
 }
