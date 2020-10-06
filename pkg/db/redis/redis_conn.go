@@ -35,15 +35,6 @@ func NewRedisClient(config *config.Config) *RedisClient {
 	return &RedisClient{config: config}
 }
 
-// func init() {
-// 	redisHost := os.Getenv("REDIS_HOST")
-// 	if redisHost == "" {
-// 		redisHost = ":6379"
-// 	}
-// 	Pool = newPool(redisHost)
-// 	cleanupHook()
-// }
-
 func newPool(server string) *redis.Pool {
 
 	return &redis.Pool{
@@ -104,24 +95,6 @@ func (r *RedisClient) GetBytes(key string) ([]byte, error) {
 	return data, err
 }
 
-// Get by key string, return []byte
-func (r *RedisClient) GetMarshalToJSON(key string, value interface{}) error {
-	conn := Pool.Get()
-	defer conn.Close()
-
-	var data []byte
-	data, err := redis.Bytes(conn.Do("GET", key))
-	if err != nil {
-		return fmt.Errorf("error getting key %s: %v", key, err)
-	}
-
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 // Set by key string, return []byte
 func (r *RedisClient) SetBytes(key string, value []byte) error {
 	conn := Pool.Get()
@@ -135,40 +108,6 @@ func (r *RedisClient) SetBytes(key string, value []byte) error {
 		}
 		return fmt.Errorf("error setting key %s to %s: %v", key, v, err)
 	}
-	return err
-}
-
-// Set by key string, return []byte, time int seconds
-func (r *RedisClient) SetExBytes(key string, seconds int, value []byte) error {
-	conn := Pool.Get()
-	defer conn.Close()
-
-	_, err := conn.Do("SETEX", key, seconds, value)
-	if err != nil {
-		v := string(value)
-		if len(v) > 15 {
-			v = v[0:12] + "..."
-		}
-		return fmt.Errorf("error setting key %s to %s: %v", key, v, err)
-	}
-	return err
-}
-
-// Set by key string, return []byte, time int seconds
-func (r *RedisClient) SetExBytesJSON(key string, seconds int, value interface{}) error {
-	conn := Pool.Get()
-	defer conn.Close()
-
-	bytes, err := json.Marshal(&value)
-	if err != nil {
-		return err
-	}
-
-	_, err = conn.Do("SETEX", key, seconds, bytes)
-	if err != nil {
-		return fmt.Errorf("error setting key %s to %s: %v", key, key, err)
-	}
-
 	return err
 }
 
@@ -227,7 +166,7 @@ func (r *RedisClient) Incr(counterKey string) (int, error) {
 }
 
 // Set JSON value
-func (r *RedisClient) SetJSONValue(key string, seconds int, value interface{}) error {
+func (r *RedisClient) SetEXJSON(key string, seconds int, value interface{}) error {
 	conn := Pool.Get()
 	defer conn.Close()
 
@@ -245,7 +184,7 @@ func (r *RedisClient) SetJSONValue(key string, seconds int, value interface{}) e
 }
 
 // Get JSON value
-func (r *RedisClient) GetJSONValue(key string, model interface{}) error {
+func (r *RedisClient) GetJSON(key string, model interface{}) error {
 	conn := Pool.Get()
 	defer conn.Close()
 
