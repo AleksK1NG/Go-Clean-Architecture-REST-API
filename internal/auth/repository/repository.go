@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"github.com/AleksK1NG/api-mc/internal/auth"
 	"github.com/AleksK1NG/api-mc/internal/dto"
 	"github.com/AleksK1NG/api-mc/internal/models"
@@ -51,6 +50,10 @@ func (r *repository) Update(ctx context.Context, user *models.UserUpdate) (*mode
 		return nil, err
 	}
 
+	if err := r.redis.Delete(u.ID.String()); err != nil {
+		r.logger.Error("REDIS Delete", zap.String("ERROR", err.Error()))
+	}
+
 	return &u, nil
 }
 
@@ -69,6 +72,10 @@ func (r *repository) Delete(ctx context.Context, userID uuid.UUID) error {
 		return sql.ErrNoRows
 	}
 
+	if err := r.redis.Delete(userID.String()); err != nil {
+		r.logger.Error("REDIS Delete", zap.String("ERROR", err.Error()))
+	}
+
 	return nil
 }
 
@@ -79,7 +86,6 @@ func (r *repository) GetByID(ctx context.Context, userID uuid.UUID) (*models.Use
 	if err := r.redis.GetIfExistsJSON(userID.String(), &user); err != nil {
 		r.logger.Error("REDIS GetIfExistsJSON", zap.String("ERROR", err.Error()))
 	} else {
-		r.logger.Info("REDIS CACHE", zap.String("USER", fmt.Sprintf("%#v", user)))
 		return &user, nil
 	}
 
@@ -87,7 +93,7 @@ func (r *repository) GetByID(ctx context.Context, userID uuid.UUID) (*models.Use
 		return nil, err
 	}
 
-	if err := r.redis.SetJSONValue(userID.String(), 50, &user); err != nil {
+	if err := r.redis.SetJSONValue(userID.String(), 3600, &user); err != nil {
 		r.logger.Error("REDIS SetJSONValue", zap.String("ERROR", err.Error()))
 	}
 
@@ -165,8 +171,19 @@ func (r *repository) GetUsers(ctx context.Context, pq *utils.PaginationQuery) (*
 func (r *repository) FindByEmail(ctx context.Context, loginDTO *dto.LoginDTO) (*models.User, error) {
 
 	var user models.User
+
+	if err := r.redis.GetIfExistsJSON(loginDTO.Email, &user); err != nil {
+		r.logger.Error("REDIS GetIfExistsJSON", zap.String("ERROR", err.Error()))
+	} else {
+		return &user, nil
+	}
+
 	if err := r.db.GetContext(ctx, &user, findUserByEmail, loginDTO.Email); err != nil {
 		return nil, err
+	}
+
+	if err := r.redis.SetJSONValue(loginDTO.Email, 3600, &user); err != nil {
+		r.logger.Error("REDIS SetJSONValue", zap.String("ERROR", err.Error()))
 	}
 
 	return &user, nil
