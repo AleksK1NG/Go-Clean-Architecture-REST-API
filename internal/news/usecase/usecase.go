@@ -89,3 +89,13 @@ func (u *useCase) Delete(ctx context.Context, newsID uuid.UUID) error {
 
 	return nil
 }
+
+// Get news
+func (u *useCase) GetNews(ctx context.Context, pq *utils.PaginationQuery) (*models.NewsList, error) {
+	newsList, err := u.newsRepo.GetNews(ctx, pq)
+	if err != nil {
+		return nil, err
+	}
+
+	return newsList, nil
+}

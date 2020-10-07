@@ -186,3 +186,41 @@ func (h handlers) Delete() echo.HandlerFunc {
 		return c.NoContent(http.StatusOK)
 	}
 }
+
+// Get all news with pagination
+func (h handlers) GetNews() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		ctx, cancel := utils.GetCtxWithReqID(c)
+		defer cancel()
+
+		h.log.Info("GetByID", zap.String("ReqID", utils.GetRequestID(c)))
+
+		pq, err := utils.GetPaginationFromCtx(c)
+		if err != nil {
+			h.log.Error(
+				"GetPaginationFromCtx",
+				zap.String("reqID", utils.GetRequestID(c)),
+				zap.String("Error:", err.Error()),
+			)
+			return c.JSON(errors.ErrorResponse(err))
+		}
+
+		newsList, err := h.newsUC.GetNews(ctx, pq)
+		if err != nil {
+			h.log.Error(
+				"newsUC.GetNewsByID",
+				zap.String("reqID", utils.GetRequestID(c)),
+				zap.String("Error:", err.Error()),
+			)
+			return c.JSON(errors.ErrorResponse(err))
+		}
+
+		h.log.Info(
+			"GetByID",
+			zap.String("reqID", utils.GetRequestID(c)),
+			zap.Int("Length", len(newsList.News)),
+		)
+
+		return c.JSON(http.StatusOK, newsList)
+	}
+}
