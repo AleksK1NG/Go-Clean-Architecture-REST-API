@@ -14,4 +14,6 @@ const (
 					RETURNING *`
 
 	getNewsByID = `SELECT news_id, author_id, title, content, image_url, category, updated_at FROM news WHERE news_id = $1`
+
+	deleteNews = `DELETE FROM news WHERE news_id = $1`
 )
