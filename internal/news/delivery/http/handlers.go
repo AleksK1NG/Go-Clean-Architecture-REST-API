@@ -26,13 +26,13 @@ func NewNewsHandlers(cfg *config.Config, newsUC news.UseCase, log *logger.Logger
 
 // Create news handler
 func (h handlers) Create() echo.HandlerFunc {
+	var n models.News
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
 
 		h.log.Info("Create news", zap.String("ReqID", utils.GetRequestID(c)))
 
-		var n models.News
 		if err := c.Bind(&n); err != nil {
 			h.log.Error(
 				"c.Bind",
