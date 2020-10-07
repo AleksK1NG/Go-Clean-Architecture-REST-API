@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/news"
+	"github.com/AleksK1NG/api-mc/internal/utils"
 	"github.com/AleksK1NG/api-mc/pkg/db/redis"
 	"github.com/AleksK1NG/api-mc/pkg/errors"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
@@ -109,4 +110,33 @@ func (r repository) Delete(ctx context.Context, newsID uuid.UUID) error {
 	}
 
 	return nil
+}
+
+// Get news
+func (r repository) GetNews(ctx context.Context, pq *utils.PaginationQuery) (*models.NewsList, error) {
+
+	var totalCount int
+	if err := r.db.GetContext(ctx, &totalCount, getTotalCount); err != nil {
+		return nil, err
+	}
+
+	var newsList = make([]*models.News, 0, pq.GetSize())
+	if err := r.db.SelectContext(
+		ctx,
+		&newsList,
+		getNews,
+		pq.GetOffset(),
+		pq.GetLimit(),
+	); err != nil {
+		return nil, err
+	}
+
+	return &models.NewsList{
+		TotalCount: totalCount,
+		TotalPages: utils.GetTotalPages(totalCount, pq.GetSize()),
+		Page:       pq.GetPage(),
+		Size:       pq.GetSize(),
+		HasMore:    utils.GetHasMore(pq.GetPage(), totalCount, pq.GetSize()),
+		News:       newsList,
+	}, nil
 }

@@ -8,4 +8,5 @@ type Handlers interface {
 	Update() echo.HandlerFunc
 	GetByID() echo.HandlerFunc
 	Delete() echo.HandlerFunc
+	GetNews() echo.HandlerFunc
 }
