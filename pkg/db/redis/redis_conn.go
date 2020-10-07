@@ -2,9 +2,9 @@ package redis
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/AleksK1NG/api-mc/config"
+	restErrors "github.com/AleksK1NG/api-mc/pkg/errors"
 	"github.com/gomodule/redigo/redis"
 	"log"
 	"os"
@@ -210,7 +210,7 @@ func (r *RedisClient) GetIfExistsJSON(key string, model interface{}) error {
 		return err
 	}
 	if !ok {
-		return errors.New("Not exists")
+		return restErrors.NotExists
 	}
 
 	bytes, err := redis.Bytes(conn.Do("GET", key))

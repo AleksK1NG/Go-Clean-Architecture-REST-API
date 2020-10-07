@@ -12,6 +12,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo"
 	"go.uber.org/zap"
+	"log"
 	"net/http"
 )
 
@@ -85,6 +86,7 @@ func (h *handlers) Login() echo.HandlerFunc {
 			return c.JSON(errors.ErrorResponse(err))
 		}
 
+		log.Printf("LOGIN DTO: %#v", loginDTO)
 		userWithToken, err := h.authUC.Login(ctx, &loginDTO)
 		if err != nil {
 			h.log.Error(

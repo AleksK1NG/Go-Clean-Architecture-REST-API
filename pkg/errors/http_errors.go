@@ -39,6 +39,7 @@ var (
 	InvalidJWTToken         = errors.New("Invalid JWT token")
 	InvalidJWTClaims        = errors.New("Invalid JWT claims")
 	InvalidJWTSignMethod    = errors.New("Invalid JWT sign method")
+	NotExists               = errors.New("Not Exists ")
 )
 
 type RestErr interface {

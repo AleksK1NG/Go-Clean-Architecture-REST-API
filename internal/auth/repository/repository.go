@@ -8,6 +8,7 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/utils"
 	"github.com/AleksK1NG/api-mc/pkg/db/redis"
+	"github.com/AleksK1NG/api-mc/pkg/errors"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -84,7 +85,9 @@ func (r *repository) GetByID(ctx context.Context, userID uuid.UUID) (*models.Use
 	var user models.User
 
 	if err := r.redis.GetIfExistsJSON(userID.String(), &user); err != nil {
-		r.logger.Error("REDIS GetIfExistsJSON", zap.String("ERROR", err.Error()))
+		if err != errors.NotExists {
+			r.logger.Error("REDIS GetIfExistsJSON", zap.String("ERROR", err.Error()))
+		}
 	} else {
 		return &user, nil
 	}
@@ -169,11 +172,12 @@ func (r *repository) GetUsers(ctx context.Context, pq *utils.PaginationQuery) (*
 
 // Find user by email
 func (r *repository) FindByEmail(ctx context.Context, loginDTO *dto.LoginDTO) (*models.User, error) {
-
 	var user models.User
 
 	if err := r.redis.GetIfExistsJSON(loginDTO.Email, &user); err != nil {
-		r.logger.Error("REDIS GetIfExistsJSON", zap.String("ERROR", err.Error()))
+		if err != errors.NotExists {
+			r.logger.Error("REDIS GetIfExistsJSON", zap.String("ERROR", err.Error()))
+		}
 	} else {
 		return &user, nil
 	}

@@ -8,4 +8,5 @@ import (
 // News use case
 type UseCase interface {
 	Create(ctx context.Context, news *models.News) (*models.News, error)
+	Update(ctx context.Context, news *models.News) (*models.News, error)
 }
