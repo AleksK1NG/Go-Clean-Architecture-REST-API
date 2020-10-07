@@ -29,13 +29,13 @@ func NewAuthHandlers(cfg *config.Config, authUC auth.UseCase, log *logger.Logger
 
 // Register new user
 func (h *handlers) Register() echo.HandlerFunc {
+	var user models.User
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
 
 		h.log.Info("Register user", zap.String("ReqID", utils.GetRequestID(c)))
 
-		var user models.User
 		if err := c.Bind(&user); err != nil {
 			h.log.Error(
 				"Register c.Bind",
@@ -69,13 +69,13 @@ func (h *handlers) Register() echo.HandlerFunc {
 
 // Login user
 func (h *handlers) Login() echo.HandlerFunc {
+	var loginDTO dto.LoginDTO
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
 
 		h.log.Info("Register user", zap.String("ReqID", utils.GetRequestID(c)))
 
-		var loginDTO dto.LoginDTO
 		if err := c.Bind(&loginDTO); err != nil {
 			h.log.Error(
 				"Login",
@@ -126,13 +126,13 @@ func (h *handlers) Logout() echo.HandlerFunc {
 
 // Update existing user
 func (h *handlers) Update() echo.HandlerFunc {
+	var user models.UserUpdate
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
 
 		h.log.Info("Update user", zap.String("ReqID", utils.GetRequestID(c)))
 
-		var user models.UserUpdate
 		uID, err := uuid.Parse(c.Param("user_id"))
 		if err != nil {
 			h.log.Error(
