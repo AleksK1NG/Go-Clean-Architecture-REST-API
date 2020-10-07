@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/news"
 	"github.com/AleksK1NG/api-mc/pkg/db/redis"
@@ -85,4 +86,27 @@ func (r repository) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*models.
 	}
 
 	return &n, nil
+}
+
+// Delete news by id
+func (r repository) Delete(ctx context.Context, newsID uuid.UUID) error {
+
+	result, err := r.db.ExecContext(ctx, deleteNews, newsID)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return sql.ErrNoRows
+	}
+
+	if err := r.redis.Delete(newsID.String()); err != nil {
+		r.logger.Error("REDIS Delete", zap.String("ERROR", err.Error()))
+	}
+
+	return nil
 }
