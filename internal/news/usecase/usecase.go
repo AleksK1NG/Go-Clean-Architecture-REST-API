@@ -7,6 +7,7 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/news"
 	"github.com/AleksK1NG/api-mc/internal/utils"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
+	"github.com/google/uuid"
 )
 
 // News useCase
@@ -59,4 +60,32 @@ func (u *useCase) Update(ctx context.Context, news *models.News) (*models.News, 
 	}
 
 	return updatedUser, nil
+}
+
+// Get news by id
+func (u *useCase) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*models.News, error) {
+	newsByID, err := u.newsRepo.GetNewsByID(ctx, newsID)
+	if err != nil {
+		return nil, err
+	}
+
+	return newsByID, nil
+}
+
+// Delete news
+func (u *useCase) Delete(ctx context.Context, newsID uuid.UUID) error {
+	newsByID, err := u.newsRepo.GetNewsByID(ctx, newsID)
+	if err != nil {
+		return err
+	}
+
+	if err := utils.ValidateIsOwner(ctx, newsByID.AuthorID.String()); err != nil {
+		return err
+	}
+
+	if err := u.newsRepo.Delete(ctx, newsID); err != nil {
+		return err
+	}
+
+	return nil
 }

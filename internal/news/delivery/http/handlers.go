@@ -21,7 +21,7 @@ type handlers struct {
 }
 
 // News handlers constructor
-func NewNewsHandlers(cfg *config.Config, newsUC news.UseCase, log *logger.Logger) *handlers {
+func NewNewsHandlers(cfg *config.Config, newsUC news.UseCase, log *logger.Logger) news.Handlers {
 	return &handlers{cfg, newsUC, log}
 }
 
@@ -109,5 +109,80 @@ func (h handlers) Update() echo.HandlerFunc {
 		)
 
 		return c.JSON(http.StatusOK, updatedNews)
+	}
+}
+
+// Get news by id
+func (h handlers) GetByID() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		ctx, cancel := utils.GetCtxWithReqID(c)
+		defer cancel()
+
+		h.log.Info("GetByID", zap.String("ReqID", utils.GetRequestID(c)))
+
+		newsUUID, err := uuid.Parse(c.Param("news_id"))
+		if err != nil {
+			h.log.Error(
+				"Update uuid.Parse",
+				zap.String("ReqID", utils.GetRequestID(c)),
+				zap.String("Error:", err.Error()),
+			)
+			return c.JSON(errors.ErrorResponse(err))
+		}
+
+		newsByID, err := h.newsUC.GetNewsByID(ctx, newsUUID)
+		if err != nil {
+			h.log.Error(
+				"newsUC.GetNewsByID",
+				zap.String("reqID", utils.GetRequestID(c)),
+				zap.String("Error:", err.Error()),
+			)
+			return c.JSON(errors.ErrorResponse(err))
+		}
+
+		h.log.Info(
+			"GetByID",
+			zap.String("reqID", utils.GetRequestID(c)),
+			zap.String("ID", newsByID.ID.String()),
+		)
+
+		return c.JSON(http.StatusOK, newsByID)
+	}
+}
+
+// Delete news handler
+func (h handlers) Delete() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		ctx, cancel := utils.GetCtxWithReqID(c)
+		defer cancel()
+
+		h.log.Info("GetByID", zap.String("ReqID", utils.GetRequestID(c)))
+
+		newsUUID, err := uuid.Parse(c.Param("news_id"))
+		if err != nil {
+			h.log.Error(
+				"Update uuid.Parse",
+				zap.String("ReqID", utils.GetRequestID(c)),
+				zap.String("Error:", err.Error()),
+			)
+			return c.JSON(errors.ErrorResponse(err))
+		}
+
+		if err := h.newsUC.Delete(ctx, newsUUID); err != nil {
+			h.log.Error(
+				"newsUC.GetNewsByID",
+				zap.String("reqID", utils.GetRequestID(c)),
+				zap.String("Error:", err.Error()),
+			)
+			return c.JSON(errors.ErrorResponse(err))
+		}
+
+		h.log.Info(
+			"GetByID",
+			zap.String("reqID", utils.GetRequestID(c)),
+			zap.String("ID", newsUUID.String()),
+		)
+
+		return c.NoContent(http.StatusOK)
 	}
 }
