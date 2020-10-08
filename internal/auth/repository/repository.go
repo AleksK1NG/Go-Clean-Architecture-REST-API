@@ -115,7 +115,13 @@ func (r *repository) FindByName(ctx context.Context, query *dto.FindUserQuery) (
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() {
+		if closeErr := rows.Close(); closeErr != nil {
+			if err == nil {
+				err = closeErr
+			}
+		}
+	}()
 
 	var users = make([]*models.User, 0, query.PQ.GetSize())
 	for rows.Next() {

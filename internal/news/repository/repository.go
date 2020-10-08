@@ -121,13 +121,21 @@ func (r repository) GetNews(ctx context.Context, pq *utils.PaginationQuery) (*mo
 	}
 
 	var newsList = make([]*models.News, 0, pq.GetSize())
-	if err := r.db.SelectContext(
-		ctx,
-		&newsList,
-		getNews,
-		pq.GetOffset(),
-		pq.GetLimit(),
-	); err != nil {
+	rows, err := r.db.QueryxContext(ctx, getNews, pq.GetOffset(), pq.GetLimit())
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		n := &models.News{}
+		if err := rows.StructScan(n); err != nil {
+			return nil, err
+		}
+		newsList = append(newsList, n)
+	}
+
+	if err := rows.Err(); err != nil {
 		return nil, err
 	}
 
