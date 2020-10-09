@@ -9,4 +9,5 @@ type Handlers interface {
 	GetByID() echo.HandlerFunc
 	Delete() echo.HandlerFunc
 	GetNews() echo.HandlerFunc
+	SearchByTitle() echo.HandlerFunc
 }
