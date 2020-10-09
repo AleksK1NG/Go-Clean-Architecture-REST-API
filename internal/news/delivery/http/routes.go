@@ -15,5 +15,6 @@ func MapNewsRoutes(newsGroup *echo.Group, h news.Handlers, authUC auth.UseCase, 
 	newsGroup.PUT("/:news_id", h.Update(), middleware.AuthJWTMiddleware(authUC, cfg, logger))
 	newsGroup.DELETE("/:news_id", h.Delete(), middleware.AuthJWTMiddleware(authUC, cfg, logger))
 	newsGroup.GET("/:news_id", h.GetByID())
+	newsGroup.GET("/search", h.SearchByTitle())
 	newsGroup.GET("", h.GetNews())
 }

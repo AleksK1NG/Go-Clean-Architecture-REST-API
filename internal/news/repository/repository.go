@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"github.com/AleksK1NG/api-mc/internal/dto"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/news"
 	"github.com/AleksK1NG/api-mc/internal/utils"
@@ -145,6 +146,52 @@ func (r repository) GetNews(ctx context.Context, pq *utils.PaginationQuery) (*mo
 		Page:       pq.GetPage(),
 		Size:       pq.GetSize(),
 		HasMore:    utils.GetHasMore(pq.GetPage(), totalCount, pq.GetSize()),
+		News:       newsList,
+	}, nil
+}
+
+// Find news by title
+func (r repository) SearchByTitle(ctx context.Context, req *dto.FindNewsDTO) (*models.NewsList, error) {
+	findByTitleCount := `SELECT COUNT(*)
+					FROM news
+					WHERE title ILIKE '%' || $1 || '%'`
+
+	var totalCount int
+	if err := r.db.GetContext(ctx, &totalCount, findByTitleCount, req.Title); err != nil {
+		return nil, err
+	}
+
+	findByTitle := `SELECT news_id, author_id, title, content, image_url, category, updated_at, created_at
+					FROM news
+					WHERE title ILIKE '%' || $1 || '%'
+					ORDER BY title, created_at, updated_at
+					OFFSET $2 LIMIT $3`
+
+	var newsList = make([]*models.News, 0, req.PQ.GetSize())
+	rows, err := r.db.QueryxContext(ctx, findByTitle, req.Title, req.PQ.GetOffset(), req.PQ.GetLimit())
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		n := &models.News{}
+		if err := rows.StructScan(n); err != nil {
+			return nil, err
+		}
+		newsList = append(newsList, n)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return &models.NewsList{
+		TotalCount: totalCount,
+		TotalPages: utils.GetTotalPages(totalCount, req.PQ.GetSize()),
+		Page:       req.PQ.GetPage(),
+		Size:       req.PQ.GetSize(),
+		HasMore:    utils.GetHasMore(req.PQ.GetPage(), totalCount, req.PQ.GetSize()),
 		News:       newsList,
 	}, nil
 }

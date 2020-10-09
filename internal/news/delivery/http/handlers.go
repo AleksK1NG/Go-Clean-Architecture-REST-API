@@ -2,6 +2,7 @@ package http
 
 import (
 	"github.com/AleksK1NG/api-mc/config"
+	"github.com/AleksK1NG/api-mc/internal/dto"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/news"
 	"github.com/AleksK1NG/api-mc/internal/utils"
@@ -206,6 +207,48 @@ func (h handlers) GetNews() echo.HandlerFunc {
 		}
 
 		newsList, err := h.newsUC.GetNews(ctx, pq)
+		if err != nil {
+			h.log.Error(
+				"newsUC.GetNewsByID",
+				zap.String("reqID", utils.GetRequestID(c)),
+				zap.String("Error:", err.Error()),
+			)
+			return c.JSON(errors.ErrorResponse(err))
+		}
+
+		h.log.Info(
+			"GetByID",
+			zap.String("reqID", utils.GetRequestID(c)),
+			zap.Int("Length", len(newsList.News)),
+		)
+
+		return c.JSON(http.StatusOK, newsList)
+	}
+}
+
+// Search by title
+func (h handlers) SearchByTitle() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		ctx, cancel := utils.GetCtxWithReqID(c)
+		defer cancel()
+
+		h.log.Info("GetByID", zap.String("ReqID", utils.GetRequestID(c)))
+
+		pq, err := utils.GetPaginationFromCtx(c)
+		if err != nil {
+			h.log.Error(
+				"GetPaginationFromCtx",
+				zap.String("reqID", utils.GetRequestID(c)),
+				zap.String("Error:", err.Error()),
+			)
+			return c.JSON(errors.ErrorResponse(err))
+		}
+
+		newsList, err := h.newsUC.SearchByTitle(ctx, &dto.FindNewsDTO{
+			Title: c.QueryParam("title"),
+			PQ:    pq,
+		})
+
 		if err != nil {
 			h.log.Error(
 				"newsUC.GetNewsByID",
