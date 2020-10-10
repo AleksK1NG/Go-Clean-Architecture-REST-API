@@ -13,7 +13,7 @@ scrape_configs:
 
   - job_name: 'api'
     static_configs:
-      - targets: ['localhost:7070']
+      - targets: ['host.docker.internal:7070']
 
 #  - job_name: 'session'
 #    static_configs:
