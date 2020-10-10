@@ -30,6 +30,7 @@ type ServerConfig struct {
 	WriteTimeout      time.Duration
 	SSL               bool
 	CtxDefaultTimeout time.Duration
+	Debug             bool
 }
 
 // Postgresql config struct
