@@ -2,7 +2,9 @@ package repository
 
 import (
 	"encoding/json"
+	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/models"
+	"github.com/AleksK1NG/api-mc/internal/session"
 	"github.com/AleksK1NG/api-mc/pkg/db/redis"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/google/uuid"
@@ -10,22 +12,23 @@ import (
 )
 
 // Session repository
-type SessionRepository struct {
+type sessionRepository struct {
 	redis      *redis.RedisClient
 	logger     *logger.Logger
 	basePrefix string
+	cfg        *config.Config
 }
 
 // Session repository constructor
-func NewSessionRepository(redis *redis.RedisClient, logger *logger.Logger, basePrefix string) *SessionRepository {
-	return &SessionRepository{redis: redis, logger: logger, basePrefix: basePrefix}
+func NewSessionRepository(redis *redis.RedisClient, log *logger.Logger, prefix string, cfg *config.Config) session.SessRepository {
+	return &sessionRepository{redis, log, prefix, cfg}
 }
 
-func (s *SessionRepository) createKey(sessionId string) string {
+func (s *sessionRepository) createKey(sessionId string) string {
 	return s.basePrefix + sessionId
 }
 
-func (s *SessionRepository) convertToString(session *models.Session) (string, error) {
+func (s *sessionRepository) convertToString(session *models.Session) (string, error) {
 	sessionJSON, err := json.Marshal(session)
 
 	if err != nil {
@@ -35,7 +38,7 @@ func (s *SessionRepository) convertToString(session *models.Session) (string, er
 	return string(sessionJSON), nil
 }
 
-func (s *SessionRepository) convertFromString(sessionString string) (*models.Session, error) {
+func (s *sessionRepository) convertFromString(sessionString string) (*models.Session, error) {
 	var storedSession models.Session
 
 	if err := json.Unmarshal([]byte(sessionString), &storedSession); err != nil {
@@ -45,7 +48,7 @@ func (s *SessionRepository) convertFromString(sessionString string) (*models.Ses
 	return &storedSession, nil
 }
 
-func (s *SessionRepository) convertToBytes(session *models.Session) ([]byte, error) {
+func (s *sessionRepository) convertToBytes(session *models.Session) ([]byte, error) {
 	sessionJSON, err := json.Marshal(session)
 
 	if err != nil {
@@ -55,7 +58,7 @@ func (s *SessionRepository) convertToBytes(session *models.Session) ([]byte, err
 	return sessionJSON, nil
 }
 
-func (s *SessionRepository) convertFromBytes(sessionBytes []byte) (*models.Session, error) {
+func (s *sessionRepository) convertFromBytes(sessionBytes []byte) (*models.Session, error) {
 	var storedSession models.Session
 
 	if err := json.Unmarshal(sessionBytes, &storedSession); err != nil {
@@ -66,7 +69,7 @@ func (s *SessionRepository) convertFromBytes(sessionBytes []byte) (*models.Sessi
 }
 
 // Create session in redis
-func (s *SessionRepository) CreateSession(session models.Session, expire time.Duration) (string, error) {
+func (s *sessionRepository) CreateSession(session models.Session, expire time.Duration) (string, error) {
 	sessionKey := s.createKey(session.ID)
 
 	session.ID = uuid.New().String()
@@ -79,7 +82,7 @@ func (s *SessionRepository) CreateSession(session models.Session, expire time.Du
 }
 
 // Get session by id
-func (s *SessionRepository) GetSessionByID(sessionId string) (*models.Session, error) {
+func (s *sessionRepository) GetSessionByID(sessionId string) (*models.Session, error) {
 	key := s.createKey(sessionId)
 
 	storedSession := &models.Session{}
@@ -92,7 +95,7 @@ func (s *SessionRepository) GetSessionByID(sessionId string) (*models.Session, e
 }
 
 // Delete session by id
-func (s *SessionRepository) DeleteByID(sessionId string) error {
+func (s *sessionRepository) DeleteByID(sessionId string) error {
 	if err := s.redis.Delete(s.createKey(sessionId)); err != nil {
 		return err
 	}
