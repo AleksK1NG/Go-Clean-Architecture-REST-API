@@ -31,8 +31,9 @@ func NewAuthRepository(logger *logger.Logger, db *sqlx.DB, redis *redis.RedisCli
 func (r *repository) Register(ctx context.Context, user *models.User) (*models.User, error) {
 
 	var u models.User
-	if err := r.db.QueryRowxContext(ctx, createUserQuery, &user.FirstName, &user.LastName, &user.Email, &user.Password, &user.Role,
-		&user.About, &user.Avatar, &user.PhoneNumber, &user.Address, &user.City, &user.Gender, &user.Postcode, &user.Birthday,
+	if err := r.db.QueryRowxContext(ctx, createUserQuery, &user.FirstName, &user.LastName, &user.Email,
+		&user.Password, &user.Role, &user.About, &user.Avatar, &user.PhoneNumber, &user.Address, &user.City,
+		&user.Gender, &user.Postcode, &user.Birthday,
 	).StructScan(&u); err != nil {
 		return nil, err
 	}
@@ -45,8 +46,9 @@ func (r *repository) Register(ctx context.Context, user *models.User) (*models.U
 func (r *repository) Update(ctx context.Context, user *models.UserUpdate) (*models.User, error) {
 
 	var u models.User
-	if err := r.db.GetContext(ctx, &u, updateUserQuery, &user.FirstName, &user.LastName, &user.Email, &user.Role, &user.About, &user.Avatar, &user.PhoneNumber,
-		&user.Address, &user.City, &user.Gender, &user.Postcode, &user.Birthday, &user.ID,
+	if err := r.db.GetContext(ctx, &u, updateUserQuery, &user.FirstName, &user.LastName, &user.Email,
+		&user.Role, &user.About, &user.Avatar, &user.PhoneNumber, &user.Address, &user.City, &user.Gender,
+		&user.Postcode, &user.Birthday, &user.ID,
 	); err != nil {
 		return nil, err
 	}
