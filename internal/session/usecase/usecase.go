@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"context"
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/session"
@@ -21,16 +22,16 @@ func NewSessionUseCase(sessionRepo session.SessRepository, logger *logger.Logger
 }
 
 // Create new session
-func (u *useCase) CreateSession(session models.Session, expire time.Duration) (string, error) {
-	return u.sessionRepo.CreateSession(session, expire)
+func (u *useCase) CreateSession(ctx context.Context, session models.Session, expire time.Duration) (string, error) {
+	return u.sessionRepo.CreateSession(ctx, session, expire)
 }
 
 // Delete session by id
-func (u *useCase) DeleteByID(sessionID string) error {
-	return u.sessionRepo.DeleteByID(sessionID)
+func (u *useCase) DeleteByID(ctx context.Context, sessionID string) error {
+	return u.sessionRepo.DeleteByID(ctx, sessionID)
 }
 
 // get session by id
-func (u *useCase) GetSessionByID(sessionID string) (*models.Session, error) {
-	return u.sessionRepo.GetSessionByID(sessionID)
+func (u *useCase) GetSessionByID(ctx context.Context, sessionID string) (*models.Session, error) {
+	return u.sessionRepo.GetSessionByID(ctx, sessionID)
 }
