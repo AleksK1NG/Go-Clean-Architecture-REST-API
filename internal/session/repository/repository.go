@@ -70,33 +70,49 @@ func (s *sessionRepository) convertFromBytes(sessionBytes []byte) (*models.Sessi
 
 // Create session in redis
 func (s *sessionRepository) CreateSession(ctx context.Context, session *models.Session, expire int) (string, error) {
-	session.ID = uuid.New().String()
-	sessionKey := s.createKey(session.ID)
 
-	if err := s.redis.SetEXJSON(sessionKey, expire, &session); err != nil {
-		return "", err
+	select {
+	case <-ctx.Done():
+		return "", ctx.Err()
+	default:
+		session.ID = uuid.New().String()
+		sessionKey := s.createKey(session.ID)
+		if err := s.redis.SetEXJSON(sessionKey, expire, &session); err != nil {
+			return "", err
+		}
+
+		return session.ID, nil
 	}
-
-	return session.ID, nil
 }
 
 // Get session by id
 func (s *sessionRepository) GetSessionByID(ctx context.Context, sessionId string) (*models.Session, error) {
-	key := s.createKey(sessionId)
-	storedSession := &models.Session{}
 
-	if err := s.redis.GetIfExistsJSON(key, storedSession); err != nil {
-		return nil, err
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	default:
+		key := s.createKey(sessionId)
+		storedSession := &models.Session{}
+		if err := s.redis.GetIfExistsJSON(key, storedSession); err != nil {
+			return nil, err
+		}
+
+		return storedSession, nil
 	}
-
-	return storedSession, nil
 }
 
 // Delete session by id
 func (s *sessionRepository) DeleteByID(ctx context.Context, sessionId string) error {
-	if err := s.redis.Delete(s.createKey(sessionId)); err != nil {
-		return err
-	}
 
-	return nil
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+		if err := s.redis.Delete(s.createKey(sessionId)); err != nil {
+			return err
+		}
+
+		return nil
+	}
 }
