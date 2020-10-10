@@ -16,6 +16,7 @@ type Config struct {
 	Cookie   Cookie
 	Store    Store
 	Session  Session
+	Metrics  Metrics
 }
 
 // Server config struct
@@ -67,6 +68,11 @@ type Session struct {
 	Prefix string
 	Name   string
 	Expire int
+}
+
+type Metrics struct {
+	Url         string
+	ServiceName string
 }
 
 type Store struct {

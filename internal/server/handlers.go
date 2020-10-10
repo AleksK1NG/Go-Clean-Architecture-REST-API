@@ -4,12 +4,14 @@ import (
 	authHttp "github.com/AleksK1NG/api-mc/internal/auth/delivery/http"
 	authRepository "github.com/AleksK1NG/api-mc/internal/auth/repository"
 	authUseCase "github.com/AleksK1NG/api-mc/internal/auth/usecase"
+	metricsMiddleware "github.com/AleksK1NG/api-mc/internal/middleware"
 	newsHttp "github.com/AleksK1NG/api-mc/internal/news/delivery/http"
 	newsRepository "github.com/AleksK1NG/api-mc/internal/news/repository"
 	newsUseCase "github.com/AleksK1NG/api-mc/internal/news/usecase"
 	"github.com/AleksK1NG/api-mc/internal/session/repository"
 	"github.com/AleksK1NG/api-mc/internal/session/usecase"
 	"github.com/AleksK1NG/api-mc/internal/utils"
+	"github.com/AleksK1NG/api-mc/pkg/metric"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"go.uber.org/zap"
@@ -22,9 +24,19 @@ const (
 
 // Map Server Handlers
 func (s *server) MapHandlers(e *echo.Echo) error {
+	metrics, err := metric.CreateMetrics(s.config.Metrics.Url, s.config.Metrics.ServiceName)
+	if err != nil {
+		s.logger.Error("CreateMetrics", zap.String("ERROR", err.Error()))
+	}
+	s.logger.Info(
+		"Metrics available",
+		zap.String("URL", s.config.Metrics.Url),
+		zap.String("ServiceName", s.config.Metrics.ServiceName),
+	)
 
 	e.Pre(middleware.HTTPSRedirect())
 	e.Use(middleware.RequestID())
+	e.Use(metricsMiddleware.MetricsMiddleware(metrics))
 	e.Use(middleware.RecoverWithConfig(middleware.RecoverConfig{
 		StackSize:         1 << 10, // 1 KB
 		DisablePrintStack: true,

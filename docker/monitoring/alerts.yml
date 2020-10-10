@@ -1,0 +1,11 @@
+groups:
+  - name: default
+    rules:
+      - alert: InternalServerError
+        expr: increase(hits{status="500"}[1m]) > 0
+        for: 1s
+        labels:
+          severity: critical
+        annotations:
+          summary: "path {{ $labels.path }} returned status 500"
+          description: "{{ $labels.path }} of job {{ $labels.job }} returned status {{ $labels.status }}"
