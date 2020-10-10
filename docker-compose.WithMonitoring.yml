@@ -38,18 +38,24 @@ services:
       - '--web.console.templates=/usr/share/prometheus/consoles'
     ports:
       - '9090:9090'
+    networks:
+      - web_api
 
   node_exporter:
     container_name: node_exporter_container
     image: prom/node-exporter
     ports:
-      - '9101:9101'
+      - '9101:9100'
+    networks:
+      - web_api
 
   grafana:
     container_name: grafana_container
     image: grafana/grafana
     ports:
       - '3000:3000'
+    networks:
+      - web_api
 
 networks:
   web_api:

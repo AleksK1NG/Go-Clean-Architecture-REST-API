@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// Prometheus metrics middleware
 func MetricsMiddleware(metrics metric.Metrics) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
