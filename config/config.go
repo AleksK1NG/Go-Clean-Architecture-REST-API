@@ -66,7 +66,7 @@ type Cookie struct {
 type Session struct {
 	Prefix string
 	Name   string
-	Expire time.Duration
+	Expire int
 }
 
 type Store struct {

@@ -6,7 +6,6 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/session"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
-	"time"
 )
 
 // Session use case
@@ -22,7 +21,7 @@ func NewSessionUseCase(sessionRepo session.SessRepository, logger *logger.Logger
 }
 
 // Create new session
-func (u *useCase) CreateSession(ctx context.Context, session models.Session, expire time.Duration) (string, error) {
+func (u *useCase) CreateSession(ctx context.Context, session *models.Session, expire int) (string, error) {
 	return u.sessionRepo.CreateSession(ctx, session, expire)
 }
 

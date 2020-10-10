@@ -6,6 +6,7 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/auth"
 	"github.com/AleksK1NG/api-mc/internal/dto"
 	"github.com/AleksK1NG/api-mc/internal/models"
+	"github.com/AleksK1NG/api-mc/internal/session"
 	"github.com/AleksK1NG/api-mc/internal/utils"
 	"github.com/AleksK1NG/api-mc/pkg/errors"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
@@ -19,12 +20,13 @@ import (
 type handlers struct {
 	cfg    *config.Config
 	authUC auth.UseCase
+	sessUC session.UCSession
 	log    *logger.Logger
 }
 
 // Auth handlers constructor
-func NewAuthHandlers(cfg *config.Config, authUC auth.UseCase, log *logger.Logger) auth.Handlers {
-	return &handlers{cfg, authUC, log}
+func NewAuthHandlers(cfg *config.Config, authUC auth.UseCase, sessUC session.UCSession, log *logger.Logger) auth.Handlers {
+	return &handlers{cfg, authUC, sessUC, log}
 }
 
 // Register new user
@@ -55,13 +57,27 @@ func (h *handlers) Register() echo.HandlerFunc {
 			return c.JSON(errors.ErrorResponse(err))
 		}
 
+		sess, err := h.sessUC.CreateSession(ctx, &models.Session{
+			UserID: createdUser.User.ID,
+		}, h.cfg.Session.Expire)
+		if err != nil {
+			h.log.Error(
+				"auth repo create",
+				zap.String("reqID", utils.GetRequestID(c)),
+				zap.String("Error:", err.Error()),
+			)
+			return c.JSON(errors.ErrorResponse(err))
+		}
+
+		// c.SetCookie(utils.ConfigureJWTCookie(h.cfg, createdUser.Token))
+		c.SetCookie(utils.CreateSessionCookie(h.cfg, sess))
+
 		h.log.Info(
 			"Created user",
 			zap.String("reqID", utils.GetRequestID(c)),
+			zap.String("Session", sess),
 			zap.String("ID", createdUser.User.ID.String()),
 		)
-
-		c.SetCookie(utils.ConfigureJWTCookie(h.cfg, createdUser.Token))
 
 		return c.JSON(http.StatusCreated, createdUser)
 	}
@@ -95,13 +111,27 @@ func (h *handlers) Login() echo.HandlerFunc {
 			return c.JSON(errors.ErrorResponse(err))
 		}
 
+		sess, err := h.sessUC.CreateSession(ctx, &models.Session{
+			UserID: userWithToken.User.ID,
+		}, h.cfg.Session.Expire)
+		if err != nil {
+			h.log.Error(
+				"auth repo create",
+				zap.String("reqID", utils.GetRequestID(c)),
+				zap.String("Error:", err.Error()),
+			)
+			return c.JSON(errors.ErrorResponse(err))
+		}
+
+		// c.SetCookie(utils.ConfigureJWTCookie(h.cfg, createdUser.Token))
+		c.SetCookie(utils.CreateSessionCookie(h.cfg, sess))
+
 		h.log.Info(
 			"Login",
 			zap.String("ReqID", utils.GetRequestID(c)),
+			zap.String("Session", sess),
 			zap.String("User ID", userWithToken.User.ID.String()),
 		)
-
-		c.SetCookie(utils.ConfigureJWTCookie(h.cfg, userWithToken.Token))
 
 		return c.JSON(http.StatusOK, userWithToken)
 	}
@@ -113,12 +143,7 @@ func (h *handlers) Logout() echo.HandlerFunc {
 
 		h.log.Info("Logout user", zap.String("ReqID", utils.GetRequestID(c)))
 
-		c.SetCookie(&http.Cookie{
-			Name:   h.cfg.Cookie.Name,
-			Value:  "",
-			Path:   "/",
-			MaxAge: -1,
-		})
+		utils.DeleteSessionCookie(c, h.cfg.Session.Name)
 
 		return c.NoContent(http.StatusOK)
 	}

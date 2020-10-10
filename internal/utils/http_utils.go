@@ -25,17 +25,41 @@ func GetCtxWithReqID(c echo.Context) (context.Context, context.CancelFunc) {
 // Configure jwt cookie
 func ConfigureJWTCookie(cfg *config.Config, jwtToken string) *http.Cookie {
 	return &http.Cookie{
-		Name:  cfg.Cookie.Name,
-		Value: jwtToken,
-		Path:  "/",
-		// Domain: "/",
-		// Expires:    time.Now().Add(1 * time.Minute),
+		Name:       cfg.Cookie.Name,
+		Value:      jwtToken,
+		Path:       "/",
 		RawExpires: "",
 		MaxAge:     cfg.Cookie.MaxAge,
 		Secure:     cfg.Cookie.Secure,
 		HttpOnly:   cfg.Cookie.HttpOnly,
 		SameSite:   0,
 	}
+}
+
+// Configure jwt cookie
+func CreateSessionCookie(cfg *config.Config, session string) *http.Cookie {
+	return &http.Cookie{
+		Name:  cfg.Session.Name,
+		Value: session,
+		Path:  "/",
+		// Domain: "/",
+		// Expires:    time.Now().Add(1 * time.Minute),
+		RawExpires: "",
+		MaxAge:     cfg.Session.Expire,
+		Secure:     cfg.Cookie.Secure,
+		HttpOnly:   cfg.Cookie.HttpOnly,
+		SameSite:   0,
+	}
+}
+
+// Delete session
+func DeleteSessionCookie(c echo.Context, sessionName string) {
+	c.SetCookie(&http.Cookie{
+		Name:   sessionName,
+		Value:  "",
+		Path:   "/",
+		MaxAge: -1,
+	})
 }
 
 // Get user from context

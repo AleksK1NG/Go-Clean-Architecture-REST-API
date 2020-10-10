@@ -58,15 +58,15 @@ func (s *server) MapHandlers(e *echo.Echo) error {
 	// Init useCases
 	authUC := authUseCase.NewAuthUseCase(s.logger, s.config, aRepo)
 	newsUC := newsUseCase.NewNewsUseCase(s.logger, s.config, nRepo)
-	sessionUC := usecase.NewSessionUseCase(sRepo, s.logger, s.config)
+	sessUC := usecase.NewSessionUseCase(sRepo, s.logger, s.config)
 
 	// Init handlers
-	aHandlers := authHttp.NewAuthHandlers(s.config, authUC, s.logger)
+	aHandlers := authHttp.NewAuthHandlers(s.config, authUC, sessUC, s.logger)
 	nHandlers := newsHttp.NewNewsHandlers(s.config, newsUC, s.logger)
 
 	{
-		authHttp.MapAuthRoutes(authGroup, aHandlers, authUC, sessionUC, s.config, s.logger)
-		newsHttp.MapNewsRoutes(newsGroup, nHandlers, authUC, s.config, s.logger)
+		authHttp.MapAuthRoutes(authGroup, aHandlers, authUC, sessUC, s.config, s.logger)
+		newsHttp.MapNewsRoutes(newsGroup, nHandlers, authUC, sessUC, s.config, s.logger)
 		health.GET("", func(c echo.Context) error {
 			s.logger.Info("Health check", zap.String("RequestID", utils.GetRequestID(c)))
 			return c.JSON(http.StatusOK, map[string]string{"status": "OK"})
