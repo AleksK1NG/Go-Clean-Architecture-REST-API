@@ -29,14 +29,14 @@ func NewAuthHandlers(cfg *config.Config, authUC auth.UseCase, log *logger.Logger
 
 // Register new user
 func (h *handlers) Register() echo.HandlerFunc {
-	var user models.User
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
 
 		h.log.Info("Register user", zap.String("ReqID", utils.GetRequestID(c)))
 
-		if err := c.Bind(&user); err != nil {
+		user := &models.User{}
+		if err := c.Bind(user); err != nil {
 			h.log.Error(
 				"Register c.Bind",
 				zap.String("ReqID", utils.GetRequestID(c)),
@@ -45,7 +45,7 @@ func (h *handlers) Register() echo.HandlerFunc {
 			return c.JSON(errors.ErrorResponse(err))
 		}
 
-		createdUser, err := h.authUC.Register(ctx, &user)
+		createdUser, err := h.authUC.Register(ctx, user)
 		if err != nil {
 			h.log.Error(
 				"auth repo create",
@@ -69,13 +69,13 @@ func (h *handlers) Register() echo.HandlerFunc {
 
 // Login user
 func (h *handlers) Login() echo.HandlerFunc {
-	var loginDTO dto.LoginDTO
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
 
 		h.log.Info("Register user", zap.String("ReqID", utils.GetRequestID(c)))
 
+		loginDTO := &dto.LoginDTO{}
 		if err := c.Bind(&loginDTO); err != nil {
 			h.log.Error(
 				"Login",
@@ -85,7 +85,7 @@ func (h *handlers) Login() echo.HandlerFunc {
 			return c.JSON(errors.ErrorResponse(err))
 		}
 
-		userWithToken, err := h.authUC.Login(ctx, &loginDTO)
+		userWithToken, err := h.authUC.Login(ctx, loginDTO)
 		if err != nil {
 			h.log.Error(
 				"authUC.Login",
@@ -126,7 +126,6 @@ func (h *handlers) Logout() echo.HandlerFunc {
 
 // Update existing user
 func (h *handlers) Update() echo.HandlerFunc {
-	var user models.UserUpdate
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
@@ -142,9 +141,11 @@ func (h *handlers) Update() echo.HandlerFunc {
 			)
 			return c.JSON(errors.ErrorResponse(err))
 		}
+
+		user := &models.UserUpdate{}
 		user.ID = uID
 
-		if err := c.Bind(&user); err != nil {
+		if err := c.Bind(user); err != nil {
 			h.log.Error(
 				"Update c.Bind",
 				zap.String("ReqID", utils.GetRequestID(c)),
@@ -153,7 +154,7 @@ func (h *handlers) Update() echo.HandlerFunc {
 			return c.JSON(errors.ErrorResponse(err))
 		}
 
-		updatedUser, err := h.authUC.Update(ctx, &user)
+		updatedUser, err := h.authUC.Update(ctx, user)
 		if err != nil {
 			h.log.Error(
 				"auth repo update",

@@ -28,14 +28,14 @@ func NewNewsHandlers(cfg *config.Config, newsUC news.UseCase, log *logger.Logger
 
 // Create news handler
 func (h handlers) Create() echo.HandlerFunc {
-	var n models.News
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
 
 		h.log.Info("Create news", zap.String("ReqID", utils.GetRequestID(c)))
 
-		if err := c.Bind(&n); err != nil {
+		n := &models.News{}
+		if err := c.Bind(n); err != nil {
 			h.log.Error(
 				"c.Bind",
 				zap.String("ReqID", utils.GetRequestID(c)),
@@ -44,7 +44,7 @@ func (h handlers) Create() echo.HandlerFunc {
 			return c.JSON(errors.ErrorResponse(err))
 		}
 
-		createdNews, err := h.newsUC.Create(ctx, &n)
+		createdNews, err := h.newsUC.Create(ctx, n)
 		if err != nil {
 			h.log.Error(
 				"News create",
@@ -66,7 +66,6 @@ func (h handlers) Create() echo.HandlerFunc {
 
 // Update news item handler
 func (h handlers) Update() echo.HandlerFunc {
-	var n models.News
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
@@ -83,7 +82,8 @@ func (h handlers) Update() echo.HandlerFunc {
 			return c.JSON(errors.ErrorResponse(err))
 		}
 
-		if err := c.Bind(&n); err != nil {
+		n := &models.News{}
+		if err := c.Bind(n); err != nil {
 			h.log.Error(
 				"c.Bind",
 				zap.String("ReqID", utils.GetRequestID(c)),
@@ -93,7 +93,7 @@ func (h handlers) Update() echo.HandlerFunc {
 		}
 		n.ID = newsUUID
 
-		updatedNews, err := h.newsUC.Update(ctx, &n)
+		updatedNews, err := h.newsUC.Update(ctx, n)
 		if err != nil {
 			h.log.Error(
 				"newsUC.Update",
