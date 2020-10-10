@@ -6,8 +6,8 @@ import (
 )
 
 // Session repository
-type SessRepo interface {
-	Create(session models.Session, expire time.Duration) (string, error)
-	GetSessByID(sessionID string) (models.Session, error)
+type SessRepository interface {
+	CreateSession(session models.Session, expire time.Duration) (string, error)
+	GetSessionByID(sessionID string) (*models.Session, error)
 	DeleteByID(sessionID string) error
 }

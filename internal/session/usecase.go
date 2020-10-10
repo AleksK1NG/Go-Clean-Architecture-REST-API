@@ -7,7 +7,7 @@ import (
 
 // Session use case
 type UCSession interface {
-	Create(session models.Session, expire time.Duration) (string, error)
-	Delete(sessionID string) error
-	GetByID(sessionID string) (models.Session, error)
+	CreateSession(session models.Session, expire time.Duration) (string, error)
+	GetSessionByID(sessionID string) (*models.Session, error)
+	DeleteByID(sessionID string) error
 }

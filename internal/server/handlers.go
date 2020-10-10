@@ -7,6 +7,8 @@ import (
 	newsHttp "github.com/AleksK1NG/api-mc/internal/news/delivery/http"
 	newsRepository "github.com/AleksK1NG/api-mc/internal/news/repository"
 	newsUseCase "github.com/AleksK1NG/api-mc/internal/news/usecase"
+	"github.com/AleksK1NG/api-mc/internal/session/repository"
+	"github.com/AleksK1NG/api-mc/internal/session/usecase"
 	"github.com/AleksK1NG/api-mc/internal/utils"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
@@ -51,17 +53,19 @@ func (s *server) MapHandlers(e *echo.Echo) error {
 	// Init repositories
 	aRepo := authRepository.NewAuthRepository(s.logger, s.db, s.redis)
 	nRepo := newsRepository.NewNewsRepository(s.logger, s.db, s.redis)
+	sRepo := repository.NewSessionRepository(s.redis, s.logger, "api-session", s.config)
 
 	// Init useCases
 	authUC := authUseCase.NewAuthUseCase(s.logger, s.config, aRepo)
 	newsUC := newsUseCase.NewNewsUseCase(s.logger, s.config, nRepo)
+	sessionUC := usecase.NewSessionUseCase(sRepo, s.logger, s.config)
 
 	// Init handlers
 	aHandlers := authHttp.NewAuthHandlers(s.config, authUC, s.logger)
 	nHandlers := newsHttp.NewNewsHandlers(s.config, newsUC, s.logger)
 
 	{
-		authHttp.MapAuthRoutes(authGroup, aHandlers, authUC, s.config, s.logger)
+		authHttp.MapAuthRoutes(authGroup, aHandlers, authUC, sessionUC, s.config, s.logger)
 		newsHttp.MapNewsRoutes(newsGroup, nHandlers, authUC, s.config, s.logger)
 		health.GET("", func(c echo.Context) error {
 			s.logger.Info("Health check", zap.String("RequestID", utils.GetRequestID(c)))
