@@ -15,6 +15,7 @@ type Config struct {
 	MongoDB  MongoDB
 	Cookie   Cookie
 	Store    Store
+	Session  Session
 }
 
 // Server config struct
@@ -60,6 +61,12 @@ type Cookie struct {
 	MaxAge   int
 	Secure   bool
 	HttpOnly bool
+}
+
+type Session struct {
+	Prefix string
+	Name   string
+	Expire time.Duration
 }
 
 type Store struct {

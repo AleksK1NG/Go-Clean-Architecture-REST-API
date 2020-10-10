@@ -30,6 +30,11 @@ cookie:
   Secure: false
   HttpOnly: true
 
+session:
+  Name: session-id
+  Prefix: api-session
+  Expire: 86400
+
 mongodb:
   MongoURI: uristring
 

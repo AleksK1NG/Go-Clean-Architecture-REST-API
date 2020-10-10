@@ -6,6 +6,7 @@ import (
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/auth"
 	"github.com/AleksK1NG/api-mc/internal/models"
+	"github.com/AleksK1NG/api-mc/internal/session"
 	"github.com/AleksK1NG/api-mc/internal/utils"
 	"github.com/AleksK1NG/api-mc/pkg/errors"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
@@ -17,6 +18,58 @@ import (
 	"strings"
 )
 
+// Auth by sessions stored in redis
+func AuthSessionMiddleware(sessUC session.UCSession, authUC auth.UseCase, cfg *config.Config, log *logger.Logger) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			cookie, err := c.Cookie(cfg.Session.Name)
+			if err != nil {
+				log.Error(
+					"AuthSessionMiddleware",
+					zap.String("reqID", utils.GetRequestID(c)),
+					zap.String("error", err.Error()),
+				)
+				return c.JSON(http.StatusUnauthorized, errors.NewUnauthorizedError(errors.Unauthorized))
+			}
+
+			sess, err := sessUC.GetSessionByID(c.Request().Context(), cookie.Value)
+			if err != nil {
+				log.Error(
+					"GetSessionByID",
+					zap.String("reqID", utils.GetRequestID(c)),
+					zap.String("error", err.Error()),
+				)
+				return c.JSON(http.StatusUnauthorized, errors.NewUnauthorizedError(errors.Unauthorized))
+			}
+
+			user, err := authUC.GetByID(c.Request().Context(), sess.UserID)
+			if err != nil {
+				log.Error(
+					"GetByID",
+					zap.String("reqID", utils.GetRequestID(c)),
+					zap.String("error", err.Error()),
+				)
+				return c.JSON(http.StatusUnauthorized, errors.NewUnauthorizedError(errors.Unauthorized))
+			}
+
+			c.Set("user", user)
+			ctx := context.WithValue(c.Request().Context(), "user", user)
+			c.Request().WithContext(ctx)
+			c.SetRequest(c.Request().WithContext(ctx))
+
+			log.Info(
+				"AuthSessionMiddleware",
+				zap.String("reqID", utils.GetRequestID(c)),
+				zap.String("IP", utils.GetIPAddress(c)),
+				zap.String("userID", user.ID.String()),
+			)
+
+			return next(c)
+		}
+	}
+}
+
+// JWT way of auth using cookie or Authorization header
 func AuthJWTMiddleware(authUC auth.UseCase, config *config.Config, logger *logger.Logger) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {

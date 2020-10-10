@@ -47,3 +47,8 @@ func GetUserFromCtx(ctx context.Context) (*models.User, error) {
 
 	return user, nil
 }
+
+// Get user ip address
+func GetIPAddress(c echo.Context) string {
+	return c.Request().RemoteAddr
+}

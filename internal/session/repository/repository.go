@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/models"
@@ -69,7 +70,7 @@ func (s *sessionRepository) convertFromBytes(sessionBytes []byte) (*models.Sessi
 }
 
 // Create session in redis
-func (s *sessionRepository) CreateSession(session models.Session, expire time.Duration) (string, error) {
+func (s *sessionRepository) CreateSession(ctx context.Context, session models.Session, expire time.Duration) (string, error) {
 	sessionKey := s.createKey(session.ID)
 
 	session.ID = uuid.New().String()
@@ -82,7 +83,7 @@ func (s *sessionRepository) CreateSession(session models.Session, expire time.Du
 }
 
 // Get session by id
-func (s *sessionRepository) GetSessionByID(sessionId string) (*models.Session, error) {
+func (s *sessionRepository) GetSessionByID(ctx context.Context, sessionId string) (*models.Session, error) {
 	key := s.createKey(sessionId)
 
 	storedSession := &models.Session{}
@@ -95,7 +96,7 @@ func (s *sessionRepository) GetSessionByID(sessionId string) (*models.Session, e
 }
 
 // Delete session by id
-func (s *sessionRepository) DeleteByID(sessionId string) error {
+func (s *sessionRepository) DeleteByID(ctx context.Context, sessionId string) error {
 	if err := s.redis.Delete(s.createKey(sessionId)); err != nil {
 		return err
 	}
