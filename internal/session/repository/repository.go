@@ -9,7 +9,6 @@ import (
 	"github.com/AleksK1NG/api-mc/pkg/db/redis"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/google/uuid"
-	"time"
 )
 
 // Session repository
@@ -70,12 +69,11 @@ func (s *sessionRepository) convertFromBytes(sessionBytes []byte) (*models.Sessi
 }
 
 // Create session in redis
-func (s *sessionRepository) CreateSession(ctx context.Context, session models.Session, expire time.Duration) (string, error) {
+func (s *sessionRepository) CreateSession(ctx context.Context, session *models.Session, expire int) (string, error) {
+	session.ID = uuid.New().String()
 	sessionKey := s.createKey(session.ID)
 
-	session.ID = uuid.New().String()
-
-	if err := s.redis.SetEXJSON(sessionKey, int(expire.Seconds()), &session); err != nil {
+	if err := s.redis.SetEXJSON(sessionKey, expire, &session); err != nil {
 		return "", err
 	}
 
@@ -85,7 +83,6 @@ func (s *sessionRepository) CreateSession(ctx context.Context, session models.Se
 // Get session by id
 func (s *sessionRepository) GetSessionByID(ctx context.Context, sessionId string) (*models.Session, error) {
 	key := s.createKey(sessionId)
-
 	storedSession := &models.Session{}
 
 	if err := s.redis.GetIfExistsJSON(key, storedSession); err != nil {
