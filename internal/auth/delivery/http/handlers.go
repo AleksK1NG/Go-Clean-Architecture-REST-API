@@ -40,7 +40,7 @@ func (h *handlers) Register() echo.HandlerFunc {
 		user := &models.User{}
 		if err := c.Bind(user); err != nil {
 			h.log.Error(
-				"Register c.Bind",
+				"c.Bind",
 				zap.String("ReqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
@@ -50,7 +50,7 @@ func (h *handlers) Register() echo.HandlerFunc {
 		createdUser, err := h.authUC.Register(ctx, user)
 		if err != nil {
 			h.log.Error(
-				"auth repo create",
+				"authUC.Register",
 				zap.String("reqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
@@ -62,18 +62,17 @@ func (h *handlers) Register() echo.HandlerFunc {
 		}, h.cfg.Session.Expire)
 		if err != nil {
 			h.log.Error(
-				"auth repo create",
+				"sessUC.CreateSession",
 				zap.String("reqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
 			return c.JSON(errors.ErrorResponse(err))
 		}
 
-		// c.SetCookie(utils.ConfigureJWTCookie(h.cfg, createdUser.Token))
 		c.SetCookie(utils.CreateSessionCookie(h.cfg, sess))
 
 		h.log.Info(
-			"Created user",
+			"CreatedUser",
 			zap.String("reqID", utils.GetRequestID(c)),
 			zap.String("Session", sess),
 			zap.String("ID", createdUser.User.ID.String()),
@@ -89,12 +88,12 @@ func (h *handlers) Login() echo.HandlerFunc {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
 
-		h.log.Info("Register user", zap.String("ReqID", utils.GetRequestID(c)))
+		h.log.Info("Login", zap.String("ReqID", utils.GetRequestID(c)))
 
 		loginDTO := &dto.LoginDTO{}
 		if err := c.Bind(&loginDTO); err != nil {
 			h.log.Error(
-				"Login",
+				"c.Bind",
 				zap.String("reqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
@@ -116,14 +115,13 @@ func (h *handlers) Login() echo.HandlerFunc {
 		}, h.cfg.Session.Expire)
 		if err != nil {
 			h.log.Error(
-				"auth repo create",
+				"CreateSession",
 				zap.String("reqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
 			return c.JSON(errors.ErrorResponse(err))
 		}
 
-		// c.SetCookie(utils.ConfigureJWTCookie(h.cfg, createdUser.Token))
 		c.SetCookie(utils.CreateSessionCookie(h.cfg, sess))
 
 		h.log.Info(
@@ -155,12 +153,12 @@ func (h *handlers) Update() echo.HandlerFunc {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
 
-		h.log.Info("Update user", zap.String("ReqID", utils.GetRequestID(c)))
+		h.log.Info("Update", zap.String("ReqID", utils.GetRequestID(c)))
 
 		uID, err := uuid.Parse(c.Param("user_id"))
 		if err != nil {
 			h.log.Error(
-				"Update uuid.Parse",
+				"uuid.Parse",
 				zap.String("ReqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
@@ -172,7 +170,7 @@ func (h *handlers) Update() echo.HandlerFunc {
 
 		if err := c.Bind(user); err != nil {
 			h.log.Error(
-				"Update c.Bind",
+				"c.Bind",
 				zap.String("ReqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
@@ -182,7 +180,7 @@ func (h *handlers) Update() echo.HandlerFunc {
 		updatedUser, err := h.authUC.Update(ctx, user)
 		if err != nil {
 			h.log.Error(
-				"auth repo update",
+				"authUC.Update",
 				zap.String("reqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
@@ -190,7 +188,7 @@ func (h *handlers) Update() echo.HandlerFunc {
 		}
 
 		h.log.Info(
-			"Update user",
+			"Update",
 			zap.String("reqID", utils.GetRequestID(c)),
 			zap.String("ID", updatedUser.ID.String()),
 		)
@@ -205,12 +203,12 @@ func (h *handlers) GetUserByID() echo.HandlerFunc {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
 
-		h.log.Info("Update user", zap.String("ReqID", utils.GetRequestID(c)))
+		h.log.Info("GetUserByID", zap.String("ReqID", utils.GetRequestID(c)))
 
 		uID, err := uuid.Parse(c.Param("user_id"))
 		if err != nil {
 			h.log.Error(
-				"Update uuid.Parse",
+				"uuid.Parse",
 				zap.String("ReqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
@@ -220,7 +218,7 @@ func (h *handlers) GetUserByID() echo.HandlerFunc {
 		user, err := h.authUC.GetByID(ctx, uID)
 		if err != nil {
 			h.log.Error(
-				"auth repo get by id",
+				"uthUC.GetByID",
 				zap.String("reqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
@@ -237,12 +235,12 @@ func (h *handlers) Delete() echo.HandlerFunc {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
 
-		h.log.Info("Update user", zap.String("ReqID", utils.GetRequestID(c)))
+		h.log.Info("Delete", zap.String("ReqID", utils.GetRequestID(c)))
 
 		uID, err := uuid.Parse(c.Param("user_id"))
 		if err != nil {
 			h.log.Error(
-				"Update uuid.Parse",
+				"uuid.Parse",
 				zap.String("ReqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
@@ -251,7 +249,7 @@ func (h *handlers) Delete() echo.HandlerFunc {
 
 		if err := h.authUC.Delete(ctx, uID); err != nil {
 			h.log.Error(
-				"auth repo delete",
+				"authUC.Delete",
 				zap.String("reqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
@@ -294,7 +292,7 @@ func (h *handlers) FindByName() echo.HandlerFunc {
 		})
 		if err != nil {
 			h.log.Error(
-				"auth repo find by name",
+				"authUC.FindByName",
 				zap.String("reqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
@@ -317,7 +315,7 @@ func (h *handlers) GetUsers() echo.HandlerFunc {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
 
-		h.log.Info("Register user", zap.String("ReqID", utils.GetRequestID(c)))
+		h.log.Info("GetUsers", zap.String("ReqID", utils.GetRequestID(c)))
 
 		paginationQuery, err := utils.GetPaginationFromCtx(c)
 		if err != nil {
@@ -362,7 +360,10 @@ func (h *handlers) GetMe() echo.HandlerFunc {
 			)
 		}
 
-		h.log.Info("GET ME", zap.String("ReqID", utils.GetRequestID(c)), zap.String("USER ID", user.ID.String()))
+		h.log.Info("GetMe", zap.String(
+			"ReqID", utils.GetRequestID(c)),
+			zap.String("userId", user.ID.String()),
+		)
 
 		return c.JSON(http.StatusOK, c.Get("user"))
 	}
