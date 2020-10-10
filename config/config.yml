@@ -35,6 +35,11 @@ session:
   Prefix: api-session
   Expire: 86400
 
+metrics:
+  Url: 0.0.0.0:7070
+  ServiceName: api
+
+
 mongodb:
   MongoURI: uristring
 
