@@ -117,6 +117,7 @@ func (r *repository) FindByName(ctx context.Context, query *dto.FindUserQuery) (
 	if err != nil {
 		return nil, err
 	}
+
 	defer func() {
 		if closeErr := rows.Close(); closeErr != nil {
 			if err == nil {
@@ -134,7 +135,7 @@ func (r *repository) FindByName(ctx context.Context, query *dto.FindUserQuery) (
 		users = append(users, &user)
 	}
 
-	if err := rows.Err(); err != nil {
+	if err = rows.Err(); err != nil {
 		return nil, err
 	}
 

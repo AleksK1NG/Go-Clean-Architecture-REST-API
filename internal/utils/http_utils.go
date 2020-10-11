@@ -15,10 +15,13 @@ func GetRequestID(c echo.Context) string {
 	return c.Response().Header().Get(echo.HeaderXRequestID)
 }
 
+// ReqIdCtxKey is a key used for the Request ID in the context
+type ReqIdCtxKey struct{}
+
 // Get ctx with timeout and request id from echo context
 func GetCtxWithReqID(c echo.Context) (context.Context, context.CancelFunc) {
 	ctx, cancel := context.WithTimeout(c.Request().Context(), time.Second*5)
-	ctx = context.WithValue(ctx, "ReqID", GetRequestID(c))
+	ctx = context.WithValue(ctx, ReqIdCtxKey{}, GetRequestID(c))
 	return ctx, cancel
 }
 

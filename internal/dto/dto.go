@@ -28,3 +28,6 @@ type FindNewsDTO struct {
 	Title string `json:"title" validate:"required"`
 	PQ    *utils.PaginationQuery
 }
+
+// UserCtxKey is a key used for the User object in the context
+type UserCtxKey struct{}

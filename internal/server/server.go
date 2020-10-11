@@ -64,7 +64,7 @@ func (s *server) Run() error {
 		}()
 
 		quit := make(chan os.Signal, 1)
-		signal.Notify(quit, os.Interrupt, syscall.SIGTERM, syscall.SIGKILL)
+		signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 
 		<-quit
 
@@ -102,7 +102,7 @@ func (s *server) Run() error {
 		}()
 
 		quit := make(chan os.Signal, 1)
-		signal.Notify(quit, os.Interrupt, syscall.SIGTERM, syscall.SIGKILL)
+		signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 
 		<-quit
 

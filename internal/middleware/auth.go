@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/auth"
+	"github.com/AleksK1NG/api-mc/internal/dto"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/session"
 	"github.com/AleksK1NG/api-mc/internal/utils"
@@ -54,7 +55,7 @@ func AuthSessionMiddleware(sessUC session.UCSession, authUC auth.UseCase, cfg *c
 			}
 
 			c.Set("user", user)
-			ctx := context.WithValue(c.Request().Context(), "user", user)
+			ctx := context.WithValue(c.Request().Context(), dto.UserCtxKey{}, user)
 			c.Request().WithContext(ctx)
 			c.SetRequest(c.Request().WithContext(ctx))
 
@@ -234,7 +235,7 @@ func validateJWTToken(tokenString string, authUC auth.UseCase, c echo.Context, c
 
 		c.Set("user", u)
 
-		ctx := context.WithValue(c.Request().Context(), "user", u)
+		ctx := context.WithValue(c.Request().Context(), dto.UserCtxKey{}, u)
 		c.Request().WithContext(ctx)
 		c.SetRequest(c.Request().WithContext(ctx))
 	}
