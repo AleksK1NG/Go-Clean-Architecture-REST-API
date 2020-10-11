@@ -29,7 +29,7 @@ services:
     container_name: prometheus_container
     image: prom/prometheus
     volumes:
-      - ./docker/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:Z
+      - ./docker/monitoring/prometheus-local.yml:/etc/prometheus/prometheus.yml:Z
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
