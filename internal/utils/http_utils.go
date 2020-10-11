@@ -65,9 +65,12 @@ func DeleteSessionCookie(c echo.Context, sessionName string) {
 	})
 }
 
+// UserCtxKey is a key used for the User object in the context
+type UserCtxKey struct{}
+
 // Get user from context
 func GetUserFromCtx(ctx context.Context) (*models.User, error) {
-	user, ok := ctx.Value("user").(*models.User)
+	user, ok := ctx.Value(UserCtxKey{}).(*models.User)
 	if !ok {
 		return nil, errors.Unauthorized
 	}
