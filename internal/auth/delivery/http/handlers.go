@@ -273,7 +273,7 @@ func (h *handlers) FindByName() echo.HandlerFunc {
 		)
 
 		if c.QueryParam("name") == "" {
-			return c.JSON(http.StatusBadRequest, errors.NewBadRequestError("name query param is required"))
+			return c.JSON(http.StatusBadRequest, errors.NewBadRequestError("name is required"))
 		}
 
 		paginationQuery, err := utils.GetPaginationFromCtx(c)

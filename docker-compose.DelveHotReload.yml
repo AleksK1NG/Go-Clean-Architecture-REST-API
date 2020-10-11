@@ -9,6 +9,7 @@ services:
     ports:
       - "5000:5000"
       - "5555:5555"
+      - "7070:7070"
       - "40000:40000"
     environment:
       - PORT=5000
@@ -49,7 +50,39 @@ services:
     networks:
       - web_api
 
+  prometheus:
+    container_name: prometheus_container
+    image: prom/prometheus
+    volumes:
+      - ./docker/monitoring/prometheus-local.yml:/etc/prometheus/prometheus.yml:Z
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention=20d'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - '9090:9090'
+    networks:
+      - web_api
+
+  node_exporter:
+    container_name: node_exporter_container
+    image: prom/node-exporter
+    ports:
+      - '9101:9100'
+    networks:
+      - web_api
+
+  grafana:
+    container_name: grafana_container
+    image: grafana/grafana
+    ports:
+      - '3000:3000'
+    networks:
+      - web_api
+
+
 networks:
   web_api:
     driver: bridge
-#    command: /dlv --headless --listen=:40000 --api-version=2 exec /server
