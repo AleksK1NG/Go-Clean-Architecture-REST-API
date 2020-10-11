@@ -168,7 +168,7 @@ func (h *handlers) Update() echo.HandlerFunc {
 		user := &models.UserUpdate{}
 		user.ID = uID
 
-		if err := c.Bind(user); err != nil {
+		if err = c.Bind(user); err != nil {
 			h.log.Error(
 				"c.Bind",
 				zap.String("ReqID", utils.GetRequestID(c)),

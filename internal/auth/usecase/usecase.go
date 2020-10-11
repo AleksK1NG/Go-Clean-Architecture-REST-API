@@ -116,7 +116,7 @@ func (u *useCase) Login(ctx context.Context, loginDTO *dto.LoginDTO) (*dto.UserW
 		return nil, err
 	}
 
-	if err := user.ComparePasswords(loginDTO.Password); err != nil {
+	if err = user.ComparePasswords(loginDTO.Password); err != nil {
 		return nil, err
 	}
 

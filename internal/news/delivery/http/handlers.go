@@ -83,7 +83,7 @@ func (h handlers) Update() echo.HandlerFunc {
 		}
 
 		n := &models.News{}
-		if err := c.Bind(n); err != nil {
+		if err = c.Bind(n); err != nil {
 			h.log.Error(
 				"c.Bind",
 				zap.String("ReqID", utils.GetRequestID(c)),

@@ -32,7 +32,7 @@ func (u *useCase) Create(ctx context.Context, news *models.News) (*models.News, 
 
 	news.AuthorID = user.ID
 
-	if err := utils.ValidateStruct(ctx, news); err != nil {
+	if err = utils.ValidateStruct(ctx, news); err != nil {
 		return nil, err
 	}
 
@@ -51,7 +51,7 @@ func (u *useCase) Update(ctx context.Context, news *models.News) (*models.News, 
 		return nil, err
 	}
 
-	if err := utils.ValidateIsOwner(ctx, newsByID.AuthorID.String()); err != nil {
+	if err = utils.ValidateIsOwner(ctx, newsByID.AuthorID.String()); err != nil {
 		return nil, err
 	}
 
