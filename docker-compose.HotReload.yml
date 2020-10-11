@@ -6,6 +6,7 @@ services:
     build:
       context: ./
       dockerfile: docker/Dockerfile.HotReload
+#      dockerfile: docker/Dockerfile
     ports:
       - "5000:5000"
       - "5555:5555"
