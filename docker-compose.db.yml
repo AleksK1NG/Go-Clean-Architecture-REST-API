@@ -28,4 +28,3 @@ services:
 networks:
   web_api:
     driver: bridge
-#    command: /dlv --headless --listen=:40000 --api-version=2 exec /server
