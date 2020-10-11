@@ -24,7 +24,19 @@ func NewCommentsRepository(logger *logger.Logger, db *sqlx.DB, redis *redis.Redi
 
 // Create comment
 func (r *repository) Create(ctx context.Context, comment *models.Comment) (*models.Comment, error) {
-	panic("implement me")
+
+	c := &models.Comment{}
+	if err := r.db.QueryRowxContext(
+		ctx,
+		createComment,
+		&comment.AuthorID,
+		&comment.NewsID,
+		&comment.Message,
+	).StructScan(c); err != nil {
+		return nil, err
+	}
+
+	return c, nil
 }
 
 // Update comment
