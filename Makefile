@@ -33,5 +33,9 @@ check_install:
 swagger: check_install
 	swagger generate spec -o ./swagger/swagger.yaml --scan-models
 
+# линтер
+run-linter:
+	golangci-lint -c .golangci.yml run ./...
+
 compose_with_monitoring:
 	 docker-compose -f docker-compose.WithMonitoring.yml up --build
