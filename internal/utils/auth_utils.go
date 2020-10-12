@@ -4,8 +4,9 @@ import (
 	"context"
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/pkg/errors"
+	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/labstack/echo"
-	"log"
+	"go.uber.org/zap"
 	"net/http"
 	"time"
 )
@@ -24,13 +25,18 @@ func SetAuthCookieWithToken(c echo.Context, token string, config *config.Config)
 }
 
 // Validate is user from owner of content
-func ValidateIsOwner(ctx context.Context, creatorId string) error {
+func ValidateIsOwner(ctx context.Context, creatorId string, logger *logger.Logger) error {
 	user, err := GetUserFromCtx(ctx)
 	if err != nil {
 		return err
 	}
-	log.Printf("ValidateIsOwner: %s : %s", user.ID.String(), creatorId)
+
 	if user.ID.String() != creatorId {
+		logger.Error(
+			"ValidateIsOwner",
+			zap.String("userID", user.ID.String()),
+			zap.String("creatorId", creatorId),
+		)
 		return errors.Forbidden
 	}
 
