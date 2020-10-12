@@ -33,7 +33,7 @@ func (r repository) Create(ctx context.Context, news *models.News) (*models.News
 
 	if err := r.db.QueryRowxContext(
 		ctx,
-		createUser,
+		createNews,
 		&news.AuthorID,
 		&news.Title,
 		&news.Content,
@@ -52,7 +52,7 @@ func (r repository) Update(ctx context.Context, news *models.News) (*models.News
 	var n models.News
 	if err := r.db.QueryRowxContext(
 		ctx,
-		updateUser,
+		updateNews,
 		&news.Title,
 		&news.Content,
 		&news.ImageURL,
@@ -61,7 +61,7 @@ func (r repository) Update(ctx context.Context, news *models.News) (*models.News
 		return nil, err
 	}
 
-	if err := r.redis.Delete(n.ID.String()); err != nil {
+	if err := r.redis.Delete(n.NewsID.String()); err != nil {
 		r.logger.Error("redis.Delete", zap.String("ERROR", err.Error()))
 	}
 
@@ -69,25 +69,25 @@ func (r repository) Update(ctx context.Context, news *models.News) (*models.News
 }
 
 // Get single news by id
-func (r repository) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*models.News, error) {
-	var n models.News
+func (r repository) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*dto.NewsWithAuthor, error) {
+	n := &dto.NewsWithAuthor{}
 	if err := r.redis.GetIfExistsJSON(newsID.String(), &n); err != nil {
 		if err != errors.NotExists {
 			r.logger.Error("REDIS GetIfExistsJSON", zap.String("ERROR", err.Error()))
 		}
 	} else {
-		return &n, nil
+		return n, nil
 	}
 
-	if err := r.db.GetContext(ctx, &n, getNewsByID, newsID); err != nil {
+	if err := r.db.GetContext(ctx, n, getNewsByID, newsID); err != nil {
 		return nil, err
 	}
 
-	if err := r.redis.SetEXJSON(n.ID.String(), 50, &n); err != nil {
+	if err := r.redis.SetEXJSON(n.NewsID.String(), 50, &n); err != nil {
 		r.logger.Error("SetEXJSON", zap.String("ERROR", err.Error()))
 	}
 
-	return &n, nil
+	return n, nil
 }
 
 // Delete news by id

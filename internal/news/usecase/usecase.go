@@ -30,7 +30,7 @@ func (u *useCase) Create(ctx context.Context, news *models.News) (*models.News, 
 		return nil, err
 	}
 
-	news.AuthorID = user.ID
+	news.AuthorID = user.UserID
 
 	if err = utils.ValidateStruct(ctx, news); err != nil {
 		return nil, err
@@ -46,12 +46,12 @@ func (u *useCase) Create(ctx context.Context, news *models.News) (*models.News, 
 
 // Update news item
 func (u *useCase) Update(ctx context.Context, news *models.News) (*models.News, error) {
-	newsByID, err := u.newsRepo.GetNewsByID(ctx, news.ID)
+	newsByID, err := u.newsRepo.GetNewsByID(ctx, news.NewsID)
 	if err != nil {
 		return nil, err
 	}
 
-	if err = utils.ValidateIsOwner(ctx, newsByID.AuthorID.String(), u.logger); err != nil {
+	if err = utils.ValidateIsOwner(ctx, newsByID.UserID.String(), u.logger); err != nil {
 		return nil, err
 	}
 
@@ -64,7 +64,7 @@ func (u *useCase) Update(ctx context.Context, news *models.News) (*models.News, 
 }
 
 // Get news by id
-func (u *useCase) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*models.News, error) {
+func (u *useCase) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*dto.NewsWithAuthor, error) {
 	newsByID, err := u.newsRepo.GetNewsByID(ctx, newsID)
 	if err != nil {
 		return nil, err
@@ -80,7 +80,7 @@ func (u *useCase) Delete(ctx context.Context, newsID uuid.UUID) error {
 		return err
 	}
 
-	if err := utils.ValidateIsOwner(ctx, newsByID.AuthorID.String(), u.logger); err != nil {
+	if err := utils.ValidateIsOwner(ctx, newsByID.UserID.String(), u.logger); err != nil {
 		return err
 	}
 

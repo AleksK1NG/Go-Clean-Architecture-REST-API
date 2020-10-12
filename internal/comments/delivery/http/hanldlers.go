@@ -57,7 +57,7 @@ func (h *handlers) Create() echo.HandlerFunc {
 		h.log.Info(
 			"createdComment",
 			zap.String("reqID", utils.GetRequestID(c)),
-			zap.String("ID", createdComment.ID.String()),
+			zap.String("ID", createdComment.CommentID.String()),
 		)
 
 		return c.JSON(http.StatusCreated, createdComment)
@@ -106,7 +106,7 @@ func (h *handlers) Update() echo.HandlerFunc {
 		h.log.Info(
 			"updatedComment",
 			zap.String("reqID", utils.GetRequestID(c)),
-			zap.String("ID", updatedComment.ID.String()),
+			zap.String("ID", updatedComment.CommentID.String()),
 		)
 
 		return c.JSON(http.StatusOK, updatedComment)

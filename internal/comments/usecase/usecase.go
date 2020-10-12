@@ -29,7 +29,7 @@ func (u *useCase) Create(ctx context.Context, comment *models.Comment) (*models.
 	if err != nil {
 		return nil, err
 	}
-	comment.AuthorID = user.ID
+	comment.AuthorID = user.UserID
 
 	createdComment, err := u.commRepo.Create(ctx, comment)
 	if err != nil {

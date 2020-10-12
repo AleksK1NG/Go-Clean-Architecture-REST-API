@@ -57,7 +57,7 @@ func (h handlers) Create() echo.HandlerFunc {
 		h.log.Info(
 			"Created news",
 			zap.String("reqID", utils.GetRequestID(c)),
-			zap.String("ID", createdNews.ID.String()),
+			zap.String("ID", createdNews.NewsID.String()),
 		)
 
 		return c.JSON(http.StatusOK, createdNews)
@@ -91,7 +91,7 @@ func (h handlers) Update() echo.HandlerFunc {
 			)
 			return c.JSON(errors.ErrorResponse(err))
 		}
-		n.ID = newsUUID
+		n.NewsID = newsUUID
 
 		updatedNews, err := h.newsUC.Update(ctx, n)
 		if err != nil {
@@ -106,7 +106,7 @@ func (h handlers) Update() echo.HandlerFunc {
 		h.log.Info(
 			"Created news",
 			zap.String("reqID", utils.GetRequestID(c)),
-			zap.String("ID", updatedNews.ID.String()),
+			zap.String("ID", updatedNews.NewsID.String()),
 		)
 
 		return c.JSON(http.StatusOK, updatedNews)
@@ -144,7 +144,7 @@ func (h handlers) GetByID() echo.HandlerFunc {
 		h.log.Info(
 			"GetByID",
 			zap.String("reqID", utils.GetRequestID(c)),
-			zap.String("ID", newsByID.ID.String()),
+			zap.String("ID", newsByID.UserID.String()),
 		)
 
 		return c.JSON(http.StatusOK, newsByID)

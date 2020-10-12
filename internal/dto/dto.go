@@ -35,3 +35,9 @@ type UpdateCommDTO struct {
 	ID      uuid.UUID `json:"comment_id" db:"comment_id" validate:"omitempty,uuid"`
 	Message string    `json:"message" db:"password" validate:"required,gte=0"`
 }
+
+// News with author
+type NewsWithAuthor struct {
+	models.NewsBase `json:"news"`
+	models.UserBase `json:"author"`
+}
