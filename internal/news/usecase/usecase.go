@@ -51,7 +51,7 @@ func (u *useCase) Update(ctx context.Context, news *models.News) (*models.News, 
 		return nil, err
 	}
 
-	if err = utils.ValidateIsOwner(ctx, newsByID.AuthorID.String()); err != nil {
+	if err = utils.ValidateIsOwner(ctx, newsByID.AuthorID.String(), u.logger); err != nil {
 		return nil, err
 	}
 
@@ -80,7 +80,7 @@ func (u *useCase) Delete(ctx context.Context, newsID uuid.UUID) error {
 		return err
 	}
 
-	if err := utils.ValidateIsOwner(ctx, newsByID.AuthorID.String()); err != nil {
+	if err := utils.ValidateIsOwner(ctx, newsByID.AuthorID.String(), u.logger); err != nil {
 		return err
 	}
 
