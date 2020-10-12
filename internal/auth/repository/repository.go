@@ -53,7 +53,7 @@ func (r *repository) Update(ctx context.Context, user *models.UserUpdate) (*mode
 		return nil, err
 	}
 
-	if err := r.redis.Delete(u.ID.String()); err != nil {
+	if err := r.redis.Delete(u.UserID.String()); err != nil {
 		r.logger.Error("REDIS Delete", zap.String("ERROR", err.Error()))
 	}
 

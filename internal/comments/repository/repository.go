@@ -50,7 +50,7 @@ func (r *repository) Update(ctx context.Context, comment *dto.UpdateCommDTO) (*m
 		return nil, err
 	}
 
-	if err := r.redis.Delete(comm.ID.String()); err != nil {
+	if err := r.redis.Delete(comm.CommentID.String()); err != nil {
 		r.logger.Error("REDIS", zap.String("ERROR", err.Error()))
 	}
 
@@ -95,7 +95,7 @@ func (r *repository) GetByID(ctx context.Context, commentID uuid.UUID) (*models.
 		return nil, err
 	}
 
-	if err := r.redis.SetEXJSON(comment.ID.String(), 3600, comment); err != nil {
+	if err := r.redis.SetEXJSON(comment.CommentID.String(), 3600, comment); err != nil {
 		r.logger.Error("REDIS", zap.String("ERROR", err.Error()))
 	}
 

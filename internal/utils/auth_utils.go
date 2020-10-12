@@ -31,10 +31,10 @@ func ValidateIsOwner(ctx context.Context, creatorId string, logger *logger.Logge
 		return err
 	}
 
-	if user.ID.String() != creatorId {
+	if user.UserID.String() != creatorId {
 		logger.Error(
 			"ValidateIsOwner",
-			zap.String("userID", user.ID.String()),
+			zap.String("userID", user.UserID.String()),
 			zap.String("creatorId", creatorId),
 		)
 		return errors.Forbidden

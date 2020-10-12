@@ -75,13 +75,13 @@ func (s *sessionRepository) CreateSession(ctx context.Context, session *models.S
 		case <-ctx.Done():
 			return "", ctx.Err()
 		default:
-			session.ID = uuid.New().String()
-			sessionKey := s.createKey(session.ID)
+			session.SessionID = uuid.New().String()
+			sessionKey := s.createKey(session.SessionID)
 			if err := s.redis.SetEXJSON(sessionKey, expire, &session); err != nil {
 				return "", err
 			}
 
-			return session.ID, nil
+			return session.SessionID, nil
 		}
 	}
 }

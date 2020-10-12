@@ -58,7 +58,7 @@ func (h *handlers) Register() echo.HandlerFunc {
 		}
 
 		sess, err := h.sessUC.CreateSession(ctx, &models.Session{
-			UserID: createdUser.User.ID,
+			UserID: createdUser.User.UserID,
 		}, h.cfg.Session.Expire)
 		if err != nil {
 			h.log.Error(
@@ -75,7 +75,7 @@ func (h *handlers) Register() echo.HandlerFunc {
 			"CreatedUser",
 			zap.String("reqID", utils.GetRequestID(c)),
 			zap.String("Session", sess),
-			zap.String("ID", createdUser.User.ID.String()),
+			zap.String("ID", createdUser.User.UserID.String()),
 		)
 
 		return c.JSON(http.StatusCreated, createdUser)
@@ -111,7 +111,7 @@ func (h *handlers) Login() echo.HandlerFunc {
 		}
 
 		sess, err := h.sessUC.CreateSession(ctx, &models.Session{
-			UserID: userWithToken.User.ID,
+			UserID: userWithToken.User.UserID,
 		}, h.cfg.Session.Expire)
 		if err != nil {
 			h.log.Error(
@@ -128,7 +128,7 @@ func (h *handlers) Login() echo.HandlerFunc {
 			"Login",
 			zap.String("ReqID", utils.GetRequestID(c)),
 			zap.String("Session", sess),
-			zap.String("User ID", userWithToken.User.ID.String()),
+			zap.String("User ID", userWithToken.User.UserID.String()),
 		)
 
 		return c.JSON(http.StatusOK, userWithToken)
@@ -190,7 +190,7 @@ func (h *handlers) Update() echo.HandlerFunc {
 		h.log.Info(
 			"Update",
 			zap.String("reqID", utils.GetRequestID(c)),
-			zap.String("ID", updatedUser.ID.String()),
+			zap.String("ID", updatedUser.UserID.String()),
 		)
 
 		return c.JSON(http.StatusCreated, updatedUser)
@@ -362,7 +362,7 @@ func (h *handlers) GetMe() echo.HandlerFunc {
 
 		h.log.Info("GetMe", zap.String(
 			"ReqID", utils.GetRequestID(c)),
-			zap.String("userId", user.ID.String()),
+			zap.String("userId", user.UserID.String()),
 		)
 
 		return c.JSON(http.StatusOK, c.Get("user"))

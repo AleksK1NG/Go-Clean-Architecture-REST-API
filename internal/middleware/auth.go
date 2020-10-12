@@ -62,7 +62,7 @@ func AuthSessionMiddleware(sessUC session.UCSession, authUC auth.UseCase, cfg *c
 				"AuthSessionMiddleware",
 				zap.String("reqID", utils.GetRequestID(c)),
 				zap.String("IP", utils.GetIPAddress(c)),
-				zap.String("userID", user.ID.String()),
+				zap.String("userID", user.UserID.String()),
 			)
 
 			return next(c)
@@ -139,18 +139,18 @@ func OwnerOrAdminMiddleware(logger *logger.Logger) echo.MiddlewareFunc {
 			logger.Info(
 				"OwnerOrAdminMiddleware",
 				zap.String("reqID", utils.GetRequestID(c)),
-				zap.String("userID", user.ID.String()),
+				zap.String("userID", user.UserID.String()),
 			)
 
 			if *user.Role == "admin" {
 				return next(c)
 			}
 
-			if user.ID.String() != c.Param("user_id") {
+			if user.UserID.String() != c.Param("user_id") {
 				logger.Error(
 					"OwnerOrAdminMiddleware",
 					zap.String("reqID", utils.GetRequestID(c)),
-					zap.String("userID", user.ID.String()),
+					zap.String("userID", user.UserID.String()),
 					zap.String("ERROR", "ctx userID != param /:user_id"),
 				)
 				return c.JSON(http.StatusForbidden, errors.NewForbiddenError(errors.Forbidden))
@@ -187,7 +187,7 @@ func RoleBasedAuthMiddleware(roles []string, logger *logger.Logger) echo.Middlew
 			logger.Error(
 				"not allowed user role",
 				zap.String("reqID", utils.GetRequestID(c)),
-				zap.String("userID", user.ID.String()),
+				zap.String("userID", user.UserID.String()),
 				zap.String("ERROR", "not allowed role"),
 			)
 
