@@ -16,4 +16,5 @@ func MapCommentsRoutes(commGroup *echo.Group, h comments.Handlers, authUC auth.U
 	commGroup.DELETE("/:comment_id", h.Delete(), middleware.AuthSessionMiddleware(sessUC, authUC, cfg, log))
 	commGroup.PUT("/:comment_id", h.Update(), middleware.AuthSessionMiddleware(sessUC, authUC, cfg, log))
 	commGroup.GET("/:comment_id", h.GetByID())
+	commGroup.GET("/byNewsId/:news_id", h.GetAllByNewsID())
 }

@@ -41,3 +41,9 @@ type NewsWithAuthor struct {
 	models.NewsBase `json:"news"`
 	models.UserBase `json:"author"`
 }
+
+// Find user query DTO
+type CommentsByNewsID struct {
+	NewsID uuid.UUID              `json:"news_id"`
+	PQ     *utils.PaginationQuery `json:"pq"`
+}
