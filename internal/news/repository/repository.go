@@ -39,7 +39,6 @@ func (r repository) Create(ctx context.Context, news *models.News) (*models.News
 		&news.Content,
 		&news.Category,
 	).StructScan(&n); err != nil {
-		r.logger.Error("QueryRowxContext", zap.String("ERROR", err.Error()))
 		return nil, err
 	}
 
@@ -62,7 +61,7 @@ func (r repository) Update(ctx context.Context, news *models.News) (*models.News
 	}
 
 	if err := r.redis.Delete(n.NewsID.String()); err != nil {
-		r.logger.Error("redis.Delete", zap.String("ERROR", err.Error()))
+		r.logger.Error("Delete", zap.String("ERROR", err.Error()))
 	}
 
 	return &n, nil
@@ -73,7 +72,7 @@ func (r repository) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*dto.New
 	n := &dto.NewsWithAuthor{}
 	if err := r.redis.GetIfExistsJSON(newsID.String(), &n); err != nil {
 		if err != errors.NotExists {
-			r.logger.Error("REDIS GetIfExistsJSON", zap.String("ERROR", err.Error()))
+			r.logger.Error("GetIfExistsJSON", zap.String("ERROR", err.Error()))
 		}
 	} else {
 		return n, nil
@@ -107,7 +106,7 @@ func (r repository) Delete(ctx context.Context, newsID uuid.UUID) error {
 	}
 
 	if err := r.redis.Delete(newsID.String()); err != nil {
-		r.logger.Error("REDIS Delete", zap.String("ERROR", err.Error()))
+		r.logger.Error("Delete", zap.String("ERROR", err.Error()))
 	}
 
 	return nil

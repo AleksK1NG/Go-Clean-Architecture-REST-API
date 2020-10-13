@@ -54,7 +54,7 @@ func (r *repository) Update(ctx context.Context, user *models.UserUpdate) (*mode
 	}
 
 	if err := r.redis.Delete(u.UserID.String()); err != nil {
-		r.logger.Error("REDIS Delete", zap.String("ERROR", err.Error()))
+		r.logger.Error("Delete", zap.String("ERROR", err.Error()))
 	}
 
 	return &u, nil
@@ -76,7 +76,7 @@ func (r *repository) Delete(ctx context.Context, userID uuid.UUID) error {
 	}
 
 	if err := r.redis.Delete(userID.String()); err != nil {
-		r.logger.Error("REDIS Delete", zap.String("ERROR", err.Error()))
+		r.logger.Error("Delete", zap.String("ERROR", err.Error()))
 	}
 
 	return nil
@@ -88,7 +88,7 @@ func (r *repository) GetByID(ctx context.Context, userID uuid.UUID) (*models.Use
 
 	if err := r.redis.GetIfExistsJSON(userID.String(), &user); err != nil {
 		if err != errors.NotExists {
-			r.logger.Error("REDIS GetIfExistsJSON", zap.String("ERROR", err.Error()))
+			r.logger.Error("GetIfExistsJSON", zap.String("ERROR", err.Error()))
 		}
 	} else {
 		return &user, nil
@@ -99,7 +99,7 @@ func (r *repository) GetByID(ctx context.Context, userID uuid.UUID) (*models.Use
 	}
 
 	if err := r.redis.SetEXJSON(userID.String(), 3600, &user); err != nil {
-		r.logger.Error("REDIS SetEXJSON", zap.String("ERROR", err.Error()))
+		r.logger.Error("SetEXJSON", zap.String("ERROR", err.Error()))
 	}
 
 	return &user, nil
@@ -185,7 +185,7 @@ func (r *repository) FindByEmail(ctx context.Context, loginDTO *dto.LoginDTO) (*
 
 	if err := r.redis.GetIfExistsJSON(loginDTO.Email, &user); err != nil {
 		if err != errors.NotExists {
-			r.logger.Error("REDIS GetIfExistsJSON", zap.String("ERROR", err.Error()))
+			r.logger.Error("GetIfExistsJSON", zap.String("ERROR", err.Error()))
 		}
 	} else {
 		return &user, nil
@@ -196,7 +196,7 @@ func (r *repository) FindByEmail(ctx context.Context, loginDTO *dto.LoginDTO) (*
 	}
 
 	if err := r.redis.SetEXJSON(loginDTO.Email, 3600, &user); err != nil {
-		r.logger.Error("REDIS SetEXJSON", zap.String("ERROR", err.Error()))
+		r.logger.Error("SetEXJSON", zap.String("ERROR", err.Error()))
 	}
 
 	return &user, nil

@@ -52,7 +52,7 @@ func (r *repository) Update(ctx context.Context, comment *dto.UpdateCommDTO) (*m
 	}
 
 	if err := r.redis.Delete(comm.CommentID.String()); err != nil {
-		r.logger.Error("REDIS", zap.String("ERROR", err.Error()))
+		r.logger.Error("Delete", zap.String("ERROR", err.Error()))
 	}
 
 	return comm, nil
@@ -75,7 +75,7 @@ func (r *repository) Delete(ctx context.Context, commentID uuid.UUID) error {
 	}
 
 	if err := r.redis.Delete(commentID.String()); err != nil {
-		r.logger.Error("REDIS", zap.String("ERROR", err.Error()))
+		r.logger.Error("Delete", zap.String("ERROR", err.Error()))
 	}
 
 	return nil
@@ -87,7 +87,7 @@ func (r *repository) GetByID(ctx context.Context, commentID uuid.UUID) (*models.
 	comment := &models.Comment{}
 
 	if err := r.redis.GetIfExistsJSON(commentID.String(), comment); err != nil {
-		r.logger.Error("REDIS", zap.String("ERROR", err.Error()))
+		r.logger.Error("GetIfExistsJSON", zap.String("ERROR", err.Error()))
 	} else {
 		return comment, nil
 	}
@@ -97,7 +97,7 @@ func (r *repository) GetByID(ctx context.Context, commentID uuid.UUID) (*models.
 	}
 
 	if err := r.redis.SetEXJSON(comment.CommentID.String(), 3600, comment); err != nil {
-		r.logger.Error("REDIS", zap.String("ERROR", err.Error()))
+		r.logger.Error("SetEXJSON", zap.String("ERROR", err.Error()))
 	}
 
 	return comment, nil
