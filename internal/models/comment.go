@@ -15,3 +15,13 @@ type Comment struct {
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
 }
+
+// All News response
+type CommentsList struct {
+	TotalCount int        `json:"total_count"`
+	TotalPages int        `json:"total_pages"`
+	Page       int        `json:"page"`
+	Size       int        `json:"size"`
+	HasMore    bool       `json:"has_more"`
+	Comments   []*Comment `json:"comments"`
+}

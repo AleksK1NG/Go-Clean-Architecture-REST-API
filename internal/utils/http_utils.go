@@ -20,7 +20,7 @@ type ReqIdCtxKey struct{}
 
 // Get ctx with timeout and request id from echo context
 func GetCtxWithReqID(c echo.Context) (context.Context, context.CancelFunc) {
-	ctx, cancel := context.WithTimeout(c.Request().Context(), time.Second*5)
+	ctx, cancel := context.WithTimeout(c.Request().Context(), time.Second*15)
 	ctx = context.WithValue(ctx, ReqIdCtxKey{}, GetRequestID(c))
 	return ctx, cancel
 }

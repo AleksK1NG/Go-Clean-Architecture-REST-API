@@ -178,5 +178,52 @@ func (h *handlers) GetByID() echo.HandlerFunc {
 
 // GetAllByNewsID comments
 func (h *handlers) GetAllByNewsID() echo.HandlerFunc {
-	panic("implement me")
+	return func(c echo.Context) error {
+		ctx, cancel := utils.GetCtxWithReqID(c)
+		defer cancel()
+
+		h.log.Info("Update", zap.String("ReqID", utils.GetRequestID(c)))
+
+		newsID, err := uuid.Parse(c.Param("news_id"))
+		if err != nil {
+			h.log.Error(
+				"uuid.Parse",
+				zap.String("ReqID", utils.GetRequestID(c)),
+				zap.String("Error:", err.Error()),
+			)
+			return c.JSON(errors.ErrorResponse(err))
+		}
+
+		pq, err := utils.GetPaginationFromCtx(c)
+		if err != nil {
+			h.log.Error(
+				"GetPaginationFromCtx",
+				zap.String("reqID", utils.GetRequestID(c)),
+				zap.String("Error:", err.Error()),
+			)
+			return c.JSON(errors.ErrorResponse(err))
+		}
+
+		commentsList, err := h.comUC.GetAllByNewsID(ctx, &dto.CommentsByNewsID{
+			NewsID: newsID,
+			PQ:     pq,
+		})
+
+		if err != nil {
+			h.log.Error(
+				"comUC.GetAllByNewsID",
+				zap.String("ReqID", utils.GetRequestID(c)),
+				zap.String("Error:", err.Error()),
+			)
+			return c.JSON(errors.ErrorResponse(err))
+		}
+
+		h.log.Info(
+			"GetAllByNewsID",
+			zap.String("reqID", utils.GetRequestID(c)),
+			zap.Int("Length", len(commentsList.Comments)),
+		)
+
+		return c.JSON(http.StatusOK, commentsList)
+	}
 }

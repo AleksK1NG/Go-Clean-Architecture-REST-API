@@ -37,4 +37,14 @@ WHERE news_id = $1`
 	getNews = `SELECT news_id, author_id, title, content, image_url, category, updated_at, created_at 
 				FROM news 
 				ORDER BY created_at, updated_at OFFSET $1 LIMIT $2`
+
+	findByTitleCount = `SELECT COUNT(*)
+					FROM news
+					WHERE title ILIKE '%' || $1 || '%'`
+
+	findByTitle = `SELECT news_id, author_id, title, content, image_url, category, updated_at, created_at
+					FROM news
+					WHERE title ILIKE '%' || $1 || '%'
+					ORDER BY title, created_at, updated_at
+					OFFSET $2 LIMIT $3`
 )

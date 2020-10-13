@@ -152,20 +152,11 @@ func (r repository) GetNews(ctx context.Context, pq *utils.PaginationQuery) (*mo
 
 // Find news by title
 func (r repository) SearchByTitle(ctx context.Context, req *dto.FindNewsDTO) (*models.NewsList, error) {
-	findByTitleCount := `SELECT COUNT(*)
-					FROM news
-					WHERE title ILIKE '%' || $1 || '%'`
 
 	var totalCount int
 	if err := r.db.GetContext(ctx, &totalCount, findByTitleCount, req.Title); err != nil {
 		return nil, err
 	}
-
-	findByTitle := `SELECT news_id, author_id, title, content, image_url, category, updated_at, created_at
-					FROM news
-					WHERE title ILIKE '%' || $1 || '%'
-					ORDER BY title, created_at, updated_at
-					OFFSET $2 LIMIT $3`
 
 	var newsList = make([]*models.News, 0, req.PQ.GetSize())
 	rows, err := r.db.QueryxContext(ctx, findByTitle, req.Title, req.PQ.GetOffset(), req.PQ.GetLimit())

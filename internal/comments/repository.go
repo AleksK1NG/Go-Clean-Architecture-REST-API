@@ -13,5 +13,5 @@ type Repository interface {
 	Update(ctx context.Context, comment *dto.UpdateCommDTO) (*models.Comment, error)
 	Delete(ctx context.Context, commentID uuid.UUID) error
 	GetByID(ctx context.Context, commentID uuid.UUID) (*models.Comment, error)
-	GetAllByNewsID(ctx context.Context, commentID uuid.UUID) (*models.Comment, error)
+	GetAllByNewsID(ctx context.Context, query *dto.CommentsByNewsID) (*models.CommentsList, error)
 }

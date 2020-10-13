@@ -72,6 +72,6 @@ func (u *useCase) GetByID(ctx context.Context, commentID uuid.UUID) (*models.Com
 }
 
 // GetAllByNewsID comments
-func (u *useCase) GetAllByNewsID(ctx context.Context, commentID uuid.UUID) (*models.Comment, error) {
-	panic("implement me")
+func (u *useCase) GetAllByNewsID(ctx context.Context, query *dto.CommentsByNewsID) (*models.CommentsList, error) {
+	return u.commRepo.GetAllByNewsID(ctx, query)
 }

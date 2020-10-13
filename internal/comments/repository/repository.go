@@ -6,6 +6,7 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/comments"
 	"github.com/AleksK1NG/api-mc/internal/dto"
 	"github.com/AleksK1NG/api-mc/internal/models"
+	"github.com/AleksK1NG/api-mc/internal/utils"
 	"github.com/AleksK1NG/api-mc/pkg/db/redis"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/google/uuid"
@@ -103,6 +104,41 @@ func (r *repository) GetByID(ctx context.Context, commentID uuid.UUID) (*models.
 }
 
 // GetAllByNewsID comments
-func (r *repository) GetAllByNewsID(ctx context.Context, commentID uuid.UUID) (*models.Comment, error) {
-	panic("implement me")
+func (r *repository) GetAllByNewsID(ctx context.Context, query *dto.CommentsByNewsID) (*models.CommentsList, error) {
+	var totalCount int
+
+	getTotalCountByNewsId := `SELECT COUNT(comment_id) FROM comments WHERE news_id = $1`
+	if err := r.db.QueryRowContext(ctx, getTotalCountByNewsId, query.NewsID).Scan(&totalCount); err != nil {
+		return nil, err
+	}
+
+	getCommentsByNewsId := `SELECT * FROM comments WHERE news_id = $1 ORDER BY updated_at OFFSET $2 LIMIT $3`
+	rows, err := r.db.QueryxContext(ctx, getCommentsByNewsId, query.NewsID, query.PQ.GetOffset(), query.PQ.GetLimit())
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	commentsList := make([]*models.Comment, 0, query.PQ.GetSize())
+	for rows.Next() {
+		comment := &models.Comment{}
+		if err := rows.StructScan(comment); err != nil {
+			return nil, err
+		}
+		commentsList = append(commentsList, comment)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return &models.CommentsList{
+		TotalCount: totalCount,
+		TotalPages: utils.GetTotalPages(totalCount, query.PQ.GetSize()),
+		Page:       query.PQ.GetPage(),
+		Size:       query.PQ.GetSize(),
+		HasMore:    utils.GetHasMore(query.PQ.GetPage(), totalCount, query.PQ.GetSize()),
+		Comments:   commentsList,
+	}, nil
+
 }
