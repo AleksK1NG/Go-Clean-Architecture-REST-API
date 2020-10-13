@@ -83,7 +83,7 @@ func (h *handlers) Update() echo.HandlerFunc {
 		}
 
 		comm := &dto.UpdateCommDTO{}
-		if err := c.Bind(comm); err != nil {
+		if err = c.Bind(comm); err != nil {
 			h.log.Error(
 				"c.Bind",
 				zap.String("ReqID", utils.GetRequestID(c)),

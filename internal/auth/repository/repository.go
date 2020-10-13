@@ -129,7 +129,7 @@ func (r *repository) FindByName(ctx context.Context, query *dto.FindUserQuery) (
 	var users = make([]*models.User, 0, query.PQ.GetSize())
 	for rows.Next() {
 		var user models.User
-		if err := rows.StructScan(&user); err != nil {
+		if err = rows.StructScan(&user); err != nil {
 			return nil, err
 		}
 		users = append(users, &user)
