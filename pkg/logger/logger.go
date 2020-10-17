@@ -31,7 +31,7 @@ func NewLogger(cfg *config.Config) (*Logger, error) {
 			LevelKey:     "LEVEL",
 			TimeKey:      "TIME",
 			NameKey:      "NAME_KEY",
-			EncodeLevel:  zapcore.CapitalColorLevelEncoder,
+			EncodeLevel:  getEncodeLevel(cfg),
 			EncodeTime:   zapcore.RFC3339TimeEncoder,
 			EncodeCaller: zapcore.FullCallerEncoder,
 		},
@@ -50,6 +50,13 @@ func NewLogger(cfg *config.Config) (*Logger, error) {
 func (l *Logger) ErrorWithLog(err error, responseError error) error {
 	l.Error(err.Error())
 	return responseError
+}
+
+func getEncodeLevel(cfg *config.Config) zapcore.LevelEncoder {
+	if cfg.Logger.Encoding == "console" {
+		return zapcore.CapitalColorLevelEncoder
+	}
+	return zapcore.CapitalLevelEncoder
 }
 
 func getLevel(level string) zapcore.Level {
