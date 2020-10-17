@@ -40,12 +40,20 @@ func main() {
 	defer psqlDB.Close()
 
 	if psqlDB != nil {
-		l.Info("Postgres connected", zap.String("Status: %#v", fmt.Sprintf("%#v", psqlDB.Stats())))
+		l.Info("Postgres connected", zap.String("Status", fmt.Sprintf("%#v", psqlDB.Stats())))
 
 	}
 
 	redisConn := redis.NewRedisClient(cfg)
 	l.Info("Redis connected")
+
+	redisPool, err := redis.NewRedisPool(cfg)
+	if err != nil {
+		l.Fatal("Init REDIS", zap.String("error", err.Error()))
+	}
+	if redisPool != nil {
+		l.Info("Redis connected", zap.String("Status", fmt.Sprintf("%#v", redisPool.Stats())))
+	}
 
 	s := server.NewServer(cfg, l, psqlDB, redisConn)
 	log.Fatal(s.Run())
