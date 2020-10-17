@@ -7,22 +7,21 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/news"
 	"github.com/AleksK1NG/api-mc/internal/utils"
-	"github.com/AleksK1NG/api-mc/pkg/db/redis"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
+	"github.com/gomodule/redigo/redis"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	"go.uber.org/zap"
 )
 
 // News Repository
 type repository struct {
 	logger *logger.Logger
 	db     *sqlx.DB
-	redis  *redis.RedisClient
+	redis  *redis.Pool
 }
 
 // News repository constructor
-func NewNewsRepository(logger *logger.Logger, db *sqlx.DB, redis *redis.RedisClient) news.Repository {
+func NewNewsRepository(logger *logger.Logger, db *sqlx.DB, redis *redis.Pool) news.Repository {
 	return &repository{logger, db, redis}
 }
 
@@ -59,9 +58,9 @@ func (r repository) Update(ctx context.Context, news *models.News) (*models.News
 		return nil, err
 	}
 
-	if err := r.redis.Delete(n.NewsID.String()); err != nil {
-		r.logger.Error("Delete", zap.String("ERROR", err.Error()))
-	}
+	// if err := r.redis.Delete(n.NewsID.String()); err != nil {
+	// 	r.logger.Error("Delete", zap.String("ERROR", err.Error()))
+	// }
 
 	return &n, nil
 }
@@ -69,26 +68,19 @@ func (r repository) Update(ctx context.Context, news *models.News) (*models.News
 // Get single news by id
 func (r repository) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*dto.NewsWithAuthor, error) {
 	n := &dto.NewsWithAuthor{}
-	// if err := r.redis.GetIfExistsJSON(newsID.String(), &n); err != nil {
-	// 	if err != errors.NotExists {
-	// 		r.logger.Error("GetIfExistsJSON", zap.String("ERROR", err.Error()))
-	// 	}
-	// } else {
+
+	// if err := r.redis.GetJSON(newsID.String(), n); err == nil {
+	// 	r.logger.Info("FROM REDIS")
 	// 	return n, nil
 	// }
-
-	if err := r.redis.GetJSON(newsID.String(), n); err == nil {
-		r.logger.Info("FROM REDIS")
-		return n, nil
-	}
 
 	if err := r.db.GetContext(ctx, n, getNewsByID, newsID); err != nil {
 		return nil, err
 	}
 
-	if err := r.redis.SetEXJSON(n.NewsID.String(), 50, &n); err != nil {
-		r.logger.Error("SetEXJSON", zap.String("ERROR", err.Error()))
-	}
+	// if err := r.redis.SetEXJSON(n.NewsID.String(), 50, &n); err != nil {
+	// 	r.logger.Error("SetEXJSON", zap.String("ERROR", err.Error()))
+	// }
 
 	return n, nil
 }
@@ -109,9 +101,9 @@ func (r repository) Delete(ctx context.Context, newsID uuid.UUID) error {
 		return sql.ErrNoRows
 	}
 
-	if err := r.redis.Delete(newsID.String()); err != nil {
-		r.logger.Error("Delete", zap.String("ERROR", err.Error()))
-	}
+	// if err := r.redis.Delete(newsID.String()); err != nil {
+	// 	r.logger.Error("Delete", zap.String("ERROR", err.Error()))
+	// }
 
 	return nil
 }

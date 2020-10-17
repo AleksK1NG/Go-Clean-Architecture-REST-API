@@ -3,8 +3,8 @@ package server
 import (
 	"context"
 	"github.com/AleksK1NG/api-mc/config"
-	"github.com/AleksK1NG/api-mc/pkg/db/redis"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
+	"github.com/gomodule/redigo/redis"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo"
 	"go.uber.org/zap"
@@ -27,11 +27,11 @@ type server struct {
 	config *config.Config
 	logger *logger.Logger
 	db     *sqlx.DB
-	redis  *redis.RedisClient
+	redis  *redis.Pool
 }
 
 // New server constructor
-func NewServer(config *config.Config, logger *logger.Logger, db *sqlx.DB, redis *redis.RedisClient) *server {
+func NewServer(config *config.Config, logger *logger.Logger, db *sqlx.DB, redis *redis.Pool) *server {
 	e := echo.New()
 
 	return &server{e, config, logger, db, redis}

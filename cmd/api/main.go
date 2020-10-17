@@ -44,9 +44,6 @@ func main() {
 
 	}
 
-	redisConn := redis.NewRedisClient(cfg)
-	l.Info("Redis connected")
-
 	redisPool, err := redis.NewRedisPool(cfg)
 	if err != nil {
 		l.Fatal("Init REDIS", zap.String("error", err.Error()))
@@ -55,6 +52,6 @@ func main() {
 		l.Info("Redis connected", zap.String("Status", fmt.Sprintf("%#v", redisPool.Stats())))
 	}
 
-	s := server.NewServer(cfg, l, psqlDB, redisConn)
+	s := server.NewServer(cfg, l, psqlDB, redisPool)
 	log.Fatal(s.Run())
 }

@@ -7,23 +7,21 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/dto"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/utils"
-	"github.com/AleksK1NG/api-mc/pkg/db/redis"
-	"github.com/AleksK1NG/api-mc/pkg/httpErrors"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
+	"github.com/gomodule/redigo/redis"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	"go.uber.org/zap"
 )
 
 // Auth Repository
 type repository struct {
 	logger *logger.Logger
 	db     *sqlx.DB
-	redis  *redis.RedisClient
+	redis  *redis.Pool
 }
 
 // Auth Repository constructor
-func NewAuthRepository(logger *logger.Logger, db *sqlx.DB, redis *redis.RedisClient) auth.Repository {
+func NewAuthRepository(logger *logger.Logger, db *sqlx.DB, redis *redis.Pool) auth.Repository {
 	return &repository{logger, db, redis}
 }
 
@@ -53,9 +51,9 @@ func (r *repository) Update(ctx context.Context, user *models.UserUpdate) (*mode
 		return nil, err
 	}
 
-	if err := r.redis.Delete(u.UserID.String()); err != nil {
-		r.logger.Error("Delete", zap.String("ERROR", err.Error()))
-	}
+	// if err := r.redis.Delete(u.UserID.String()); err != nil {
+	// 	r.logger.Error("Delete", zap.String("ERROR", err.Error()))
+	// }
 
 	return &u, nil
 }
@@ -75,9 +73,9 @@ func (r *repository) Delete(ctx context.Context, userID uuid.UUID) error {
 		return sql.ErrNoRows
 	}
 
-	if err := r.redis.Delete(userID.String()); err != nil {
-		r.logger.Error("Delete", zap.String("ERROR", err.Error()))
-	}
+	// if err := r.redis.Delete(userID.String()); err != nil {
+	// 	r.logger.Error("Delete", zap.String("ERROR", err.Error()))
+	// }
 
 	return nil
 }
@@ -86,21 +84,21 @@ func (r *repository) Delete(ctx context.Context, userID uuid.UUID) error {
 func (r *repository) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, error) {
 	var user models.User
 
-	if err := r.redis.GetIfExistsJSON(userID.String(), &user); err != nil {
-		if err != httpErrors.NotExists {
-			r.logger.Error("GetIfExistsJSON", zap.String("ERROR", err.Error()))
-		}
-	} else {
-		return &user, nil
-	}
+	// if err := r.redis.GetIfExistsJSON(userID.String(), &user); err != nil {
+	// 	if err != httpErrors.NotExists {
+	// 		r.logger.Error("GetIfExistsJSON", zap.String("ERROR", err.Error()))
+	// 	}
+	// } else {
+	// 	return &user, nil
+	// }
 
 	if err := r.db.GetContext(ctx, &user, getUserQuery, userID); err != nil {
 		return nil, err
 	}
 
-	if err := r.redis.SetEXJSON(userID.String(), 3600, &user); err != nil {
-		r.logger.Error("SetEXJSON", zap.String("ERROR", err.Error()))
-	}
+	// if err := r.redis.SetEXJSON(userID.String(), 3600, &user); err != nil {
+	// 	r.logger.Error("SetEXJSON", zap.String("ERROR", err.Error()))
+	// }
 
 	return &user, nil
 }
@@ -183,21 +181,21 @@ func (r *repository) GetUsers(ctx context.Context, pq *utils.PaginationQuery) (*
 func (r *repository) FindByEmail(ctx context.Context, loginDTO *dto.LoginDTO) (*models.User, error) {
 	var user models.User
 
-	if err := r.redis.GetIfExistsJSON(loginDTO.Email, &user); err != nil {
-		if err != httpErrors.NotExists {
-			r.logger.Error("GetIfExistsJSON", zap.String("ERROR", err.Error()))
-		}
-	} else {
-		return &user, nil
-	}
+	// if err := r.redis.GetIfExistsJSON(loginDTO.Email, &user); err != nil {
+	// 	if err != httpErrors.NotExists {
+	// 		r.logger.Error("GetIfExistsJSON", zap.String("ERROR", err.Error()))
+	// 	}
+	// } else {
+	// 	return &user, nil
+	// }
 
 	if err := r.db.GetContext(ctx, &user, findUserByEmail, loginDTO.Email); err != nil {
 		return nil, err
 	}
 
-	if err := r.redis.SetEXJSON(loginDTO.Email, 3600, &user); err != nil {
-		r.logger.Error("SetEXJSON", zap.String("ERROR", err.Error()))
-	}
+	// if err := r.redis.SetEXJSON(loginDTO.Email, 3600, &user); err != nil {
+	// 	r.logger.Error("SetEXJSON", zap.String("ERROR", err.Error()))
+	// }
 
 	return &user, nil
 }
