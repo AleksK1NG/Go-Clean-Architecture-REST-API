@@ -38,8 +38,9 @@ func NewRedisClient(config *config.Config) *RedisClient {
 func newPool(server string) *redis.Pool {
 
 	return &redis.Pool{
-
-		MaxIdle:     3,
+		MaxIdle:     60,
+		MaxActive:   250,
+		Wait:        true,
 		IdleTimeout: 240 * time.Second,
 
 		Dial: func() (redis.Conn, error) {
