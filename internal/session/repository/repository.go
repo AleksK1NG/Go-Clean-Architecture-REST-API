@@ -117,48 +117,27 @@ func (s *sessionRepository) deleteSession(ctx context.Context, sessionID string)
 
 // Create session in redis
 func (s *sessionRepository) CreateSession(ctx context.Context, session *models.Session, expire int) (string, error) {
-	for {
-		select {
-		case <-ctx.Done():
-			return "", ctx.Err()
-		default:
-			session.SessionID = uuid.New().String()
-			sessionKey := s.createKey(session.SessionID)
-			if err := s.setexSessionJSON(ctx, sessionKey, expire, session); err != nil {
-				return "", err
-			}
-			return sessionKey, nil
-		}
+	session.SessionID = uuid.New().String()
+	sessionKey := s.createKey(session.SessionID)
+	if err := s.setexSessionJSON(ctx, sessionKey, expire, session); err != nil {
+		return "", err
 	}
+	return sessionKey, nil
 }
 
 // Get session by id
 func (s *sessionRepository) GetSessionByID(ctx context.Context, sessionId string) (*models.Session, error) {
-	for {
-		select {
-		case <-ctx.Done():
-			return nil, ctx.Err()
-		default:
-			sess, err := s.getSessionJSON(ctx, sessionId)
-			if err != nil {
-				return nil, err
-			}
-			return sess, nil
-		}
+	sess, err := s.getSessionJSON(ctx, sessionId)
+	if err != nil {
+		return nil, err
 	}
+	return sess, nil
 }
 
 // Delete session by id
 func (s *sessionRepository) DeleteByID(ctx context.Context, sessionId string) error {
-	for {
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		default:
-			if err := s.deleteSession(ctx, sessionId); err != nil {
-				return err
-			}
-			return nil
-		}
+	if err := s.deleteSession(ctx, sessionId); err != nil {
+		return err
 	}
+	return nil
 }
