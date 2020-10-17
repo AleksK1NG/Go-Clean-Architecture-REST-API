@@ -69,7 +69,7 @@ func (s *server) MapHandlers(e *echo.Echo) error {
 
 	// Init repositories
 	aRepo := authRepository.NewAuthRepository(s.logger, s.db, s.redis, "api-auth")
-	nRepo := newsRepository.NewNewsRepository(s.logger, s.db, s.redis)
+	nRepo := newsRepository.NewNewsRepository(s.logger, s.db, s.redis, "api-news")
 	cRepo := commentsRepository.NewCommentsRepository(s.logger, s.db, s.redis)
 	sRepo := sessionRepository.NewSessionRepository(s.redis, s.logger, "api-session", s.config)
 
