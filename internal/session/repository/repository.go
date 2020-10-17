@@ -3,14 +3,12 @@ package repository
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/session"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/gomodule/redigo/redis"
 	"github.com/google/uuid"
-	"go.uber.org/zap"
 )
 
 // Session repository
@@ -74,12 +72,11 @@ func (s *sessionRepository) setexSessionJSON(ctx context.Context, key string, ex
 		return err
 	}
 
-	values, err := redis.String(conn.Do("SETEX", key, expire, sessBytes))
+	_, err = redis.String(conn.Do("SETEX", key, expire, sessBytes))
 	if err != nil {
 		return err
 	}
 
-	s.logger.Info("REDIS SET", zap.String("values", fmt.Sprintf("%#v", values)))
 	return nil
 }
 
@@ -100,7 +97,6 @@ func (s *sessionRepository) getSessionJSON(ctx context.Context, key string) (*mo
 		return nil, err
 	}
 
-	s.logger.Info("REDIS GET", zap.String("session", fmt.Sprintf("%#v", sess)))
 	return sess, nil
 }
 
@@ -111,12 +107,11 @@ func (s *sessionRepository) deleteSession(ctx context.Context, sessionID string)
 	}
 	defer conn.Close()
 
-	values, err := redis.Values(conn.Do("DEL", sessionID))
+	_, err = redis.Values(conn.Do("DEL", sessionID))
 	if err != nil {
 		return err
 	}
 
-	s.logger.Info("REDIS DEL", zap.String("values", fmt.Sprintf("%#v", values)))
 	return nil
 }
 
@@ -129,8 +124,6 @@ func (s *sessionRepository) CreateSession(ctx context.Context, session *models.S
 		default:
 			session.SessionID = uuid.New().String()
 			sessionKey := s.createKey(session.SessionID)
-			s.logger.Info("CreateSession ID", zap.String("SessionID", session.SessionID))
-			s.logger.Info("CreateSession sessionKey", zap.String("sessionKey", sessionKey))
 			if err := s.setexSessionJSON(ctx, sessionKey, expire, session); err != nil {
 				return "", err
 			}
@@ -146,7 +139,6 @@ func (s *sessionRepository) GetSessionByID(ctx context.Context, sessionId string
 		case <-ctx.Done():
 			return nil, ctx.Err()
 		default:
-			// key := s.createKey(sessionId)
 			sess, err := s.getSessionJSON(ctx, sessionId)
 			if err != nil {
 				return nil, err
@@ -163,7 +155,6 @@ func (s *sessionRepository) DeleteByID(ctx context.Context, sessionId string) er
 		case <-ctx.Done():
 			return ctx.Err()
 		default:
-			// key := s.createKey(sessionId)
 			if err := s.deleteSession(ctx, sessionId); err != nil {
 				return err
 			}
