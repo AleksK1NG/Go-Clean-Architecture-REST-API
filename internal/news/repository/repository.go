@@ -8,7 +8,6 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/news"
 	"github.com/AleksK1NG/api-mc/internal/utils"
 	"github.com/AleksK1NG/api-mc/pkg/db/redis"
-	"github.com/AleksK1NG/api-mc/pkg/errors"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -70,11 +69,16 @@ func (r repository) Update(ctx context.Context, news *models.News) (*models.News
 // Get single news by id
 func (r repository) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*dto.NewsWithAuthor, error) {
 	n := &dto.NewsWithAuthor{}
-	if err := r.redis.GetIfExistsJSON(newsID.String(), &n); err != nil {
-		if err != errors.NotExists {
-			r.logger.Error("GetIfExistsJSON", zap.String("ERROR", err.Error()))
-		}
-	} else {
+	// if err := r.redis.GetIfExistsJSON(newsID.String(), &n); err != nil {
+	// 	if err != errors.NotExists {
+	// 		r.logger.Error("GetIfExistsJSON", zap.String("ERROR", err.Error()))
+	// 	}
+	// } else {
+	// 	return n, nil
+	// }
+
+	if err := r.redis.GetJSON(newsID.String(), n); err == nil {
+		r.logger.Info("FROM REDIS")
 		return n, nil
 	}
 

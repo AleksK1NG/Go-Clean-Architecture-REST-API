@@ -30,41 +30,33 @@ func (s *sessionRepository) createKey(sessionId string) string {
 
 func (s *sessionRepository) convertToString(session *models.Session) (string, error) {
 	sessionJSON, err := json.Marshal(session)
-
 	if err != nil {
 		return "", err
 	}
-
 	return string(sessionJSON), nil
 }
 
 func (s *sessionRepository) convertFromString(sessionString string) (*models.Session, error) {
 	var storedSession models.Session
-
 	if err := json.Unmarshal([]byte(sessionString), &storedSession); err != nil {
 		return nil, err
 	}
-
 	return &storedSession, nil
 }
 
 func (s *sessionRepository) convertToBytes(session *models.Session) ([]byte, error) {
 	sessionJSON, err := json.Marshal(session)
-
 	if err != nil {
 		return nil, err
 	}
-
 	return sessionJSON, nil
 }
 
 func (s *sessionRepository) convertFromBytes(sessionBytes []byte) (*models.Session, error) {
 	var storedSession models.Session
-
 	if err := json.Unmarshal(sessionBytes, &storedSession); err != nil {
 		return nil, err
 	}
-
 	return &storedSession, nil
 }
 
@@ -80,7 +72,6 @@ func (s *sessionRepository) CreateSession(ctx context.Context, session *models.S
 			if err := s.redis.SetEXJSON(sessionKey, expire, &session); err != nil {
 				return "", err
 			}
-
 			return session.SessionID, nil
 		}
 	}
@@ -98,7 +89,6 @@ func (s *sessionRepository) GetSessionByID(ctx context.Context, sessionId string
 			if err := s.redis.GetIfExistsJSON(key, storedSession); err != nil {
 				return nil, err
 			}
-
 			return storedSession, nil
 		}
 	}
@@ -114,7 +104,6 @@ func (s *sessionRepository) DeleteByID(ctx context.Context, sessionId string) er
 			if err := s.redis.Delete(s.createKey(sessionId)); err != nil {
 				return err
 			}
-
 			return nil
 		}
 	}
