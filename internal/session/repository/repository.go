@@ -6,6 +6,7 @@ import (
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/session"
+	"github.com/AleksK1NG/api-mc/internal/utils"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/gomodule/redigo/redis"
 	"github.com/google/uuid"
@@ -119,7 +120,7 @@ func (s *sessionRepository) deleteSession(ctx context.Context, sessionID string)
 func (s *sessionRepository) CreateSession(ctx context.Context, session *models.Session, expire int) (string, error) {
 	session.SessionID = uuid.New().String()
 	sessionKey := s.createKey(session.SessionID)
-	if err := s.setexSessionJSON(ctx, sessionKey, expire, session); err != nil {
+	if err := utils.RedisMarshalJSON(ctx, s.redisPool, sessionKey, expire, session); err != nil {
 		return "", err
 	}
 	return sessionKey, nil
@@ -127,16 +128,17 @@ func (s *sessionRepository) CreateSession(ctx context.Context, session *models.S
 
 // Get session by id
 func (s *sessionRepository) GetSessionByID(ctx context.Context, sessionId string) (*models.Session, error) {
-	sess, err := s.getSessionJSON(ctx, sessionId)
-	if err != nil {
+	sess := &models.Session{}
+	if err := utils.RedisUnmarshalJSON(ctx, s.redisPool, sessionId, sess); err != nil {
 		return nil, err
 	}
+
 	return sess, nil
 }
 
 // Delete session by id
 func (s *sessionRepository) DeleteByID(ctx context.Context, sessionId string) error {
-	if err := s.deleteSession(ctx, sessionId); err != nil {
+	if err := utils.RedisDeleteKey(ctx, s.redisPool, sessionId); err != nil {
 		return err
 	}
 	return nil
