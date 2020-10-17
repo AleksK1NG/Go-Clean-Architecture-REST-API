@@ -10,6 +10,13 @@ server:
   CtxDefaultTimeout: 12
   Debug: false
 
+logger:
+  Development: true
+  DisableCaller: false
+  DisableStacktrace: false
+  Encoding: console
+  Level: info
+
 postgres:
   PostgresqlHost: localhost
   PostgresqlPort: 5432

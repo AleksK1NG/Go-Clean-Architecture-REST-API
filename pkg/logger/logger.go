@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"github.com/AleksK1NG/api-mc/config"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"os"
@@ -8,7 +9,6 @@ import (
 )
 
 const (
-	envLogLevel  = "LOG_LEVEL"
 	envLogOutput = "LOG_OUTPUT"
 )
 
@@ -17,14 +17,14 @@ type Logger struct {
 }
 
 // Return new app logger instance
-func NewLogger() (*Logger, error) {
-	config := zap.Config{
+func NewLogger(cfg *config.Config) (*Logger, error) {
+	c := zap.Config{
 		OutputPaths:       []string{getOutput()},
-		Level:             zap.NewAtomicLevel(),
-		Development:       true,
-		DisableCaller:     false,
-		DisableStacktrace: false,
-		Encoding:          "console",
+		Level:             zap.NewAtomicLevelAt(getLevel(cfg.Logger.Level)),
+		Development:       cfg.Logger.Development,
+		DisableCaller:     cfg.Logger.DisableCaller,
+		DisableStacktrace: cfg.Logger.DisableStacktrace,
+		Encoding:          cfg.Logger.Encoding,
 		EncoderConfig: zapcore.EncoderConfig{
 			MessageKey:   "MESSAGE",
 			CallerKey:    "CALLER",
@@ -37,7 +37,7 @@ func NewLogger() (*Logger, error) {
 		},
 	}
 
-	l, err := config.Build()
+	l, err := c.Build()
 	if err != nil {
 		return nil, err
 	}
@@ -52,8 +52,8 @@ func (l *Logger) ErrorWithLog(err error, responseError error) error {
 	return responseError
 }
 
-func getLevel() zapcore.Level {
-	switch strings.ToLower(strings.TrimSpace(os.Getenv(envLogLevel))) {
+func getLevel(level string) zapcore.Level {
+	switch strings.ToLower(strings.TrimSpace(level)) {
 	case "debug":
 		return zap.DebugLevel
 	case "info":
