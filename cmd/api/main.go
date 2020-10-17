@@ -12,35 +12,35 @@ import (
 )
 
 const (
-	configPath = "./config/config-docker"
+	configPath = "./config/config-local"
 )
 
 func main() {
-	log.Println("Starting auth server")
-
-	l, err := logger.NewLogger()
-	if err != nil {
-		log.Fatal(err)
-	}
+	log.Println("Starting api server")
 
 	cfgFile, err := config.LoadConfig(configPath)
 	if err != nil {
-		l.Fatal("fatal", zap.String("LoadConfig", err.Error()))
+		log.Fatal(err.Error())
 	}
 
 	cfg, err := config.ParseConfig(cfgFile)
 	if err != nil {
-		l.Fatal("fatal", zap.String("ParseConfig", err.Error()))
+		log.Fatal(err.Error())
+	}
+
+	l, err := logger.NewLogger(cfg)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	psqlDB, err := postgres.NewPsqlDB(cfg)
 	if err != nil {
-		l.Fatal("", zap.String("init psql", err.Error()))
+		l.Fatal("Init postgres", zap.String("error", err.Error()))
 	}
 	defer psqlDB.Close()
 
 	if psqlDB != nil {
-		l.Info("Postgres connected", zap.String("DB Status: %#v", fmt.Sprintf("%#v", psqlDB.Stats())))
+		l.Info("Postgres connected", zap.String("Status: %#v", fmt.Sprintf("%#v", psqlDB.Stats())))
 
 	}
 

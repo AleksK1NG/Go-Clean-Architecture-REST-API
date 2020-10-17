@@ -17,6 +17,7 @@ type Config struct {
 	Store    Store
 	Session  Session
 	Metrics  Metrics
+	Logger   Logger
 }
 
 // Server config struct
@@ -33,7 +34,16 @@ type ServerConfig struct {
 	Debug             bool
 }
 
-// Postgresql config struct
+// Logger config
+type Logger struct {
+	Development       bool
+	DisableCaller     bool
+	DisableStacktrace bool
+	Encoding          string
+	Level             string
+}
+
+// Postgresql config
 type PostgresConfig struct {
 	PostgresqlHost     string
 	PostgresqlPort     string
@@ -44,7 +54,7 @@ type PostgresConfig struct {
 	PgDriver           string
 }
 
-// Redis config struct
+// Redis config
 type RedisConfig struct {
 	RedisAddr      string
 	RedisPassword  string
@@ -52,12 +62,12 @@ type RedisConfig struct {
 	RedisDefaultdb string
 }
 
-// MongoDB config struct
+// MongoDB config
 type MongoDB struct {
 	MongoURI string
 }
 
-// Cookie config struct
+// Cookie config
 type Cookie struct {
 	Name     string
 	MaxAge   int
@@ -65,17 +75,20 @@ type Cookie struct {
 	HttpOnly bool
 }
 
+// Session config
 type Session struct {
 	Prefix string
 	Name   string
 	Expire int
 }
 
+// Metrics config
 type Metrics struct {
 	Url         string
 	ServiceName string
 }
 
+// Store config
 type Store struct {
 	ImagesFolder string
 }
