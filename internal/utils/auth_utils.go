@@ -3,7 +3,7 @@ package utils
 import (
 	"context"
 	"github.com/AleksK1NG/api-mc/config"
-	"github.com/AleksK1NG/api-mc/pkg/errors"
+	"github.com/AleksK1NG/api-mc/pkg/httpErrors"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/labstack/echo"
 	"go.uber.org/zap"
@@ -37,7 +37,7 @@ func ValidateIsOwner(ctx context.Context, creatorId string, logger *logger.Logge
 			zap.String("userID", user.UserID.String()),
 			zap.String("creatorId", creatorId),
 		)
-		return errors.Forbidden
+		return httpErrors.Forbidden
 	}
 
 	return nil

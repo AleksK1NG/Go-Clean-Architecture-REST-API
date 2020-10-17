@@ -1,11 +1,11 @@
-package errors
+package httpErrors
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/hashicorp/go.net/context"
 	"net/http"
 	"strings"
 )
@@ -38,7 +38,6 @@ var (
 	ExistsEmailError        = errors.New("User with given email already exists")
 	InvalidJWTToken         = errors.New("Invalid JWT token")
 	InvalidJWTClaims        = errors.New("Invalid JWT claims")
-	InvalidJWTSignMethod    = errors.New("Invalid JWT sign method")
 	NotExists               = errors.New("Not Exists ")
 )
 
@@ -127,14 +126,14 @@ func NewInternalServerError(causes interface{}) RestErr {
 func ParseErrors(err error) RestErr {
 
 	switch {
+	case errors.Is(err, sql.ErrNoRows):
+		return NewRestError(http.StatusNotFound, NotFound.Error(), err)
+	case errors.Is(err, context.DeadlineExceeded):
+		return NewRestError(http.StatusRequestTimeout, RequestTimeoutError.Error(), err)
 	case strings.Contains(err.Error(), "SQLSTATE"):
 		return parseSqlErrors(err)
 	case strings.Contains(err.Error(), "Field validation"):
 		return parseValidatorError(err)
-	case err == sql.ErrNoRows:
-		return NewRestError(http.StatusNotFound, NotFound.Error(), err)
-	case err == context.DeadlineExceeded:
-		return NewRestError(http.StatusRequestTimeout, RequestTimeoutError.Error(), err)
 	case strings.Contains(err.Error(), "Unmarshal"):
 		return NewRestError(http.StatusBadRequest, BadRequest.Error(), err)
 	case strings.Contains(err.Error(), "UUID"):

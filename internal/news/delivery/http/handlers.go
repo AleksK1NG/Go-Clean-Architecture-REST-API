@@ -6,7 +6,7 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/news"
 	"github.com/AleksK1NG/api-mc/internal/utils"
-	"github.com/AleksK1NG/api-mc/pkg/errors"
+	"github.com/AleksK1NG/api-mc/pkg/httpErrors"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/google/uuid"
 	"github.com/labstack/echo"
@@ -41,7 +41,7 @@ func (h handlers) Create() echo.HandlerFunc {
 				zap.String("ReqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		createdNews, err := h.newsUC.Create(ctx, n)
@@ -51,7 +51,7 @@ func (h handlers) Create() echo.HandlerFunc {
 				zap.String("reqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		h.log.Info(
@@ -79,7 +79,7 @@ func (h handlers) Update() echo.HandlerFunc {
 				zap.String("ReqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		n := &models.News{}
@@ -89,7 +89,7 @@ func (h handlers) Update() echo.HandlerFunc {
 				zap.String("ReqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 		n.NewsID = newsUUID
 
@@ -100,7 +100,7 @@ func (h handlers) Update() echo.HandlerFunc {
 				zap.String("reqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		h.log.Info(
@@ -128,7 +128,7 @@ func (h handlers) GetByID() echo.HandlerFunc {
 				zap.String("ReqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		newsByID, err := h.newsUC.GetNewsByID(ctx, newsUUID)
@@ -138,7 +138,7 @@ func (h handlers) GetByID() echo.HandlerFunc {
 				zap.String("reqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		h.log.Info(
@@ -166,7 +166,7 @@ func (h handlers) Delete() echo.HandlerFunc {
 				zap.String("ReqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		if err := h.newsUC.Delete(ctx, newsUUID); err != nil {
@@ -175,7 +175,7 @@ func (h handlers) Delete() echo.HandlerFunc {
 				zap.String("reqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		h.log.Info(
@@ -203,7 +203,7 @@ func (h handlers) GetNews() echo.HandlerFunc {
 				zap.String("reqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		newsList, err := h.newsUC.GetNews(ctx, pq)
@@ -213,7 +213,7 @@ func (h handlers) GetNews() echo.HandlerFunc {
 				zap.String("reqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		h.log.Info(
@@ -241,7 +241,7 @@ func (h handlers) SearchByTitle() echo.HandlerFunc {
 				zap.String("reqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		newsList, err := h.newsUC.SearchByTitle(ctx, &dto.FindNewsDTO{
@@ -255,7 +255,7 @@ func (h handlers) SearchByTitle() echo.HandlerFunc {
 				zap.String("reqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		h.log.Info(

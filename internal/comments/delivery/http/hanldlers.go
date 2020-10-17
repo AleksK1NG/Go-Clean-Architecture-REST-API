@@ -6,7 +6,7 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/dto"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/utils"
-	"github.com/AleksK1NG/api-mc/pkg/errors"
+	"github.com/AleksK1NG/api-mc/pkg/httpErrors"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/google/uuid"
 	"github.com/labstack/echo"
@@ -41,7 +41,7 @@ func (h *handlers) Create() echo.HandlerFunc {
 				zap.String("ReqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		createdComment, err := h.comUC.Create(ctx, comment)
@@ -51,7 +51,7 @@ func (h *handlers) Create() echo.HandlerFunc {
 				zap.String("reqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		h.log.Info(
@@ -79,7 +79,7 @@ func (h *handlers) Update() echo.HandlerFunc {
 				zap.String("ReqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		comm := &dto.UpdateCommDTO{}
@@ -89,7 +89,7 @@ func (h *handlers) Update() echo.HandlerFunc {
 				zap.String("ReqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 		comm.ID = commID
 
@@ -100,7 +100,7 @@ func (h *handlers) Update() echo.HandlerFunc {
 				zap.String("reqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		h.log.Info(
@@ -128,7 +128,7 @@ func (h *handlers) Delete() echo.HandlerFunc {
 				zap.String("ReqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		if err := h.comUC.Delete(ctx, commID); err != nil {
@@ -137,7 +137,7 @@ func (h *handlers) Delete() echo.HandlerFunc {
 				zap.String("ReqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		return c.NoContent(http.StatusOK)
@@ -159,7 +159,7 @@ func (h *handlers) GetByID() echo.HandlerFunc {
 				zap.String("ReqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		comment, err := h.comUC.GetByID(ctx, commID)
@@ -169,7 +169,7 @@ func (h *handlers) GetByID() echo.HandlerFunc {
 				zap.String("ReqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		return c.JSON(http.StatusOK, comment)
@@ -191,7 +191,7 @@ func (h *handlers) GetAllByNewsID() echo.HandlerFunc {
 				zap.String("ReqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		pq, err := utils.GetPaginationFromCtx(c)
@@ -201,7 +201,7 @@ func (h *handlers) GetAllByNewsID() echo.HandlerFunc {
 				zap.String("reqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		commentsList, err := h.comUC.GetAllByNewsID(ctx, &dto.CommentsByNewsID{
@@ -215,7 +215,7 @@ func (h *handlers) GetAllByNewsID() echo.HandlerFunc {
 				zap.String("ReqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		h.log.Info(
