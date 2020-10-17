@@ -63,6 +63,7 @@ func AuthSessionMiddleware(sessUC session.UCSession, authUC auth.UseCase, cfg *c
 				zap.String("reqID", utils.GetRequestID(c)),
 				zap.String("IP", utils.GetIPAddress(c)),
 				zap.String("userID", user.UserID.String()),
+				zap.String("cookieSessionID", cookie.Value),
 			)
 
 			return next(c)

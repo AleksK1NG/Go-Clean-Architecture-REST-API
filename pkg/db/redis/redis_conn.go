@@ -27,7 +27,7 @@ func NewRedisClient(config *config.Config) *RedisClient {
 	}
 	Pool = newPool(redisHost)
 
-	cleanupHook()
+	// cleanupHook()
 	return &RedisClient{config: config}
 }
 

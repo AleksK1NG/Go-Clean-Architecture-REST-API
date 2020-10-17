@@ -138,8 +138,20 @@ func (h *handlers) Login() echo.HandlerFunc {
 // Logout user
 func (h *handlers) Logout() echo.HandlerFunc {
 	return func(c echo.Context) error {
+		// ctx, cancel := utils.GetCtxWithReqID(c)
+		// defer cancel()
 
-		h.log.Info("Logout user", zap.String("ReqID", utils.GetRequestID(c)))
+		cookie, err := c.Cookie("session-id")
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, httpErrors.NewInternalServerError(err))
+		}
+
+		h.log.Info("Logout user", zap.String("ReqID", utils.GetRequestID(c)), zap.String("cookie", cookie.Value))
+
+		// user, err := utils.GetUserFromCtx(ctx)
+		// if err != nil {
+		// 	return c.JSON(http.StatusInternalServerError, httpErrors.NewInternalServerError(err))
+		// }
 
 		utils.DeleteSessionCookie(c, h.cfg.Session.Name)
 

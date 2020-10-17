@@ -3,6 +3,7 @@ package redis
 import (
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/gomodule/redigo/redis"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -18,15 +19,15 @@ func NewRedisPool(cfg *config.Config) (*redis.Pool, error) {
 	}
 	pool := newPool(redisHost)
 
-	cleanupHook()
+	cleanupHook(pool)
 	return pool, nil
 }
 
 func newPool(server string) *redis.Pool {
 
 	return &redis.Pool{
-		MaxIdle:     60,
-		MaxActive:   250,
+		MaxIdle:     80,
+		MaxActive:   12000,
 		Wait:        true,
 		IdleTimeout: 240 * time.Second,
 
@@ -45,14 +46,15 @@ func newPool(server string) *redis.Pool {
 	}
 }
 
-func cleanupHook() {
+func cleanupHook(pool *redis.Pool) {
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 
 	go func() {
 		<-c
-		if err := Pool.Close(); err != nil {
+		if err := pool.Close(); err != nil {
+			log.Printf("POOL CLOSE ERROR: %s", err.Error())
 			return
 		}
 		os.Exit(0)

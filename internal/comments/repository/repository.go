@@ -7,22 +7,21 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/dto"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/utils"
-	"github.com/AleksK1NG/api-mc/pkg/db/redis"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
+	"github.com/gomodule/redigo/redis"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	"go.uber.org/zap"
 )
 
 // Comments repository
 type repository struct {
 	logger *logger.Logger
 	db     *sqlx.DB
-	redis  *redis.RedisClient
+	redis  *redis.Pool
 }
 
 // Comments Repository constructor
-func NewCommentsRepository(logger *logger.Logger, db *sqlx.DB, redis *redis.RedisClient) comments.Repository {
+func NewCommentsRepository(logger *logger.Logger, db *sqlx.DB, redis *redis.Pool) comments.Repository {
 	return &repository{logger, db, redis}
 }
 
@@ -50,10 +49,10 @@ func (r *repository) Update(ctx context.Context, comment *dto.UpdateCommDTO) (*m
 	if err := r.db.QueryRowxContext(ctx, updateComment, comment.Message, comment.ID).StructScan(comm); err != nil {
 		return nil, err
 	}
-
-	if err := r.redis.Delete(comm.CommentID.String()); err != nil {
-		r.logger.Error("Delete", zap.String("ERROR", err.Error()))
-	}
+	//
+	// if err := r.redis.Delete(comm.CommentID.String()); err != nil {
+	// 	r.logger.Error("Delete", zap.String("ERROR", err.Error()))
+	// }
 
 	return comm, nil
 }
@@ -74,9 +73,9 @@ func (r *repository) Delete(ctx context.Context, commentID uuid.UUID) error {
 		return sql.ErrNoRows
 	}
 
-	if err := r.redis.Delete(commentID.String()); err != nil {
-		r.logger.Error("Delete", zap.String("ERROR", err.Error()))
-	}
+	// if err := r.redis.Delete(commentID.String()); err != nil {
+	// 	r.logger.Error("Delete", zap.String("ERROR", err.Error()))
+	// }
 
 	return nil
 }
@@ -86,19 +85,19 @@ func (r *repository) GetByID(ctx context.Context, commentID uuid.UUID) (*models.
 
 	comment := &models.Comment{}
 
-	if err := r.redis.GetIfExistsJSON(commentID.String(), comment); err != nil {
-		r.logger.Error("GetIfExistsJSON", zap.String("ERROR", err.Error()))
-	} else {
-		return comment, nil
-	}
+	// if err := r.redis.GetIfExistsJSON(commentID.String(), comment); err != nil {
+	// 	r.logger.Error("GetIfExistsJSON", zap.String("ERROR", err.Error()))
+	// } else {
+	// 	return comment, nil
+	// }
 
 	if err := r.db.GetContext(ctx, comment, getCommentByID, commentID); err != nil {
 		return nil, err
 	}
 
-	if err := r.redis.SetEXJSON(comment.CommentID.String(), 3600, comment); err != nil {
-		r.logger.Error("SetEXJSON", zap.String("ERROR", err.Error()))
-	}
+	// if err := r.redis.SetEXJSON(comment.CommentID.String(), 3600, comment); err != nil {
+	// 	r.logger.Error("SetEXJSON", zap.String("ERROR", err.Error()))
+	// }
 
 	return comment, nil
 }
