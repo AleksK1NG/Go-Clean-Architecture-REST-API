@@ -8,7 +8,7 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/utils"
 	"github.com/AleksK1NG/api-mc/pkg/db/redis"
-	"github.com/AleksK1NG/api-mc/pkg/errors"
+	"github.com/AleksK1NG/api-mc/pkg/httpErrors"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -87,7 +87,7 @@ func (r *repository) GetByID(ctx context.Context, userID uuid.UUID) (*models.Use
 	var user models.User
 
 	if err := r.redis.GetIfExistsJSON(userID.String(), &user); err != nil {
-		if err != errors.NotExists {
+		if err != httpErrors.NotExists {
 			r.logger.Error("GetIfExistsJSON", zap.String("ERROR", err.Error()))
 		}
 	} else {
@@ -184,7 +184,7 @@ func (r *repository) FindByEmail(ctx context.Context, loginDTO *dto.LoginDTO) (*
 	var user models.User
 
 	if err := r.redis.GetIfExistsJSON(loginDTO.Email, &user); err != nil {
-		if err != errors.NotExists {
+		if err != httpErrors.NotExists {
 			r.logger.Error("GetIfExistsJSON", zap.String("ERROR", err.Error()))
 		}
 	} else {

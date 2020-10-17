@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/AleksK1NG/api-mc/config"
-	restErrors "github.com/AleksK1NG/api-mc/pkg/errors"
+	restErrors "github.com/AleksK1NG/api-mc/pkg/httpErrors"
 	"github.com/gomodule/redigo/redis"
 	"log"
 	"os"

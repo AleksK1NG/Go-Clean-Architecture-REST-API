@@ -8,7 +8,7 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/session"
 	"github.com/AleksK1NG/api-mc/internal/utils"
-	"github.com/AleksK1NG/api-mc/pkg/errors"
+	"github.com/AleksK1NG/api-mc/pkg/httpErrors"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
@@ -29,7 +29,7 @@ func AuthSessionMiddleware(sessUC session.UCSession, authUC auth.UseCase, cfg *c
 					zap.String("reqID", utils.GetRequestID(c)),
 					zap.String("error", err.Error()),
 				)
-				return c.JSON(http.StatusUnauthorized, errors.NewUnauthorizedError(errors.Unauthorized))
+				return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
 			}
 
 			sess, err := sessUC.GetSessionByID(c.Request().Context(), cookie.Value)
@@ -40,7 +40,7 @@ func AuthSessionMiddleware(sessUC session.UCSession, authUC auth.UseCase, cfg *c
 					zap.String("cookieValue", cookie.Value),
 					zap.String("error", err.Error()),
 				)
-				return c.JSON(http.StatusUnauthorized, errors.NewUnauthorizedError(errors.Unauthorized))
+				return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
 			}
 
 			user, err := authUC.GetByID(c.Request().Context(), sess.UserID)
@@ -50,7 +50,7 @@ func AuthSessionMiddleware(sessUC session.UCSession, authUC auth.UseCase, cfg *c
 					zap.String("reqID", utils.GetRequestID(c)),
 					zap.String("error", err.Error()),
 				)
-				return c.JSON(http.StatusUnauthorized, errors.NewUnauthorizedError(errors.Unauthorized))
+				return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
 			}
 
 			c.Set("user", user)
@@ -82,14 +82,14 @@ func AuthJWTMiddleware(authUC auth.UseCase, config *config.Config, logger *logge
 				headerParts := strings.Split(bearerHeader, " ")
 				if len(headerParts) != 2 {
 					logger.Error("auth middleware", zap.String("headerParts", "len(headerParts) != 2"))
-					return c.JSON(http.StatusUnauthorized, errors.NewUnauthorizedError(errors.Unauthorized))
+					return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
 				}
 
 				tokenString := headerParts[1]
 
 				if err := validateJWTToken(tokenString, authUC, c, config); err != nil {
 					logger.Error("middleware validateJWTToken", zap.String("headerJWT", err.Error()))
-					return c.JSON(http.StatusUnauthorized, errors.NewUnauthorizedError(errors.Unauthorized))
+					return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
 				}
 
 				return next(c)
@@ -97,12 +97,12 @@ func AuthJWTMiddleware(authUC auth.UseCase, config *config.Config, logger *logge
 				cookie, err := c.Cookie("jwt-token")
 				if err != nil {
 					logger.Error("middleware cookie", zap.String("cookieJWT", err.Error()))
-					return c.JSON(http.StatusUnauthorized, errors.NewUnauthorizedError(errors.Unauthorized))
+					return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
 				}
 
 				if err = validateJWTToken(cookie.Value, authUC, c, config); err != nil {
 					logger.Error("cookie JWT validate", zap.String("cookieJWT", err.Error()))
-					return c.JSON(http.StatusUnauthorized, errors.NewUnauthorizedError(errors.Unauthorized))
+					return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
 				}
 				return next(c)
 			}
@@ -115,7 +115,7 @@ func AdminMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		user, ok := c.Get("user").(*models.User)
 		if !ok || *user.Role != "admin" {
-			return c.JSON(http.StatusForbidden, errors.NewUnauthorizedError(errors.PermissionDenied))
+			return c.JSON(http.StatusForbidden, httpErrors.NewUnauthorizedError(httpErrors.PermissionDenied))
 		}
 		return next(c)
 	}
@@ -133,7 +133,7 @@ func OwnerOrAdminMiddleware(logger *logger.Logger) echo.MiddlewareFunc {
 					zap.String("reqID", utils.GetRequestID(c)),
 					zap.String("ERROR", "invalid user ctx"),
 				)
-				return c.JSON(http.StatusUnauthorized, errors.NewUnauthorizedError(errors.Unauthorized))
+				return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
 			}
 
 			logger.Info(
@@ -153,7 +153,7 @@ func OwnerOrAdminMiddleware(logger *logger.Logger) echo.MiddlewareFunc {
 					zap.String("userID", user.UserID.String()),
 					zap.String("ERROR", "ctx userID != param /:user_id"),
 				)
-				return c.JSON(http.StatusForbidden, errors.NewForbiddenError(errors.Forbidden))
+				return c.JSON(http.StatusForbidden, httpErrors.NewForbiddenError(httpErrors.Forbidden))
 			}
 
 			return next(c)
@@ -175,7 +175,7 @@ func RoleBasedAuthMiddleware(roles []string, logger *logger.Logger) echo.Middlew
 					zap.String("reqID", utils.GetRequestID(c)),
 					zap.String("ERROR", "invalid user ctx"),
 				)
-				return c.JSON(http.StatusUnauthorized, errors.NewUnauthorizedError(errors.Unauthorized))
+				return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
 			}
 
 			for _, role := range roles {
@@ -191,14 +191,14 @@ func RoleBasedAuthMiddleware(roles []string, logger *logger.Logger) echo.Middlew
 				zap.String("ERROR", "not allowed role"),
 			)
 
-			return c.JSON(http.StatusForbidden, errors.NewForbiddenError(errors.PermissionDenied))
+			return c.JSON(http.StatusForbidden, httpErrors.NewForbiddenError(httpErrors.PermissionDenied))
 		}
 	}
 }
 
 func validateJWTToken(tokenString string, authUC auth.UseCase, c echo.Context, config *config.Config) error {
 	if tokenString == "" {
-		return errors.InvalidJWTToken
+		return httpErrors.InvalidJWTToken
 	}
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
@@ -213,13 +213,13 @@ func validateJWTToken(tokenString string, authUC auth.UseCase, c echo.Context, c
 	}
 
 	if !token.Valid {
-		return errors.InvalidJWTToken
+		return httpErrors.InvalidJWTToken
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		userID, ok := claims["id"].(string)
 		if !ok {
-			return errors.InvalidJWTClaims
+			return httpErrors.InvalidJWTClaims
 		}
 
 		userUUID, err := uuid.Parse(userID)

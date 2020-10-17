@@ -7,7 +7,7 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/dto"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/utils"
-	"github.com/AleksK1NG/api-mc/pkg/errors"
+	"github.com/AleksK1NG/api-mc/pkg/httpErrors"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/google/uuid"
 )
@@ -31,7 +31,7 @@ func (u *useCase) Register(ctx context.Context, user *models.User) (*dto.UserWit
 	}
 
 	if err := user.PrepareCreate(); err != nil {
-		return nil, errors.NewBadRequestError(err.Error())
+		return nil, httpErrors.NewBadRequestError(err.Error())
 	}
 
 	createdUser, err := u.authRepo.Register(ctx, user)

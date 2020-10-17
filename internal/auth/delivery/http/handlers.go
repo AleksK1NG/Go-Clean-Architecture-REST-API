@@ -8,7 +8,7 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/session"
 	"github.com/AleksK1NG/api-mc/internal/utils"
-	"github.com/AleksK1NG/api-mc/pkg/errors"
+	"github.com/AleksK1NG/api-mc/pkg/httpErrors"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/google/uuid"
 	"github.com/labstack/echo"
@@ -44,7 +44,7 @@ func (h *handlers) Register() echo.HandlerFunc {
 				zap.String("ReqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		createdUser, err := h.authUC.Register(ctx, user)
@@ -54,7 +54,7 @@ func (h *handlers) Register() echo.HandlerFunc {
 				zap.String("reqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		sess, err := h.sessUC.CreateSession(ctx, &models.Session{
@@ -66,7 +66,7 @@ func (h *handlers) Register() echo.HandlerFunc {
 				zap.String("reqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		c.SetCookie(utils.CreateSessionCookie(h.cfg, sess))
@@ -97,7 +97,7 @@ func (h *handlers) Login() echo.HandlerFunc {
 				zap.String("reqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		userWithToken, err := h.authUC.Login(ctx, loginDTO)
@@ -107,7 +107,7 @@ func (h *handlers) Login() echo.HandlerFunc {
 				zap.String("reqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		sess, err := h.sessUC.CreateSession(ctx, &models.Session{
@@ -119,7 +119,7 @@ func (h *handlers) Login() echo.HandlerFunc {
 				zap.String("reqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		c.SetCookie(utils.CreateSessionCookie(h.cfg, sess))
@@ -162,7 +162,7 @@ func (h *handlers) Update() echo.HandlerFunc {
 				zap.String("ReqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		user := &models.UserUpdate{}
@@ -174,7 +174,7 @@ func (h *handlers) Update() echo.HandlerFunc {
 				zap.String("ReqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		updatedUser, err := h.authUC.Update(ctx, user)
@@ -184,7 +184,7 @@ func (h *handlers) Update() echo.HandlerFunc {
 				zap.String("reqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		h.log.Info(
@@ -212,7 +212,7 @@ func (h *handlers) GetUserByID() echo.HandlerFunc {
 				zap.String("ReqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		user, err := h.authUC.GetByID(ctx, uID)
@@ -222,7 +222,7 @@ func (h *handlers) GetUserByID() echo.HandlerFunc {
 				zap.String("reqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		return c.JSON(http.StatusOK, user)
@@ -244,7 +244,7 @@ func (h *handlers) Delete() echo.HandlerFunc {
 				zap.String("ReqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		if err := h.authUC.Delete(ctx, uID); err != nil {
@@ -253,7 +253,7 @@ func (h *handlers) Delete() echo.HandlerFunc {
 				zap.String("reqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		return c.NoContent(http.StatusOK)
@@ -273,7 +273,7 @@ func (h *handlers) FindByName() echo.HandlerFunc {
 		)
 
 		if c.QueryParam("name") == "" {
-			return c.JSON(http.StatusBadRequest, errors.NewBadRequestError("name is required"))
+			return c.JSON(http.StatusBadRequest, httpErrors.NewBadRequestError("name is required"))
 		}
 
 		paginationQuery, err := utils.GetPaginationFromCtx(c)
@@ -283,7 +283,7 @@ func (h *handlers) FindByName() echo.HandlerFunc {
 				zap.String("reqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		response, err := h.authUC.FindByName(ctx, &dto.FindUserQuery{
@@ -296,7 +296,7 @@ func (h *handlers) FindByName() echo.HandlerFunc {
 				zap.String("reqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		h.log.Info(
@@ -324,7 +324,7 @@ func (h *handlers) GetUsers() echo.HandlerFunc {
 				zap.String("reqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		usersList, err := h.authUC.GetUsers(ctx, paginationQuery)
@@ -334,7 +334,7 @@ func (h *handlers) GetUsers() echo.HandlerFunc {
 				zap.String("reqID", utils.GetRequestID(c)),
 				zap.String("Error:", err.Error()),
 			)
-			return c.JSON(errors.ErrorResponse(err))
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		h.log.Info(
