@@ -15,7 +15,8 @@ import (
 )
 
 const (
-	basePrefix = "api-auth"
+	basePrefix    = "api-auth"
+	cacheDuration = 3600
 )
 
 // Auth Repository
@@ -100,7 +101,7 @@ func (r *repository) GetByID(ctx context.Context, userID uuid.UUID) (*models.Use
 		return nil, err
 	}
 
-	if err := utils.RedisMarshalJSON(ctx, r.redisPool, r.generateUserKey(userID.String()), 50, user); err != nil {
+	if err := utils.RedisMarshalJSON(ctx, r.redisPool, r.generateUserKey(userID.String()), cacheDuration, user); err != nil {
 		r.logger.Error("RedisMarshalJSON", zap.String("ERROR", err.Error()))
 	}
 
@@ -195,7 +196,7 @@ func (r *repository) FindByEmail(ctx context.Context, loginDTO *dto.LoginDTO) (*
 		return nil, err
 	}
 
-	if err := utils.RedisMarshalJSON(ctx, r.redisPool, r.generateUserKey(loginDTO.Email), 50, user); err != nil {
+	if err := utils.RedisMarshalJSON(ctx, r.redisPool, r.generateUserKey(loginDTO.Email), cacheDuration, user); err != nil {
 		r.logger.Error("RedisMarshalJSON", zap.String("ERROR", err.Error()))
 	}
 
