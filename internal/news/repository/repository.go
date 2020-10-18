@@ -15,7 +15,8 @@ import (
 )
 
 const (
-	basePrefix = "api-news"
+	basePrefix    = "api-news"
+	cacheDuration = 3600
 )
 
 // News Repository
@@ -86,7 +87,7 @@ func (r repository) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*dto.New
 		return nil, err
 	}
 
-	if err := utils.RedisMarshalJSON(ctx, r.redisPool, r.generateNewsKey(newsID.String()), 50, n); err != nil {
+	if err := utils.RedisMarshalJSON(ctx, r.redisPool, r.generateNewsKey(newsID.String()), cacheDuration, n); err != nil {
 		r.logger.Error("RedisUnmarshalJSON", zap.String("ERROR", err.Error()))
 	}
 
