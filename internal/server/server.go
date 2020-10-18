@@ -73,7 +73,6 @@ func (s *server) Run() error {
 
 		s.logger.Info("Server Exited Properly")
 		return s.echo.Server.Shutdown(ctx)
-
 	} else {
 		e := echo.New()
 		if err := s.MapHandlers(s.echo); err != nil {
