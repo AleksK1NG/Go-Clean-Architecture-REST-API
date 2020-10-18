@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	basePrefix = "api-session"
+	basePrefix = "api-session:"
 )
 
 // Session repository

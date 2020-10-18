@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"github.com/AleksK1NG/api-mc/internal/dto"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/news"
@@ -15,7 +16,7 @@ import (
 )
 
 const (
-	basePrefix    = "api-news"
+	basePrefix    = "api-news:"
 	cacheDuration = 3600
 )
 
@@ -78,7 +79,9 @@ func (r repository) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*dto.New
 	n := &dto.NewsWithAuthor{}
 
 	if err := utils.RedisUnmarshalJSON(ctx, r.redisPool, r.generateNewsKey(newsID.String()), n); err != nil {
-		r.logger.Error("RedisUnmarshalJSON", zap.String("ERROR", err.Error()))
+		if errors.Is(err, redis.ErrNil) {
+			r.logger.Error("RedisUnmarshalJSON", zap.String("ERROR", err.Error()))
+		}
 	} else {
 		return n, nil
 	}
