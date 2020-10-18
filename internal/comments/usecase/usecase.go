@@ -19,8 +19,8 @@ type useCase struct {
 }
 
 // Auth useCase constructor
-func NewCommentsUseCase(l *logger.Logger, c *config.Config, commRepo comments.Repository) comments.UseCase {
-	return &useCase{l, c, commRepo}
+func NewCommentsUseCase(logger *logger.Logger, cfg *config.Config, commRepo comments.Repository) comments.UseCase {
+	return &useCase{logger: logger, cfg: cfg, commRepo: commRepo}
 }
 
 // Create comment

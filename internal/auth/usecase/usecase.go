@@ -20,8 +20,8 @@ type useCase struct {
 }
 
 // Auth useCase constructor
-func NewAuthUseCase(l *logger.Logger, c *config.Config, ar auth.Repository) auth.UseCase {
-	return &useCase{l, c, ar}
+func NewAuthUseCase(logger *logger.Logger, cfg *config.Config, authRepo auth.Repository) auth.UseCase {
+	return &useCase{logger: logger, cfg: cfg, authRepo: authRepo}
 }
 
 // Create new user

@@ -20,7 +20,7 @@ type useCase struct {
 
 // News use case constructor
 func NewNewsUseCase(logger *logger.Logger, cfg *config.Config, newsRepo news.Repository) news.UseCase {
-	return &useCase{logger, cfg, newsRepo}
+	return &useCase{logger: logger, cfg: cfg, newsRepo: newsRepo}
 }
 
 // Create news
