@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"encoding/json"
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/session"
@@ -10,6 +9,10 @@ import (
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/gomodule/redigo/redis"
 	"github.com/google/uuid"
+)
+
+const (
+	basePrefix = "api-session"
 )
 
 // Session repository
@@ -21,99 +24,12 @@ type sessionRepository struct {
 }
 
 // Session repository constructor
-func NewSessionRepository(redisPool *redis.Pool, log *logger.Logger, prefix string, cfg *config.Config) session.SessRepository {
-	return &sessionRepository{redisPool, log, prefix, cfg}
+func NewSessionRepository(redisPool *redis.Pool, log *logger.Logger, cfg *config.Config) session.SessRepository {
+	return &sessionRepository{redisPool: redisPool, logger: log, basePrefix: basePrefix, cfg: cfg}
 }
 
 func (s *sessionRepository) createKey(sessionId string) string {
 	return s.basePrefix + sessionId
-}
-
-func (s *sessionRepository) convertToString(session *models.Session) (string, error) {
-	sessionJSON, err := json.Marshal(session)
-	if err != nil {
-		return "", err
-	}
-	return string(sessionJSON), nil
-}
-
-func (s *sessionRepository) convertFromString(sessionString string) (*models.Session, error) {
-	var storedSession models.Session
-	if err := json.Unmarshal([]byte(sessionString), &storedSession); err != nil {
-		return nil, err
-	}
-	return &storedSession, nil
-}
-
-func (s *sessionRepository) convertToBytes(session *models.Session) ([]byte, error) {
-	sessionJSON, err := json.Marshal(session)
-	if err != nil {
-		return nil, err
-	}
-	return sessionJSON, nil
-}
-
-func (s *sessionRepository) convertFromBytes(sessionBytes []byte) (*models.Session, error) {
-	var storedSession models.Session
-	if err := json.Unmarshal(sessionBytes, &storedSession); err != nil {
-		return nil, err
-	}
-	return &storedSession, nil
-}
-
-func (s *sessionRepository) setexSessionJSON(ctx context.Context, key string, expire int, session *models.Session) error {
-	conn, err := s.redisPool.GetContext(ctx)
-	if err != nil {
-		return err
-	}
-	defer conn.Close()
-
-	sessBytes, err := json.Marshal(session)
-	if err != nil {
-		return err
-	}
-
-	_, err = redis.String(conn.Do("SETEX", key, expire, sessBytes))
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (s *sessionRepository) getSessionJSON(ctx context.Context, key string) (*models.Session, error) {
-	conn, err := s.redisPool.GetContext(ctx)
-	if err != nil {
-		return nil, err
-	}
-	defer conn.Close()
-
-	values, err := redis.Bytes(conn.Do("GET", key))
-	if err != nil {
-		return nil, err
-	}
-
-	sess := &models.Session{}
-	if err := json.Unmarshal(values, sess); err != nil {
-		return nil, err
-	}
-
-	return sess, nil
-}
-
-func (s *sessionRepository) deleteSession(ctx context.Context, sessionID string) error {
-	conn, err := s.redisPool.GetContext(ctx)
-	if err != nil {
-		return err
-	}
-	defer conn.Close()
-
-	_, err = redis.Values(conn.Do("DEL", sessionID))
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 // Create session in redis
@@ -132,14 +48,10 @@ func (s *sessionRepository) GetSessionByID(ctx context.Context, sessionId string
 	if err := utils.RedisUnmarshalJSON(ctx, s.redisPool, sessionId, sess); err != nil {
 		return nil, err
 	}
-
 	return sess, nil
 }
 
 // Delete session by id
 func (s *sessionRepository) DeleteByID(ctx context.Context, sessionId string) error {
-	if err := utils.RedisDeleteKey(ctx, s.redisPool, sessionId); err != nil {
-		return err
-	}
-	return nil
+	return utils.RedisDeleteKey(ctx, s.redisPool, sessionId)
 }

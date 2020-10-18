@@ -14,17 +14,21 @@ import (
 	"go.uber.org/zap"
 )
 
+const (
+	basePrefix = "api-news"
+)
+
 // News Repository
 type repository struct {
-	logger    *logger.Logger
-	db        *sqlx.DB
-	redisPool *redis.Pool
-	prefix    string
+	logger     *logger.Logger
+	db         *sqlx.DB
+	redisPool  *redis.Pool
+	basePrefix string
 }
 
 // News repository constructor
-func NewNewsRepository(logger *logger.Logger, db *sqlx.DB, redis *redis.Pool, prefix string) news.Repository {
-	return &repository{logger, db, redis, prefix}
+func NewNewsRepository(logger *logger.Logger, db *sqlx.DB, redisPool *redis.Pool) news.Repository {
+	return &repository{logger: logger, db: db, redisPool: redisPool, basePrefix: basePrefix}
 }
 
 // Create news
@@ -69,6 +73,7 @@ func (r repository) Update(ctx context.Context, news *models.News) (*models.News
 
 // Get single news by id
 func (r repository) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*dto.NewsWithAuthor, error) {
+
 	n := &dto.NewsWithAuthor{}
 
 	if err := utils.RedisUnmarshalJSON(ctx, r.redisPool, r.generateNewsKey(newsID.String()), n); err != nil {
@@ -82,7 +87,7 @@ func (r repository) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*dto.New
 	}
 
 	if err := utils.RedisMarshalJSON(ctx, r.redisPool, r.generateNewsKey(newsID.String()), 50, n); err != nil {
-		r.logger.Error("RedisMarshalJSON", zap.String("ERROR", err.Error()))
+		r.logger.Error("RedisUnmarshalJSON", zap.String("ERROR", err.Error()))
 	}
 
 	return n, nil
@@ -186,5 +191,5 @@ func (r repository) SearchByTitle(ctx context.Context, req *dto.FindNewsDTO) (*m
 }
 
 func (r *repository) generateNewsKey(newsID string) string {
-	return r.prefix + newsID
+	return r.basePrefix + newsID
 }
