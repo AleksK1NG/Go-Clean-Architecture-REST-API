@@ -89,9 +89,9 @@ func (r *repository) Delete(ctx context.Context, commentID uuid.UUID) error {
 }
 
 // GetByID comment
-func (r *repository) GetByID(ctx context.Context, commentID uuid.UUID) (*models.Comment, error) {
+func (r *repository) GetByID(ctx context.Context, commentID uuid.UUID) (*models.CommentBase, error) {
 
-	comment := &models.Comment{}
+	comment := &models.CommentBase{}
 
 	if err := utils.RedisUnmarshalJSON(ctx, r.redisPool, r.createKey(commentID.String()), comment); err != nil {
 		if errors.Is(err, redis.ErrNil) {
@@ -126,9 +126,9 @@ func (r *repository) GetAllByNewsID(ctx context.Context, query *dto.CommentsByNe
 	}
 	defer rows.Close()
 
-	commentsList := make([]*models.Comment, 0, query.PQ.GetSize())
+	commentsList := make([]*models.CommentBase, 0, query.PQ.GetSize())
 	for rows.Next() {
-		comment := &models.Comment{}
+		comment := &models.CommentBase{}
 		if err := rows.StructScan(comment); err != nil {
 			return nil, err
 		}

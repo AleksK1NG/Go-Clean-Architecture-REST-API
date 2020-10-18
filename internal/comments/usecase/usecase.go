@@ -67,7 +67,7 @@ func (u *useCase) Delete(ctx context.Context, commentID uuid.UUID) error {
 }
 
 // GetByID comment
-func (u *useCase) GetByID(ctx context.Context, commentID uuid.UUID) (*models.Comment, error) {
+func (u *useCase) GetByID(ctx context.Context, commentID uuid.UUID) (*models.CommentBase, error) {
 	return u.commRepo.GetByID(ctx, commentID)
 }
 
