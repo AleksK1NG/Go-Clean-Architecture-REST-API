@@ -143,7 +143,10 @@ func (h *handlers) Logout() echo.HandlerFunc {
 
 		cookie, err := c.Cookie("session-id")
 		if err != nil {
-			return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(err))
+			if err == http.ErrNoCookie {
+				return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(err))
+			}
+			return c.JSON(http.StatusInternalServerError, httpErrors.NewInternalServerError(err))
 		}
 
 		h.log.Info(

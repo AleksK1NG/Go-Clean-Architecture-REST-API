@@ -29,6 +29,9 @@ func AuthSessionMiddleware(sessUC session.UCSession, authUC auth.UseCase, cfg *c
 					zap.String("reqID", utils.GetRequestID(c)),
 					zap.String("error", err.Error()),
 				)
+				if err == http.ErrNoCookie {
+					return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(err))
+				}
 				return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
 			}
 
