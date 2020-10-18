@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"github.com/AleksK1NG/api-mc/internal/comments"
 	"github.com/AleksK1NG/api-mc/internal/dto"
 	"github.com/AleksK1NG/api-mc/internal/models"
@@ -11,18 +12,25 @@ import (
 	"github.com/gomodule/redigo/redis"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"go.uber.org/zap"
+)
+
+const (
+	basePrefix      = "api-comments:"
+	durationSeconds = 3600
 )
 
 // Comments repository
 type repository struct {
-	logger *logger.Logger
-	db     *sqlx.DB
-	redis  *redis.Pool
+	logger     *logger.Logger
+	db         *sqlx.DB
+	redisPool  *redis.Pool
+	basePrefix string
 }
 
 // Comments Repository constructor
-func NewCommentsRepository(logger *logger.Logger, db *sqlx.DB, redis *redis.Pool) comments.Repository {
-	return &repository{logger, db, redis}
+func NewCommentsRepository(logger *logger.Logger, db *sqlx.DB, redisPool *redis.Pool) comments.Repository {
+	return &repository{logger: logger, db: db, redisPool: redisPool, basePrefix: basePrefix}
 }
 
 // Create comment
@@ -49,10 +57,10 @@ func (r *repository) Update(ctx context.Context, comment *dto.UpdateCommDTO) (*m
 	if err := r.db.QueryRowxContext(ctx, updateComment, comment.Message, comment.ID).StructScan(comm); err != nil {
 		return nil, err
 	}
-	//
-	// if err := r.redis.Delete(comm.CommentID.String()); err != nil {
-	// 	r.logger.Error("Delete", zap.String("ERROR", err.Error()))
-	// }
+
+	if err := utils.RedisDeleteKey(ctx, r.redisPool, r.createKey(comment.ID.String())); err != nil {
+		r.logger.Error("RedisDeleteKey", zap.String("ERROR", err.Error()))
+	}
 
 	return comm, nil
 }
@@ -73,9 +81,9 @@ func (r *repository) Delete(ctx context.Context, commentID uuid.UUID) error {
 		return sql.ErrNoRows
 	}
 
-	// if err := r.redis.Delete(commentID.String()); err != nil {
-	// 	r.logger.Error("Delete", zap.String("ERROR", err.Error()))
-	// }
+	if err := utils.RedisDeleteKey(ctx, r.redisPool, r.createKey(commentID.String())); err != nil {
+		r.logger.Error("RedisDeleteKey", zap.String("ERROR", err.Error()))
+	}
 
 	return nil
 }
@@ -85,19 +93,21 @@ func (r *repository) GetByID(ctx context.Context, commentID uuid.UUID) (*models.
 
 	comment := &models.Comment{}
 
-	// if err := r.redis.GetIfExistsJSON(commentID.String(), comment); err != nil {
-	// 	r.logger.Error("GetIfExistsJSON", zap.String("ERROR", err.Error()))
-	// } else {
-	// 	return comment, nil
-	// }
+	if err := utils.RedisUnmarshalJSON(ctx, r.redisPool, r.createKey(commentID.String()), comment); err != nil {
+		if errors.Is(err, redis.ErrNil) {
+			r.logger.Error("RedisUnmarshalJSON", zap.String("ERROR", err.Error()))
+		}
+	} else {
+		return comment, nil
+	}
 
 	if err := r.db.GetContext(ctx, comment, getCommentByID, commentID); err != nil {
 		return nil, err
 	}
 
-	// if err := r.redis.SetEXJSON(comment.CommentID.String(), 3600, comment); err != nil {
-	// 	r.logger.Error("SetEXJSON", zap.String("ERROR", err.Error()))
-	// }
+	if err := utils.RedisMarshalJSON(ctx, r.redisPool, r.createKey(commentID.String()), durationSeconds, comment); err != nil {
+		r.logger.Error("RedisMarshalJSON", zap.String("ERROR", err.Error()))
+	}
 
 	return comment, nil
 }
@@ -138,4 +148,8 @@ func (r *repository) GetAllByNewsID(ctx context.Context, query *dto.CommentsByNe
 		Comments:   commentsList,
 	}, nil
 
+}
+
+func (r *repository) createKey(commentID string) string {
+	return r.basePrefix + commentID
 }

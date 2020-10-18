@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"github.com/AleksK1NG/api-mc/internal/auth"
 	"github.com/AleksK1NG/api-mc/internal/dto"
 	"github.com/AleksK1NG/api-mc/internal/models"
@@ -15,7 +16,7 @@ import (
 )
 
 const (
-	basePrefix    = "api-auth"
+	basePrefix    = "api-auth:"
 	cacheDuration = 3600
 )
 
@@ -92,7 +93,9 @@ func (r *repository) GetByID(ctx context.Context, userID uuid.UUID) (*models.Use
 
 	user := &models.User{}
 	if err := utils.RedisUnmarshalJSON(ctx, r.redisPool, r.generateUserKey(userID.String()), user); err != nil {
-		r.logger.Error("RedisUnmarshalJSON", zap.String("ERROR", err.Error()))
+		if errors.Is(err, redis.ErrNil) {
+			r.logger.Error("RedisUnmarshalJSON", zap.String("ERROR", err.Error()))
+		}
 	} else {
 		return user, nil
 	}
