@@ -1,6 +1,7 @@
 package redis
 
 import (
+	"fmt"
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/gomodule/redigo/redis"
 	"log"
@@ -20,6 +21,11 @@ func NewRedisPool(cfg *config.Config) (*redis.Pool, error) {
 	pool := newPool(redisHost)
 
 	cleanupHook(pool)
+
+	if err := pingRedis(pool); err != nil {
+		return nil, err
+	}
+
 	return pool, nil
 }
 
@@ -59,4 +65,17 @@ func cleanupHook(pool *redis.Pool) {
 		}
 		os.Exit(0)
 	}()
+}
+
+// Redis ping method
+func pingRedis(pool *redis.Pool) error {
+	conn := pool.Get()
+	defer conn.Close()
+
+	ping, err := redis.String(conn.Do("PING"))
+	if err != nil {
+		return fmt.Errorf("cannot 'PING' db: %v", err)
+	}
+	log.Printf("REDIS PING: %v", ping)
+	return nil
 }
