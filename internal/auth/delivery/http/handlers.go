@@ -138,20 +138,28 @@ func (h *handlers) Login() echo.HandlerFunc {
 // Logout user
 func (h *handlers) Logout() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		// ctx, cancel := utils.GetCtxWithReqID(c)
-		// defer cancel()
+		ctx, cancel := utils.GetCtxWithReqID(c)
+		defer cancel()
 
 		cookie, err := c.Cookie("session-id")
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, httpErrors.NewInternalServerError(err))
+			return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(err))
 		}
 
-		h.log.Info("Logout user", zap.String("ReqID", utils.GetRequestID(c)), zap.String("cookie", cookie.Value))
+		h.log.Info(
+			"Logout user",
+			zap.String("ReqID", utils.GetRequestID(c)),
+			zap.String("cookie", cookie.Value),
+		)
 
-		// user, err := utils.GetUserFromCtx(ctx)
-		// if err != nil {
-		// 	return c.JSON(http.StatusInternalServerError, httpErrors.NewInternalServerError(err))
-		// }
+		if err := h.sessUC.DeleteByID(ctx, cookie.Value); err != nil {
+			h.log.Error(
+				"authUC.Update",
+				zap.String("reqID", utils.GetRequestID(c)),
+				zap.String("Error:", err.Error()),
+			)
+			return c.JSON(httpErrors.ErrorResponse(err))
+		}
 
 		utils.DeleteSessionCookie(c, h.cfg.Session.Name)
 
