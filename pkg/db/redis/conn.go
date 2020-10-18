@@ -26,8 +26,8 @@ func NewRedisPool(cfg *config.Config) (*redis.Pool, error) {
 func newPool(server string) *redis.Pool {
 
 	return &redis.Pool{
-		MaxIdle:     80,
-		MaxActive:   12000,
+		MaxIdle:     50,
+		MaxActive:   300,
 		Wait:        true,
 		IdleTimeout: 240 * time.Second,
 

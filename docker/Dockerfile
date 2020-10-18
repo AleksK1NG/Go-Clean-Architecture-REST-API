@@ -1,7 +1,7 @@
 # Initial stage: download modules
 FROM golang:1.15.2 as modules
 
-ADD ../go.mod go.sum /m/
+ADD ./go.mod go.sum /m/
 RUN cd /m && go mod download
 RUN go get github.com/githubnemo/CompileDaemon
 

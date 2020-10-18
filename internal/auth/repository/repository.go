@@ -14,17 +14,21 @@ import (
 	"go.uber.org/zap"
 )
 
+const (
+	basePrefix = "api-auth"
+)
+
 // Auth Repository
 type repository struct {
-	logger    *logger.Logger
-	db        *sqlx.DB
-	redisPool *redis.Pool
-	prefix    string
+	logger     *logger.Logger
+	db         *sqlx.DB
+	redisPool  *redis.Pool
+	basePrefix string
 }
 
 // Auth Repository constructor
-func NewAuthRepository(logger *logger.Logger, db *sqlx.DB, redis *redis.Pool, prefix string) auth.Repository {
-	return &repository{logger, db, redis, prefix}
+func NewAuthRepository(logger *logger.Logger, db *sqlx.DB, redisPool *redis.Pool) auth.Repository {
+	return &repository{logger: logger, db: db, redisPool: redisPool, basePrefix: basePrefix}
 }
 
 // Create new user
@@ -199,5 +203,5 @@ func (r *repository) FindByEmail(ctx context.Context, loginDTO *dto.LoginDTO) (*
 }
 
 func (r *repository) generateUserKey(userID string) string {
-	return r.prefix + userID
+	return r.basePrefix + userID
 }
