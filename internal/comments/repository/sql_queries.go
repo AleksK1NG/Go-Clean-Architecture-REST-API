@@ -7,11 +7,18 @@ const (
 
 	deleteComment = `DELETE FROM comments WHERE comment_id = $1`
 
-	getCommentByID = `SELECT comment_id, author_id, news_id, message, likes, updated_at 
-						FROM comments 
-						WHERE comment_id = $1`
+	getCommentByID = `SELECT concat(u.first_name, ' ', u.last_name) as author, u.avatar as avatar_url, c.message, c.likes, c.updated_at, c.author_id
+						FROM comments c
+        				LEFT JOIN users u on c.author_id = u.user_id
+						WHERE c.comment_id = $1`
 
 	getTotalCountByNewsId = `SELECT COUNT(comment_id) FROM comments WHERE news_id = $1`
 
-	getCommentsByNewsId = `SELECT * FROM comments WHERE news_id = $1 ORDER BY updated_at OFFSET $2 LIMIT $3`
+	// getCommentsByNewsId = `SELECT * FROM comments WHERE news_id = $1 ORDER BY updated_at OFFSET $2 LIMIT $3`
+
+	getCommentsByNewsId = `SELECT concat(u.first_name, ' ', u.last_name) as author, u.avatar as avatar_url, c.message, c.likes, c.updated_at, c.author_id
+							FROM comments c
+        					LEFT JOIN users u on c.author_id = u.user_id
+        					WHERE c.news_id = $1 
+							ORDER BY updated_at OFFSET $2 LIMIT $3`
 )
