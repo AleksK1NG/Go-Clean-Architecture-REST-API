@@ -5,7 +5,9 @@ import (
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/pkg/httpErrors"
+	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/labstack/echo"
+	"go.uber.org/zap"
 	"net/http"
 	"time"
 )
@@ -81,4 +83,15 @@ func GetUserFromCtx(ctx context.Context) (*models.User, error) {
 // Get user ip address
 func GetIPAddress(c echo.Context) string {
 	return c.Request().RemoteAddr
+}
+
+// Error response with logging error for echo context
+func ErrResponseWithLog(ctx echo.Context, log *logger.Logger, err error) error {
+	log.Error(
+		"ErrResponseWithLog",
+		zap.String("reqID", GetRequestID(ctx)),
+		zap.String("IPAddress", GetIPAddress(ctx)),
+		zap.String("Error:", err.Error()),
+	)
+	return ctx.JSON(httpErrors.ErrorResponse(err))
 }

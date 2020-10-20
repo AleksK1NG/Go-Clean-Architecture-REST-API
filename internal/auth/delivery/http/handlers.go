@@ -39,34 +39,19 @@ func (h *handlers) Register() echo.HandlerFunc {
 
 		user := &models.User{}
 		if err := c.Bind(user); err != nil {
-			h.log.Error(
-				"c.Bind",
-				zap.String("ReqID", utils.GetRequestID(c)),
-				zap.String("Error:", err.Error()),
-			)
-			return c.JSON(httpErrors.ErrorResponse(err))
+			return utils.ErrResponseWithLog(c, h.log, err)
 		}
 
 		createdUser, err := h.authUC.Register(ctx, user)
 		if err != nil {
-			h.log.Error(
-				"authUC.Register",
-				zap.String("reqID", utils.GetRequestID(c)),
-				zap.String("Error:", err.Error()),
-			)
-			return c.JSON(httpErrors.ErrorResponse(err))
+			return utils.ErrResponseWithLog(c, h.log, err)
 		}
 
 		sess, err := h.sessUC.CreateSession(ctx, &models.Session{
 			UserID: createdUser.User.UserID,
 		}, h.cfg.Session.Expire)
 		if err != nil {
-			h.log.Error(
-				"sessUC.CreateSession",
-				zap.String("reqID", utils.GetRequestID(c)),
-				zap.String("Error:", err.Error()),
-			)
-			return c.JSON(httpErrors.ErrorResponse(err))
+			return utils.ErrResponseWithLog(c, h.log, err)
 		}
 
 		c.SetCookie(utils.CreateSessionCookie(h.cfg, sess))
@@ -92,34 +77,19 @@ func (h *handlers) Login() echo.HandlerFunc {
 
 		loginDTO := &dto.LoginDTO{}
 		if err := c.Bind(&loginDTO); err != nil {
-			h.log.Error(
-				"c.Bind",
-				zap.String("reqID", utils.GetRequestID(c)),
-				zap.String("Error:", err.Error()),
-			)
-			return c.JSON(httpErrors.ErrorResponse(err))
+			return utils.ErrResponseWithLog(c, h.log, err)
 		}
 
 		userWithToken, err := h.authUC.Login(ctx, loginDTO)
 		if err != nil {
-			h.log.Error(
-				"authUC.Login",
-				zap.String("reqID", utils.GetRequestID(c)),
-				zap.String("Error:", err.Error()),
-			)
-			return c.JSON(httpErrors.ErrorResponse(err))
+			return utils.ErrResponseWithLog(c, h.log, err)
 		}
 
 		sess, err := h.sessUC.CreateSession(ctx, &models.Session{
 			UserID: userWithToken.User.UserID,
 		}, h.cfg.Session.Expire)
 		if err != nil {
-			h.log.Error(
-				"CreateSession",
-				zap.String("reqID", utils.GetRequestID(c)),
-				zap.String("Error:", err.Error()),
-			)
-			return c.JSON(httpErrors.ErrorResponse(err))
+			return utils.ErrResponseWithLog(c, h.log, err)
 		}
 
 		c.SetCookie(utils.CreateSessionCookie(h.cfg, sess))
@@ -156,12 +126,7 @@ func (h *handlers) Logout() echo.HandlerFunc {
 		)
 
 		if err := h.sessUC.DeleteByID(ctx, cookie.Value); err != nil {
-			h.log.Error(
-				"authUC.Update",
-				zap.String("reqID", utils.GetRequestID(c)),
-				zap.String("Error:", err.Error()),
-			)
-			return c.JSON(httpErrors.ErrorResponse(err))
+			return utils.ErrResponseWithLog(c, h.log, err)
 		}
 
 		utils.DeleteSessionCookie(c, h.cfg.Session.Name)
@@ -180,34 +145,19 @@ func (h *handlers) Update() echo.HandlerFunc {
 
 		uID, err := uuid.Parse(c.Param("user_id"))
 		if err != nil {
-			h.log.Error(
-				"uuid.Parse",
-				zap.String("ReqID", utils.GetRequestID(c)),
-				zap.String("Error:", err.Error()),
-			)
-			return c.JSON(httpErrors.ErrorResponse(err))
+			return utils.ErrResponseWithLog(c, h.log, err)
 		}
 
 		user := &models.UserUpdate{}
 		user.ID = uID
 
 		if err = c.Bind(user); err != nil {
-			h.log.Error(
-				"c.Bind",
-				zap.String("ReqID", utils.GetRequestID(c)),
-				zap.String("Error:", err.Error()),
-			)
-			return c.JSON(httpErrors.ErrorResponse(err))
+			return utils.ErrResponseWithLog(c, h.log, err)
 		}
 
 		updatedUser, err := h.authUC.Update(ctx, user)
 		if err != nil {
-			h.log.Error(
-				"authUC.Update",
-				zap.String("reqID", utils.GetRequestID(c)),
-				zap.String("Error:", err.Error()),
-			)
-			return c.JSON(httpErrors.ErrorResponse(err))
+			return utils.ErrResponseWithLog(c, h.log, err)
 		}
 
 		h.log.Info(
@@ -230,22 +180,12 @@ func (h *handlers) GetUserByID() echo.HandlerFunc {
 
 		uID, err := uuid.Parse(c.Param("user_id"))
 		if err != nil {
-			h.log.Error(
-				"uuid.Parse",
-				zap.String("ReqID", utils.GetRequestID(c)),
-				zap.String("Error:", err.Error()),
-			)
-			return c.JSON(httpErrors.ErrorResponse(err))
+			return utils.ErrResponseWithLog(c, h.log, err)
 		}
 
 		user, err := h.authUC.GetByID(ctx, uID)
 		if err != nil {
-			h.log.Error(
-				"uthUC.GetByID",
-				zap.String("reqID", utils.GetRequestID(c)),
-				zap.String("Error:", err.Error()),
-			)
-			return c.JSON(httpErrors.ErrorResponse(err))
+			return utils.ErrResponseWithLog(c, h.log, err)
 		}
 
 		return c.JSON(http.StatusOK, user)
@@ -262,21 +202,11 @@ func (h *handlers) Delete() echo.HandlerFunc {
 
 		uID, err := uuid.Parse(c.Param("user_id"))
 		if err != nil {
-			h.log.Error(
-				"uuid.Parse",
-				zap.String("ReqID", utils.GetRequestID(c)),
-				zap.String("Error:", err.Error()),
-			)
-			return c.JSON(httpErrors.ErrorResponse(err))
+			return utils.ErrResponseWithLog(c, h.log, err)
 		}
 
 		if err := h.authUC.Delete(ctx, uID); err != nil {
-			h.log.Error(
-				"authUC.Delete",
-				zap.String("reqID", utils.GetRequestID(c)),
-				zap.String("Error:", err.Error()),
-			)
-			return c.JSON(httpErrors.ErrorResponse(err))
+			return utils.ErrResponseWithLog(c, h.log, err)
 		}
 
 		return c.NoContent(http.StatusOK)
@@ -301,12 +231,7 @@ func (h *handlers) FindByName() echo.HandlerFunc {
 
 		paginationQuery, err := utils.GetPaginationFromCtx(c)
 		if err != nil {
-			h.log.Error(
-				"GetPaginationFromCtx",
-				zap.String("reqID", utils.GetRequestID(c)),
-				zap.String("Error:", err.Error()),
-			)
-			return c.JSON(httpErrors.ErrorResponse(err))
+			return utils.ErrResponseWithLog(c, h.log, err)
 		}
 
 		response, err := h.authUC.FindByName(ctx, &dto.FindUserQuery{
@@ -314,12 +239,7 @@ func (h *handlers) FindByName() echo.HandlerFunc {
 			PQ:   *paginationQuery,
 		})
 		if err != nil {
-			h.log.Error(
-				"authUC.FindByName",
-				zap.String("reqID", utils.GetRequestID(c)),
-				zap.String("Error:", err.Error()),
-			)
-			return c.JSON(httpErrors.ErrorResponse(err))
+			return utils.ErrResponseWithLog(c, h.log, err)
 		}
 
 		h.log.Info(
@@ -342,22 +262,12 @@ func (h *handlers) GetUsers() echo.HandlerFunc {
 
 		paginationQuery, err := utils.GetPaginationFromCtx(c)
 		if err != nil {
-			h.log.Error(
-				"GetPaginationFromCtx",
-				zap.String("reqID", utils.GetRequestID(c)),
-				zap.String("Error:", err.Error()),
-			)
-			return c.JSON(httpErrors.ErrorResponse(err))
+			return utils.ErrResponseWithLog(c, h.log, err)
 		}
 
 		usersList, err := h.authUC.GetUsers(ctx, paginationQuery)
 		if err != nil {
-			h.log.Error(
-				"GetUsers",
-				zap.String("reqID", utils.GetRequestID(c)),
-				zap.String("Error:", err.Error()),
-			)
-			return c.JSON(httpErrors.ErrorResponse(err))
+			return utils.ErrResponseWithLog(c, h.log, err)
 		}
 
 		h.log.Info(
@@ -376,11 +286,7 @@ func (h *handlers) GetMe() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		user, ok := c.Get("user").(*models.User)
 		if !ok {
-			h.log.Error(
-				"GetMe",
-				zap.String("ReqID", utils.GetRequestID(c)),
-				zap.String("ERROR", "no user ctx"),
-			)
+			return utils.ErrResponseWithLog(c, h.log, httpErrors.NewUnauthorizedError(nil))
 		}
 
 		h.log.Info("GetMe", zap.String(

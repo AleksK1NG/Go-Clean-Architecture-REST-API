@@ -6,7 +6,6 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/news"
 	"github.com/AleksK1NG/api-mc/internal/utils"
-	"github.com/AleksK1NG/api-mc/pkg/httpErrors"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/google/uuid"
 	"github.com/labstack/echo"
@@ -36,22 +35,12 @@ func (h handlers) Create() echo.HandlerFunc {
 
 		n := &models.News{}
 		if err := c.Bind(n); err != nil {
-			h.log.Error(
-				"c.Bind",
-				zap.String("ReqID", utils.GetRequestID(c)),
-				zap.String("Error:", err.Error()),
-			)
-			return c.JSON(httpErrors.ErrorResponse(err))
+			return utils.ErrResponseWithLog(c, h.log, err)
 		}
 
 		createdNews, err := h.newsUC.Create(ctx, n)
 		if err != nil {
-			h.log.Error(
-				"News create",
-				zap.String("reqID", utils.GetRequestID(c)),
-				zap.String("Error:", err.Error()),
-			)
-			return c.JSON(httpErrors.ErrorResponse(err))
+			return utils.ErrResponseWithLog(c, h.log, err)
 		}
 
 		h.log.Info(
@@ -74,33 +63,18 @@ func (h handlers) Update() echo.HandlerFunc {
 
 		newsUUID, err := uuid.Parse(c.Param("news_id"))
 		if err != nil {
-			h.log.Error(
-				"Update uuid.Parse",
-				zap.String("ReqID", utils.GetRequestID(c)),
-				zap.String("Error:", err.Error()),
-			)
-			return c.JSON(httpErrors.ErrorResponse(err))
+			return utils.ErrResponseWithLog(c, h.log, err)
 		}
 
 		n := &models.News{}
 		if err = c.Bind(n); err != nil {
-			h.log.Error(
-				"c.Bind",
-				zap.String("ReqID", utils.GetRequestID(c)),
-				zap.String("Error:", err.Error()),
-			)
-			return c.JSON(httpErrors.ErrorResponse(err))
+			return utils.ErrResponseWithLog(c, h.log, err)
 		}
 		n.NewsID = newsUUID
 
 		updatedNews, err := h.newsUC.Update(ctx, n)
 		if err != nil {
-			h.log.Error(
-				"newsUC.Update",
-				zap.String("reqID", utils.GetRequestID(c)),
-				zap.String("Error:", err.Error()),
-			)
-			return c.JSON(httpErrors.ErrorResponse(err))
+			return utils.ErrResponseWithLog(c, h.log, err)
 		}
 
 		h.log.Info(
@@ -123,22 +97,12 @@ func (h handlers) GetByID() echo.HandlerFunc {
 
 		newsUUID, err := uuid.Parse(c.Param("news_id"))
 		if err != nil {
-			h.log.Error(
-				"Update uuid.Parse",
-				zap.String("ReqID", utils.GetRequestID(c)),
-				zap.String("Error:", err.Error()),
-			)
-			return c.JSON(httpErrors.ErrorResponse(err))
+			return utils.ErrResponseWithLog(c, h.log, err)
 		}
 
 		newsByID, err := h.newsUC.GetNewsByID(ctx, newsUUID)
 		if err != nil {
-			h.log.Error(
-				"newsUC.GetNewsByID",
-				zap.String("reqID", utils.GetRequestID(c)),
-				zap.String("Error:", err.Error()),
-			)
-			return c.JSON(httpErrors.ErrorResponse(err))
+			return utils.ErrResponseWithLog(c, h.log, err)
 		}
 
 		h.log.Info(
@@ -161,21 +125,11 @@ func (h handlers) Delete() echo.HandlerFunc {
 
 		newsUUID, err := uuid.Parse(c.Param("news_id"))
 		if err != nil {
-			h.log.Error(
-				"Update uuid.Parse",
-				zap.String("ReqID", utils.GetRequestID(c)),
-				zap.String("Error:", err.Error()),
-			)
-			return c.JSON(httpErrors.ErrorResponse(err))
+			return utils.ErrResponseWithLog(c, h.log, err)
 		}
 
 		if err := h.newsUC.Delete(ctx, newsUUID); err != nil {
-			h.log.Error(
-				"newsUC.GetNewsByID",
-				zap.String("reqID", utils.GetRequestID(c)),
-				zap.String("Error:", err.Error()),
-			)
-			return c.JSON(httpErrors.ErrorResponse(err))
+			return utils.ErrResponseWithLog(c, h.log, err)
 		}
 
 		h.log.Info(
@@ -198,22 +152,12 @@ func (h handlers) GetNews() echo.HandlerFunc {
 
 		pq, err := utils.GetPaginationFromCtx(c)
 		if err != nil {
-			h.log.Error(
-				"GetPaginationFromCtx",
-				zap.String("reqID", utils.GetRequestID(c)),
-				zap.String("Error:", err.Error()),
-			)
-			return c.JSON(httpErrors.ErrorResponse(err))
+			return utils.ErrResponseWithLog(c, h.log, err)
 		}
 
 		newsList, err := h.newsUC.GetNews(ctx, pq)
 		if err != nil {
-			h.log.Error(
-				"newsUC.GetNewsByID",
-				zap.String("reqID", utils.GetRequestID(c)),
-				zap.String("Error:", err.Error()),
-			)
-			return c.JSON(httpErrors.ErrorResponse(err))
+			return utils.ErrResponseWithLog(c, h.log, err)
 		}
 
 		h.log.Info(
@@ -236,12 +180,7 @@ func (h handlers) SearchByTitle() echo.HandlerFunc {
 
 		pq, err := utils.GetPaginationFromCtx(c)
 		if err != nil {
-			h.log.Error(
-				"GetPaginationFromCtx",
-				zap.String("reqID", utils.GetRequestID(c)),
-				zap.String("Error:", err.Error()),
-			)
-			return c.JSON(httpErrors.ErrorResponse(err))
+			return utils.ErrResponseWithLog(c, h.log, err)
 		}
 
 		newsList, err := h.newsUC.SearchByTitle(ctx, &dto.FindNewsDTO{
@@ -250,12 +189,7 @@ func (h handlers) SearchByTitle() echo.HandlerFunc {
 		})
 
 		if err != nil {
-			h.log.Error(
-				"newsUC.GetNewsByID",
-				zap.String("reqID", utils.GetRequestID(c)),
-				zap.String("Error:", err.Error()),
-			)
-			return c.JSON(httpErrors.ErrorResponse(err))
+			return utils.ErrResponseWithLog(c, h.log, err)
 		}
 
 		h.log.Info(
