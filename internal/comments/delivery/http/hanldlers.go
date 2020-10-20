@@ -93,7 +93,7 @@ func (h *handlers) Delete() echo.HandlerFunc {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
 
-		h.log.Info("Update", zap.String("ReqID", utils.GetRequestID(c)))
+		h.log.Info("Delete", zap.String("ReqID", utils.GetRequestID(c)))
 
 		commID, err := uuid.Parse(c.Param("comment_id"))
 		if err != nil {
@@ -114,7 +114,7 @@ func (h *handlers) GetByID() echo.HandlerFunc {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
 
-		h.log.Info("Update", zap.String("ReqID", utils.GetRequestID(c)))
+		h.log.Info("GetByID", zap.String("ReqID", utils.GetRequestID(c)))
 
 		commID, err := uuid.Parse(c.Param("comment_id"))
 		if err != nil {
@@ -136,7 +136,7 @@ func (h *handlers) GetAllByNewsID() echo.HandlerFunc {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
 
-		h.log.Info("Update", zap.String("ReqID", utils.GetRequestID(c)))
+		h.log.Info("GetAllByNewsID", zap.String("ReqID", utils.GetRequestID(c)))
 
 		newsID, err := uuid.Parse(c.Param("news_id"))
 		if err != nil {

@@ -58,9 +58,7 @@ func (r *repository) Update(ctx context.Context, comment *dto.UpdateCommDTO) (*m
 		return nil, err
 	}
 
-	if err := utils.RedisDeleteKey(ctx, r.redisPool, r.createKey(comment.ID.String())); err != nil {
-		r.logger.Error("RedisDeleteKey", zap.String("ERROR", err.Error()))
-	}
+	r.deleteRedisKey(ctx, comment.ID.String())
 
 	return comm, nil
 }
@@ -81,9 +79,7 @@ func (r *repository) Delete(ctx context.Context, commentID uuid.UUID) error {
 		return sql.ErrNoRows
 	}
 
-	if err := utils.RedisDeleteKey(ctx, r.redisPool, r.createKey(commentID.String())); err != nil {
-		r.logger.Error("RedisDeleteKey", zap.String("ERROR", err.Error()))
-	}
+	r.deleteRedisKey(ctx, commentID.String())
 
 	return nil
 }
@@ -93,11 +89,7 @@ func (r *repository) GetByID(ctx context.Context, commentID uuid.UUID) (*models.
 
 	comment := &models.CommentBase{}
 
-	if err := utils.RedisUnmarshalJSON(ctx, r.redisPool, r.createKey(commentID.String()), comment); err != nil {
-		if errors.Is(err, redis.ErrNil) {
-			r.logger.Error("RedisUnmarshalJSON", zap.String("ERROR", err.Error()))
-		}
-	} else {
+	if err := r.getRedisUnmarshalJSON(ctx, commentID.String(), comment); err == nil {
 		return comment, nil
 	}
 
@@ -105,9 +97,7 @@ func (r *repository) GetByID(ctx context.Context, commentID uuid.UUID) (*models.
 		return nil, err
 	}
 
-	if err := utils.RedisMarshalJSON(ctx, r.redisPool, r.createKey(commentID.String()), durationSeconds, comment); err != nil {
-		r.logger.Error("RedisMarshalJSON", zap.String("ERROR", err.Error()))
-	}
+	r.setRedisMarshalJSON(ctx, commentID.String(), comment)
 
 	return comment, nil
 }
@@ -152,4 +142,27 @@ func (r *repository) GetAllByNewsID(ctx context.Context, query *dto.CommentsByNe
 
 func (r *repository) createKey(commentID string) string {
 	return r.basePrefix + commentID
+}
+
+func (r *repository) deleteRedisKey(ctx context.Context, key string) {
+	if err := utils.RedisDeleteKey(ctx, r.redisPool, r.createKey(key)); err != nil {
+		r.logger.Error("RedisDeleteKey", zap.String("ERROR", err.Error()))
+	}
+}
+
+func (r *repository) setRedisMarshalJSON(ctx context.Context, key string, value interface{}) {
+	if err := utils.RedisMarshalJSON(ctx, r.redisPool, r.createKey(key), durationSeconds, value); err != nil {
+		r.logger.Error("RedisMarshalJSON", zap.String("ERROR", err.Error()))
+	}
+}
+
+func (r *repository) getRedisUnmarshalJSON(ctx context.Context, key string, value interface{}) error {
+	if err := utils.RedisUnmarshalJSON(ctx, r.redisPool, r.createKey(key), value); err != nil {
+		if errors.Is(err, redis.ErrNil) {
+			return err
+		}
+		r.logger.Error("RedisUnmarshalJSON", zap.String("ERROR", err.Error()))
+		return err
+	}
+	return nil
 }
