@@ -286,7 +286,7 @@ func (h *handlers) GetMe() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		user, ok := c.Get("user").(*models.User)
 		if !ok {
-			return utils.ErrResponseWithLog(c, h.log, httpErrors.NewUnauthorizedError(nil))
+			return utils.ErrResponseWithLog(c, h.log, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
 		}
 
 		h.log.Info("GetMe", zap.String(
