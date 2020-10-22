@@ -86,18 +86,28 @@ func (r *repository) Delete(ctx context.Context, commentID uuid.UUID) error {
 
 // GetByID comment
 func (r *repository) GetByID(ctx context.Context, commentID uuid.UUID) (*models.CommentBase, error) {
-
 	comment := &models.CommentBase{}
 
-	if err := r.getRedisUnmarshalJSON(ctx, commentID.String(), comment); err == nil {
-		return comment, nil
-	}
+	//poolGet, err := redis2.PoolGet(r.createKey(commentID.String()))
+	//if err == nil {
+	//	if err := json.Unmarshal(poolGet, comment); err != nil {
+	//		r.logger.Info("GET REDIS", zap.String("ERROR", comment.CommentID.String()))
+	//	} else {
+	//		return comment, nil
+	//	}
+	//	r.logger.Info("GET REDIS", zap.String("ERROR", comment.CommentID.String()))
+	//}
 
 	if err := r.db.GetContext(ctx, comment, getCommentByID, commentID); err != nil {
 		return nil, err
 	}
 
-	r.setRedisMarshalJSON(ctx, commentID.String(), comment)
+	//bytes, err := json.Marshal(comment)
+	//if err == nil {
+	//	if err := redis2.PoolSetex(r.createKey(commentID.String()), 60, bytes); err != nil {
+	//		r.logger.Info("SET REDIS", zap.String("ERROR", err.Error()))
+	//	}
+	//}
 
 	return comment, nil
 }

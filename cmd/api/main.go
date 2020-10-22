@@ -36,21 +36,13 @@ func main() {
 	psqlDB, err := postgres.NewPsqlDB(cfg)
 	if err != nil {
 		l.Fatal("Init postgres", zap.String("error", err.Error()))
+	} else {
+		l.Info("Postgres connected", zap.String("Status", fmt.Sprintf("%#v", psqlDB.Stats())))
 	}
 	defer psqlDB.Close()
 
-	if psqlDB != nil {
-		l.Info("Postgres connected", zap.String("Status", fmt.Sprintf("%#v", psqlDB.Stats())))
-
-	}
-
-	redisPool, err := redis.NewRedisPool(cfg)
-	if err != nil {
-		l.Fatal("Init REDIS", zap.String("error", err.Error()))
-	}
-	if redisPool != nil {
-		l.Info("Redis connected", zap.String("Status", fmt.Sprintf("%#v", redisPool.Stats())))
-	}
+	redisPool := redis.NewRedisConnPool(cfg)
+	l.Info("Redis connected", zap.String("Status", fmt.Sprintf("%#v", redisPool.Stats())))
 
 	s := server.NewServer(cfg, l, psqlDB, redisPool)
 	log.Fatal(s.Run())

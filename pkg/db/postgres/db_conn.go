@@ -26,7 +26,7 @@ func NewPsqlDB(c *config.Config) (*sqlx.DB, error) {
 	db.SetMaxOpenConns(50)
 	db.SetConnMaxLifetime(120 * time.Second)
 	db.SetMaxIdleConns(30)
-	db.SetConnMaxIdleTime(20 * time.Second)
+	db.SetConnMaxIdleTime(1 * time.Second)
 	if err = db.Ping(); err != nil {
 		return nil, err
 	}
