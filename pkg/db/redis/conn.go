@@ -1,21 +1,21 @@
 package redis
 
-// Create new redis pool
+// Create new redis Pool
 //func NewRedisPool(cfg *config.Config) (*redis.Pool, error) {
 //	redisHost := cfg.Redis.RedisAddr
 //
 //	if redisHost == "" {
 //		redisHost = ":6379"
 //	}
-//	pool := newPool(redisHost)
+//	Pool := newPool(redisHost)
 //
-//	cleanupHook(pool)
+//	cleanupHook(Pool)
 //
-//	if err := pingRedis(pool); err != nil {
+//	if err := pingRedis(Pool); err != nil {
 //		return nil, err
 //	}
 //
-//	return pool, nil
+//	return Pool, nil
 //}
 
 //func newPool(server string) *redis.Pool {
@@ -41,14 +41,14 @@ package redis
 //	}
 //}
 
-//func cleanupHook(pool *redis.Pool) {
+//func cleanupHook(Pool *redis.Pool) {
 //
 //	c := make(chan os.Signal, 1)
 //	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 //
 //	go func() {
 //		<-c
-//		if err := pool.Close(); err != nil {
+//		if err := Pool.Close(); err != nil {
 //			log.Printf("POOL CLOSE ERROR: %s", err.Error())
 //			return
 //		}
@@ -57,8 +57,8 @@ package redis
 //}
 //
 //// Redis ping method
-//func pingRedis(pool *redis.Pool) error {
-//	conn := pool.Get()
+//func pingRedis(Pool *redis.Pool) error {
+//	conn := Pool.Get()
 //	defer conn.Close()
 //
 //	ping, err := redis.String(conn.Do("PING"))

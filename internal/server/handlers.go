@@ -37,7 +37,7 @@ func (s *server) MapHandlers(e *echo.Echo) error {
 		zap.String("ServiceName", s.config.Metrics.ServiceName),
 	)
 
-	e.Pre(middleware.HTTPSRedirect())
+	//e.Pre(middleware.HTTPSRedirect())
 	e.Use(middleware.RequestID())
 	e.Use(metricsMiddleware.MetricsMiddleware(metrics))
 	e.Use(middleware.RecoverWithConfig(middleware.RecoverConfig{
@@ -58,7 +58,7 @@ func (s *server) MapHandlers(e *echo.Echo) error {
 	// e.Use(middleware.CSRF())
 	e.Use(middleware.Secure())
 	e.Use(middleware.BodyLimit("2M"))
-	e.Use(metricsMiddleware.DebugMiddleware(s.config.Server.Debug, s.logger))
+	//e.Use(metricsMiddleware.DebugMiddleware(s.config.Server.Debug, s.logger))
 
 	v1 := e.Group("/api/v1")
 
