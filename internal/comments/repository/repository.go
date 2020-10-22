@@ -3,11 +3,13 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"github.com/AleksK1NG/api-mc/internal/comments"
 	"github.com/AleksK1NG/api-mc/internal/dto"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/utils"
+	redigo "github.com/AleksK1NG/api-mc/pkg/db/redis"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/gomodule/redigo/redis"
 	"github.com/google/uuid"
@@ -88,26 +90,28 @@ func (r *repository) Delete(ctx context.Context, commentID uuid.UUID) error {
 func (r *repository) GetByID(ctx context.Context, commentID uuid.UUID) (*models.CommentBase, error) {
 	comment := &models.CommentBase{}
 
-	//poolGet, err := redis2.PoolGet(r.createKey(commentID.String()))
-	//if err == nil {
-	//	if err := json.Unmarshal(poolGet, comment); err != nil {
-	//		r.logger.Info("GET REDIS", zap.String("ERROR", comment.CommentID.String()))
-	//	} else {
-	//		return comment, nil
-	//	}
-	//	r.logger.Info("GET REDIS", zap.String("ERROR", comment.CommentID.String()))
-	//}
+	poolGet, err := redigo.PoolGet(r.createKey(commentID.String()))
+	if err == nil {
+		if err := json.Unmarshal(poolGet, comment); err != nil {
+			r.logger.Info("GET REDIS", zap.String("ERROR", comment.CommentID.String()))
+		} else {
+			r.logger.Info("r.redisPool.ActiveCount()", zap.Int("r.redisPool.ActiveCount()", r.redisPool.ActiveCount()))
+			//r.logger.Info("r.redisPool.IdleCount()", zap.Int("r.redisPool.IdleCount()", r.redisPool.IdleCount()))
+			return comment, nil
+		}
+		r.logger.Info("GET REDIS", zap.String("ERROR", comment.CommentID.String()))
+	}
 
 	if err := r.db.GetContext(ctx, comment, getCommentByID, commentID); err != nil {
 		return nil, err
 	}
 
-	//bytes, err := json.Marshal(comment)
-	//if err == nil {
-	//	if err := redis2.PoolSetex(r.createKey(commentID.String()), 60, bytes); err != nil {
-	//		r.logger.Info("SET REDIS", zap.String("ERROR", err.Error()))
-	//	}
-	//}
+	bytes, err := json.Marshal(comment)
+	if err == nil {
+		if err := redigo.PoolSetex(r.createKey(commentID.String()), 60, bytes); err != nil {
+			r.logger.Info("SET REDIS", zap.String("ERROR", err.Error()))
+		}
+	}
 
 	return comment, nil
 }

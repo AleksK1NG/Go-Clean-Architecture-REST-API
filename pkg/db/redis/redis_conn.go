@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	pool *redis.Pool
+	Pool *redis.Pool
 )
 
 //func init() {
@@ -19,7 +19,7 @@ var (
 //	if redisHost == "" {
 //		redisHost = ":6379"
 //	}
-//	pool = newPool(redisHost)
+//	Pool = newPool(redisHost)
 //	cleanupHook()
 //}
 
@@ -28,18 +28,20 @@ func NewRedisConnPool(config *config.Config) *redis.Pool {
 	if redisHost == "" {
 		redisHost = ":6379"
 	}
-	pool = newPool(redisHost)
+	Pool = newPool(redisHost)
 	cleanupHook()
 
-	return pool
+	return Pool
 }
 
 func newPool(server string) *redis.Pool {
 
 	return &redis.Pool{
 
-		MaxIdle:     3,
+		MaxIdle:     100,
 		IdleTimeout: 240 * time.Second,
+		MaxActive:   200,
+		Wait:        true,
 
 		Dial: func() (redis.Conn, error) {
 			c, err := redis.Dial("tcp", server)
@@ -64,14 +66,14 @@ func cleanupHook() {
 	signal.Notify(c, syscall.SIGKILL)
 	go func() {
 		<-c
-		pool.Close()
+		Pool.Close()
 		os.Exit(0)
 	}()
 }
 
 func Ping() error {
 
-	conn := pool.Get()
+	conn := Pool.Get()
 	defer conn.Close()
 
 	_, err := redis.String(conn.Do("PING"))
@@ -82,7 +84,7 @@ func Ping() error {
 }
 
 func PoolGet(key string) ([]byte, error) {
-	conn := pool.Get()
+	conn := Pool.Get()
 	defer conn.Close()
 
 	var data []byte
@@ -94,7 +96,7 @@ func PoolGet(key string) ([]byte, error) {
 }
 
 func Set(key string, value []byte) error {
-	conn := pool.Get()
+	conn := Pool.Get()
 	defer conn.Close()
 
 	_, err := conn.Do("SET", key, value)
@@ -109,7 +111,7 @@ func Set(key string, value []byte) error {
 }
 
 func PoolSetex(key string, time int, value []byte) error {
-	conn := pool.Get()
+	conn := Pool.Get()
 	defer conn.Close()
 
 	_, err := conn.Do("SETEX", key, time, value)
@@ -125,7 +127,7 @@ func PoolSetex(key string, time int, value []byte) error {
 
 func Exists(key string) (bool, error) {
 
-	conn := pool.Get()
+	conn := Pool.Get()
 	defer conn.Close()
 
 	ok, err := redis.Bool(conn.Do("EXISTS", key))
@@ -137,7 +139,7 @@ func Exists(key string) (bool, error) {
 
 func Delete(key string) error {
 
-	conn := pool.Get()
+	conn := Pool.Get()
 	defer conn.Close()
 
 	_, err := conn.Do("DEL", key)
@@ -146,7 +148,7 @@ func Delete(key string) error {
 
 func GetKeys(pattern string) ([]string, error) {
 
-	conn := pool.Get()
+	conn := Pool.Get()
 	defer conn.Close()
 
 	iter := 0
@@ -171,7 +173,7 @@ func GetKeys(pattern string) ([]string, error) {
 
 func Incr(counterKey string) (int, error) {
 
-	conn := pool.Get()
+	conn := Pool.Get()
 	defer conn.Close()
 
 	return redis.Int(conn.Do("INCR", counterKey))
