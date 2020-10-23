@@ -3,8 +3,8 @@ package server
 import (
 	"context"
 	"github.com/AleksK1NG/api-mc/config"
+	"github.com/AleksK1NG/api-mc/pkg/db/redis"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
-	"github.com/gomodule/redigo/redis"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo"
 	"go.uber.org/zap"
@@ -23,18 +23,18 @@ const (
 
 // Server struct
 type server struct {
-	echo   *echo.Echo
-	config *config.Config
-	logger *logger.Logger
-	db     *sqlx.DB
-	redis  *redis.Pool
+	echo      *echo.Echo
+	config    *config.Config
+	logger    *logger.Logger
+	db        *sqlx.DB
+	redisPool redis.RedisPool
 }
 
 // New server constructor
-func NewServer(config *config.Config, logger *logger.Logger, db *sqlx.DB, redis *redis.Pool) *server {
+func NewServer(config *config.Config, logger *logger.Logger, db *sqlx.DB, redisPool redis.RedisPool) *server {
 	e := echo.New()
 
-	return &server{e, config, logger, db, redis}
+	return &server{e, config, logger, db, redisPool}
 }
 
 // Run server depends on config SSL option

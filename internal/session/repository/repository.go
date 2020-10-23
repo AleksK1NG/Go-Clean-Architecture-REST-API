@@ -5,9 +5,8 @@ import (
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/session"
-	"github.com/AleksK1NG/api-mc/internal/utils"
+	"github.com/AleksK1NG/api-mc/pkg/db/redis"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
-	"github.com/gomodule/redigo/redis"
 	"github.com/google/uuid"
 )
 
@@ -17,14 +16,14 @@ const (
 
 // Session repository
 type sessionRepository struct {
-	redisPool  *redis.Pool
+	redisPool  redis.RedisPool
 	logger     *logger.Logger
 	basePrefix string
 	cfg        *config.Config
 }
 
 // Session repository constructor
-func NewSessionRepository(redisPool *redis.Pool, log *logger.Logger, cfg *config.Config) session.SessRepository {
+func NewSessionRepository(redisPool redis.RedisPool, log *logger.Logger, cfg *config.Config) session.SessRepository {
 	return &sessionRepository{redisPool: redisPool, logger: log, basePrefix: basePrefix, cfg: cfg}
 }
 
@@ -36,16 +35,18 @@ func (s *sessionRepository) createKey(sessionId string) string {
 func (s *sessionRepository) CreateSession(ctx context.Context, session *models.Session, expire int) (string, error) {
 	session.SessionID = uuid.New().String()
 	sessionKey := s.createKey(session.SessionID)
-	if err := utils.RedisMarshalJSON(ctx, s.redisPool, sessionKey, expire, session); err != nil {
+
+	if err := s.redisPool.SetexJSONContext(ctx, sessionKey, expire, session); err != nil {
 		return "", err
 	}
+
 	return sessionKey, nil
 }
 
 // Get session by id
 func (s *sessionRepository) GetSessionByID(ctx context.Context, sessionId string) (*models.Session, error) {
 	sess := &models.Session{}
-	if err := utils.RedisUnmarshalJSON(ctx, s.redisPool, sessionId, sess); err != nil {
+	if err := s.redisPool.GetJSONContext(ctx, sessionId, sess); err != nil {
 		return nil, err
 	}
 	return sess, nil
@@ -53,5 +54,5 @@ func (s *sessionRepository) GetSessionByID(ctx context.Context, sessionId string
 
 // Delete session by id
 func (s *sessionRepository) DeleteByID(ctx context.Context, sessionId string) error {
-	return utils.RedisDeleteKey(ctx, s.redisPool, sessionId)
+	return s.redisPool.DeleteContext(ctx, sessionId)
 }

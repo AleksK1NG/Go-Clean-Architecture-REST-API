@@ -3,16 +3,14 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"github.com/AleksK1NG/api-mc/internal/dto"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/news"
 	"github.com/AleksK1NG/api-mc/internal/utils"
+	"github.com/AleksK1NG/api-mc/pkg/db/redis"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
-	"github.com/gomodule/redigo/redis"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	"go.uber.org/zap"
 )
 
 const (
@@ -24,12 +22,12 @@ const (
 type repository struct {
 	logger     *logger.Logger
 	db         *sqlx.DB
-	redisPool  *redis.Pool
+	redisPool  redis.RedisPool
 	basePrefix string
 }
 
 // News repository constructor
-func NewNewsRepository(logger *logger.Logger, db *sqlx.DB, redisPool *redis.Pool) news.Repository {
+func NewNewsRepository(logger *logger.Logger, db *sqlx.DB, redisPool redis.RedisPool) news.Repository {
 	return &repository{logger: logger, db: db, redisPool: redisPool, basePrefix: basePrefix}
 }
 
@@ -66,10 +64,6 @@ func (r repository) Update(ctx context.Context, news *models.News) (*models.News
 		return nil, err
 	}
 
-	if err := utils.RedisDeleteKey(ctx, r.redisPool, r.generateNewsKey(n.NewsID.String())); err != nil {
-		r.logger.Error("RedisDeleteKey", zap.String("ERROR", err.Error()))
-	}
-
 	return &n, nil
 }
 
@@ -78,20 +72,8 @@ func (r repository) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*dto.New
 
 	n := &dto.NewsWithAuthor{}
 
-	if err := utils.RedisUnmarshalJSON(ctx, r.redisPool, r.generateNewsKey(newsID.String()), n); err != nil {
-		if errors.Is(err, redis.ErrNil) {
-			r.logger.Error("RedisUnmarshalJSON", zap.String("ERROR", err.Error()))
-		}
-	} else {
-		return n, nil
-	}
-
 	if err := r.db.GetContext(ctx, n, getNewsByID, newsID); err != nil {
 		return nil, err
-	}
-
-	if err := utils.RedisMarshalJSON(ctx, r.redisPool, r.generateNewsKey(newsID.String()), cacheDuration, n); err != nil {
-		r.logger.Error("RedisUnmarshalJSON", zap.String("ERROR", err.Error()))
 	}
 
 	return n, nil
@@ -111,10 +93,6 @@ func (r repository) Delete(ctx context.Context, newsID uuid.UUID) error {
 	}
 	if rowsAffected == 0 {
 		return sql.ErrNoRows
-	}
-
-	if err := utils.RedisDeleteKey(ctx, r.redisPool, r.generateNewsKey(newsID.String())); err != nil {
-		r.logger.Error("RedisDeleteKey", zap.String("ERROR", err.Error()))
 	}
 
 	return nil
