@@ -68,10 +68,10 @@ func (s *server) MapHandlers(e *echo.Echo) error {
 	commGroup := v1.Group("/comments")
 
 	// Init repositories
-	aRepo := authRepository.NewAuthRepository(s.logger, s.db, s.redis)
-	nRepo := newsRepository.NewNewsRepository(s.logger, s.db, s.redis)
-	cRepo := commentsRepository.NewCommentsRepository(s.logger, s.db, s.redis)
-	sRepo := sessionRepository.NewSessionRepository(s.redis, s.logger, s.config)
+	aRepo := authRepository.NewAuthRepository(s.logger, s.db, s.redisPool)
+	nRepo := newsRepository.NewNewsRepository(s.logger, s.db, s.redisPool)
+	cRepo := commentsRepository.NewCommentsRepository(s.logger, s.db, s.redisPool)
+	sRepo := sessionRepository.NewSessionRepository(s.redisPool, s.logger, s.config)
 
 	// Init useCases
 	authUC := authUseCase.NewAuthUseCase(s.logger, s.config, aRepo)

@@ -3,18 +3,14 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
-	"errors"
 	"github.com/AleksK1NG/api-mc/internal/comments"
 	"github.com/AleksK1NG/api-mc/internal/dto"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/utils"
-	redigo "github.com/AleksK1NG/api-mc/pkg/db/redis"
+	"github.com/AleksK1NG/api-mc/pkg/db/redis"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
-	"github.com/gomodule/redigo/redis"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	"go.uber.org/zap"
 )
 
 const (
@@ -26,12 +22,12 @@ const (
 type repository struct {
 	logger     *logger.Logger
 	db         *sqlx.DB
-	redisPool  *redis.Pool
+	redisPool  redis.RedisPool
 	basePrefix string
 }
 
 // Comments Repository constructor
-func NewCommentsRepository(logger *logger.Logger, db *sqlx.DB, redisPool *redis.Pool) comments.Repository {
+func NewCommentsRepository(logger *logger.Logger, db *sqlx.DB, redisPool redis.RedisPool) comments.Repository {
 	return &repository{logger: logger, db: db, redisPool: redisPool, basePrefix: basePrefix}
 }
 
@@ -60,8 +56,6 @@ func (r *repository) Update(ctx context.Context, comment *dto.UpdateCommDTO) (*m
 		return nil, err
 	}
 
-	r.deleteRedisKey(ctx, comment.ID.String())
-
 	return comm, nil
 }
 
@@ -81,8 +75,6 @@ func (r *repository) Delete(ctx context.Context, commentID uuid.UUID) error {
 		return sql.ErrNoRows
 	}
 
-	r.deleteRedisKey(ctx, commentID.String())
-
 	return nil
 }
 
@@ -90,27 +82,8 @@ func (r *repository) Delete(ctx context.Context, commentID uuid.UUID) error {
 func (r *repository) GetByID(ctx context.Context, commentID uuid.UUID) (*models.CommentBase, error) {
 	comment := &models.CommentBase{}
 
-	poolGet, err := redigo.PoolGet(r.createKey(commentID.String()))
-	if err == nil {
-		if err := json.Unmarshal(poolGet, comment); err != nil {
-			r.logger.Info("GET REDIS", zap.String("ERROR", comment.CommentID.String()))
-		} else {
-			r.logger.Info("r.redisPool.ActiveCount()", zap.Int("r.redisPool.ActiveCount()", r.redisPool.ActiveCount()))
-			//r.logger.Info("r.redisPool.IdleCount()", zap.Int("r.redisPool.IdleCount()", r.redisPool.IdleCount()))
-			return comment, nil
-		}
-		r.logger.Info("GET REDIS", zap.String("ERROR", comment.CommentID.String()))
-	}
-
 	if err := r.db.GetContext(ctx, comment, getCommentByID, commentID); err != nil {
 		return nil, err
-	}
-
-	bytes, err := json.Marshal(comment)
-	if err == nil {
-		if err := redigo.PoolSetex(r.createKey(commentID.String()), 60, bytes); err != nil {
-			r.logger.Info("SET REDIS", zap.String("ERROR", err.Error()))
-		}
 	}
 
 	return comment, nil
@@ -156,27 +129,4 @@ func (r *repository) GetAllByNewsID(ctx context.Context, query *dto.CommentsByNe
 
 func (r *repository) createKey(commentID string) string {
 	return r.basePrefix + commentID
-}
-
-func (r *repository) deleteRedisKey(ctx context.Context, key string) {
-	if err := utils.RedisDeleteKey(ctx, r.redisPool, r.createKey(key)); err != nil {
-		r.logger.Error("RedisDeleteKey", zap.String("ERROR", err.Error()))
-	}
-}
-
-func (r *repository) setRedisMarshalJSON(ctx context.Context, key string, value interface{}) {
-	if err := utils.RedisMarshalJSON(ctx, r.redisPool, r.createKey(key), durationSeconds, value); err != nil {
-		r.logger.Error("RedisMarshalJSON", zap.String("ERROR", err.Error()))
-	}
-}
-
-func (r *repository) getRedisUnmarshalJSON(ctx context.Context, key string, value interface{}) error {
-	if err := utils.RedisUnmarshalJSON(ctx, r.redisPool, r.createKey(key), value); err != nil {
-		if errors.Is(err, redis.ErrNil) {
-			return err
-		}
-		r.logger.Error("RedisUnmarshalJSON", zap.String("ERROR", err.Error()))
-		return err
-	}
-	return nil
 }

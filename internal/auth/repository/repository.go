@@ -3,16 +3,14 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"github.com/AleksK1NG/api-mc/internal/auth"
 	"github.com/AleksK1NG/api-mc/internal/dto"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/utils"
+	"github.com/AleksK1NG/api-mc/pkg/db/redis"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
-	"github.com/gomodule/redigo/redis"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	"go.uber.org/zap"
 )
 
 const (
@@ -24,12 +22,12 @@ const (
 type repository struct {
 	logger     *logger.Logger
 	db         *sqlx.DB
-	redisPool  *redis.Pool
+	redisPool  redis.RedisPool
 	basePrefix string
 }
 
 // Auth Repository constructor
-func NewAuthRepository(logger *logger.Logger, db *sqlx.DB, redisPool *redis.Pool) auth.Repository {
+func NewAuthRepository(logger *logger.Logger, db *sqlx.DB, redisPool redis.RedisPool) auth.Repository {
 	return &repository{logger: logger, db: db, redisPool: redisPool, basePrefix: basePrefix}
 }
 
@@ -59,10 +57,6 @@ func (r *repository) Update(ctx context.Context, user *models.UserUpdate) (*mode
 		return nil, err
 	}
 
-	if err := utils.RedisDeleteKey(ctx, r.redisPool, r.generateUserKey(u.UserID.String())); err != nil {
-		r.logger.Error("RedisDeleteKey", zap.String("ERROR", err.Error()))
-	}
-
 	return &u, nil
 }
 
@@ -81,10 +75,6 @@ func (r *repository) Delete(ctx context.Context, userID uuid.UUID) error {
 		return sql.ErrNoRows
 	}
 
-	if err := utils.RedisDeleteKey(ctx, r.redisPool, r.generateUserKey(userID.String())); err != nil {
-		r.logger.Error("RedisDeleteKey", zap.String("ERROR", err.Error()))
-	}
-
 	return nil
 }
 
@@ -92,20 +82,9 @@ func (r *repository) Delete(ctx context.Context, userID uuid.UUID) error {
 func (r *repository) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, error) {
 
 	user := &models.User{}
-	if err := utils.RedisUnmarshalJSON(ctx, r.redisPool, r.generateUserKey(userID.String()), user); err != nil {
-		if errors.Is(err, redis.ErrNil) {
-			r.logger.Error("RedisUnmarshalJSON", zap.String("ERROR", err.Error()))
-		}
-	} else {
-		return user, nil
-	}
 
 	if err := r.db.QueryRowxContext(ctx, getUserQuery, userID).StructScan(user); err != nil {
 		return nil, err
-	}
-
-	if err := utils.RedisMarshalJSON(ctx, r.redisPool, r.generateUserKey(userID.String()), cacheDuration, user); err != nil {
-		r.logger.Error("RedisMarshalJSON", zap.String("ERROR", err.Error()))
 	}
 
 	return user, nil
@@ -189,18 +168,9 @@ func (r *repository) GetUsers(ctx context.Context, pq *utils.PaginationQuery) (*
 func (r *repository) FindByEmail(ctx context.Context, loginDTO *dto.LoginDTO) (*models.User, error) {
 
 	user := &models.User{}
-	if err := utils.RedisUnmarshalJSON(ctx, r.redisPool, r.generateUserKey(loginDTO.Email), user); err != nil {
-		r.logger.Error("RedisUnmarshalJSON", zap.String("ERROR", err.Error()))
-	} else {
-		return user, nil
-	}
 
 	if err := r.db.QueryRowxContext(ctx, findUserByEmail, loginDTO.Email).StructScan(user); err != nil {
 		return nil, err
-	}
-
-	if err := utils.RedisMarshalJSON(ctx, r.redisPool, r.generateUserKey(loginDTO.Email), cacheDuration, user); err != nil {
-		r.logger.Error("RedisMarshalJSON", zap.String("ERROR", err.Error()))
 	}
 
 	return user, nil
