@@ -42,7 +42,6 @@ func main() {
 	defer psqlDB.Close()
 
 	redisClient := redis.NewRedisClient(cfg)
-
 	l.Info("Redis connected", zap.String("Status", fmt.Sprintf("%#v", redisClient.GetPool().Stats())))
 
 	s := server.NewServer(cfg, l, psqlDB, redisClient)

@@ -40,6 +40,7 @@ func (s *server) MapHandlers(e *echo.Echo) error {
 
 	//e.Pre(middleware.HTTPSRedirect())
 	e.Use(middleware.RequestID())
+	e.Use(metricsMiddleware.RequestLoggerMiddleware(s.logger))
 	e.Use(metricsMiddleware.MetricsMiddleware(metrics))
 	e.Use(middleware.RecoverWithConfig(middleware.RecoverConfig{
 		StackSize:         1 << 10, // 1 KB
