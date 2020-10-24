@@ -9,7 +9,6 @@ import (
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
-	"go.uber.org/zap"
 	"net/http"
 )
 
@@ -31,8 +30,6 @@ func (h *handlers) Create() echo.HandlerFunc {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
 
-		h.log.Info("Create", zap.String("ReqID", utils.GetRequestID(c)))
-
 		comment := &models.Comment{}
 		if err := c.Bind(comment); err != nil {
 			return utils.ErrResponseWithLog(c, h.log, err)
@@ -43,12 +40,6 @@ func (h *handlers) Create() echo.HandlerFunc {
 			return utils.ErrResponseWithLog(c, h.log, err)
 		}
 
-		h.log.Info(
-			"createdComment",
-			zap.String("reqID", utils.GetRequestID(c)),
-			zap.String("ID", createdComment.CommentID.String()),
-		)
-
 		return c.JSON(http.StatusCreated, createdComment)
 	}
 }
@@ -58,8 +49,6 @@ func (h *handlers) Update() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
-
-		h.log.Info("Update", zap.String("ReqID", utils.GetRequestID(c)))
 
 		commID, err := uuid.Parse(c.Param("comment_id"))
 		if err != nil {
@@ -77,12 +66,6 @@ func (h *handlers) Update() echo.HandlerFunc {
 			return utils.ErrResponseWithLog(c, h.log, err)
 		}
 
-		h.log.Info(
-			"updatedComment",
-			zap.String("reqID", utils.GetRequestID(c)),
-			zap.String("ID", updatedComment.CommentID.String()),
-		)
-
 		return c.JSON(http.StatusOK, updatedComment)
 	}
 }
@@ -92,8 +75,6 @@ func (h *handlers) Delete() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
-
-		h.log.Info("Delete", zap.String("ReqID", utils.GetRequestID(c)))
 
 		commID, err := uuid.Parse(c.Param("comment_id"))
 		if err != nil {
@@ -113,8 +94,6 @@ func (h *handlers) GetByID() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
-
-		h.log.Info("GetByID", zap.String("ReqID", utils.GetRequestID(c)))
 
 		commID, err := uuid.Parse(c.Param("comment_id"))
 		if err != nil {
@@ -136,8 +115,6 @@ func (h *handlers) GetAllByNewsID() echo.HandlerFunc {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
 
-		h.log.Info("GetAllByNewsID", zap.String("ReqID", utils.GetRequestID(c)))
-
 		newsID, err := uuid.Parse(c.Param("news_id"))
 		if err != nil {
 			return utils.ErrResponseWithLog(c, h.log, err)
@@ -156,12 +133,6 @@ func (h *handlers) GetAllByNewsID() echo.HandlerFunc {
 		if err != nil {
 			return utils.ErrResponseWithLog(c, h.log, err)
 		}
-
-		h.log.Info(
-			"GetAllByNewsID",
-			zap.String("reqID", utils.GetRequestID(c)),
-			zap.Int("Length", len(commentsList.Comments)),
-		)
 
 		return c.JSON(http.StatusOK, commentsList)
 	}

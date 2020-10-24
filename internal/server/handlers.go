@@ -7,7 +7,7 @@ import (
 	commentsHttp "github.com/AleksK1NG/api-mc/internal/comments/delivery/http"
 	commentsRepository "github.com/AleksK1NG/api-mc/internal/comments/repository"
 	commentsUseCase "github.com/AleksK1NG/api-mc/internal/comments/usecase"
-	metricsMiddleware "github.com/AleksK1NG/api-mc/internal/middleware"
+	apiMiddlewares "github.com/AleksK1NG/api-mc/internal/middleware"
 	newsHttp "github.com/AleksK1NG/api-mc/internal/news/delivery/http"
 	newsRepository "github.com/AleksK1NG/api-mc/internal/news/repository"
 	newsUseCase "github.com/AleksK1NG/api-mc/internal/news/usecase"
@@ -38,29 +38,31 @@ func (s *server) MapHandlers(e *echo.Echo) error {
 		zap.String("ServiceName", s.config.Metrics.ServiceName),
 	)
 
-	//e.Pre(middleware.HTTPSRedirect())
-	e.Use(middleware.RequestID())
-	e.Use(metricsMiddleware.RequestLoggerMiddleware(s.logger))
-	e.Use(metricsMiddleware.MetricsMiddleware(metrics))
+	//if s.config.Server.SSL {
+	//	e.Pre(middleware.HTTPSRedirect())
+	//}
+	e.Use(apiMiddlewares.RequestLoggerMiddleware(s.logger))
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"https://labstack.com", "https://labstack.net"},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+	}))
 	e.Use(middleware.RecoverWithConfig(middleware.RecoverConfig{
 		StackSize:         1 << 10, // 1 KB
 		DisablePrintStack: true,
 		DisableStackAll:   true,
 	}))
-	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"https://labstack.com", "https://labstack.net"},
-		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
-	}))
+	e.Use(middleware.RequestID())
+	e.Use(apiMiddlewares.MetricsMiddleware(metrics))
+
 	e.Use(middleware.GzipWithConfig(middleware.GzipConfig{
 		Level: 5,
 	}))
-	//e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-	//	Format: loggerFormat,
-	//}))
 	// e.Use(middleware.CSRF())
 	e.Use(middleware.Secure())
 	e.Use(middleware.BodyLimit("2M"))
-	//e.Use(metricsMiddleware.DebugMiddleware(s.config.Server.Debug, s.logger))
+	if s.config.Server.Debug {
+		e.Use(apiMiddlewares.DebugMiddleware(s.config.Server.Debug, s.logger))
+	}
 
 	v1 := e.Group("/api/v1")
 

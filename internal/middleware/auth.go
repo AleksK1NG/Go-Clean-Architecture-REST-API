@@ -62,7 +62,7 @@ func AuthSessionMiddleware(sessUC session.UCSession, authUC auth.UseCase, cfg *c
 			c.SetRequest(c.Request().WithContext(ctx))
 
 			log.Info(
-				"AuthSessionMiddleware",
+				"SessionMiddleware",
 				zap.String("reqID", utils.GetRequestID(c)),
 				zap.String("IP", utils.GetIPAddress(c)),
 				zap.String("userID", user.UserID.String()),

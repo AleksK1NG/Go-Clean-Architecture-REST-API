@@ -9,6 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"go.uber.org/zap"
 	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"syscall"

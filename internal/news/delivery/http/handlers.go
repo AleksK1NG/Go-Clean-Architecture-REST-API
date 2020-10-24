@@ -9,7 +9,6 @@ import (
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
-	"go.uber.org/zap"
 	"net/http"
 )
 
@@ -31,8 +30,6 @@ func (h handlers) Create() echo.HandlerFunc {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
 
-		h.log.Info("Create news", zap.String("ReqID", utils.GetRequestID(c)))
-
 		n := &models.News{}
 		if err := c.Bind(n); err != nil {
 			return utils.ErrResponseWithLog(c, h.log, err)
@@ -43,12 +40,6 @@ func (h handlers) Create() echo.HandlerFunc {
 			return utils.ErrResponseWithLog(c, h.log, err)
 		}
 
-		h.log.Info(
-			"Created news",
-			zap.String("reqID", utils.GetRequestID(c)),
-			zap.String("ID", createdNews.NewsID.String()),
-		)
-
 		return c.JSON(http.StatusOK, createdNews)
 	}
 }
@@ -58,8 +49,6 @@ func (h handlers) Update() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
-
-		h.log.Info("Update", zap.String("ReqID", utils.GetRequestID(c)))
 
 		newsUUID, err := uuid.Parse(c.Param("news_id"))
 		if err != nil {
@@ -77,12 +66,6 @@ func (h handlers) Update() echo.HandlerFunc {
 			return utils.ErrResponseWithLog(c, h.log, err)
 		}
 
-		h.log.Info(
-			"Created news",
-			zap.String("reqID", utils.GetRequestID(c)),
-			zap.String("ID", updatedNews.NewsID.String()),
-		)
-
 		return c.JSON(http.StatusOK, updatedNews)
 	}
 }
@@ -92,8 +75,6 @@ func (h handlers) GetByID() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
-
-		h.log.Info("GetByID", zap.String("ReqID", utils.GetRequestID(c)))
 
 		newsUUID, err := uuid.Parse(c.Param("news_id"))
 		if err != nil {
@@ -105,12 +86,6 @@ func (h handlers) GetByID() echo.HandlerFunc {
 			return utils.ErrResponseWithLog(c, h.log, err)
 		}
 
-		h.log.Info(
-			"GetByID",
-			zap.String("reqID", utils.GetRequestID(c)),
-			zap.String("ID", newsByID.UserID.String()),
-		)
-
 		return c.JSON(http.StatusOK, newsByID)
 	}
 }
@@ -121,8 +96,6 @@ func (h handlers) Delete() echo.HandlerFunc {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
 
-		h.log.Info("GetByID", zap.String("ReqID", utils.GetRequestID(c)))
-
 		newsUUID, err := uuid.Parse(c.Param("news_id"))
 		if err != nil {
 			return utils.ErrResponseWithLog(c, h.log, err)
@@ -131,12 +104,6 @@ func (h handlers) Delete() echo.HandlerFunc {
 		if err := h.newsUC.Delete(ctx, newsUUID); err != nil {
 			return utils.ErrResponseWithLog(c, h.log, err)
 		}
-
-		h.log.Info(
-			"GetByID",
-			zap.String("reqID", utils.GetRequestID(c)),
-			zap.String("ID", newsUUID.String()),
-		)
 
 		return c.NoContent(http.StatusOK)
 	}
@@ -148,8 +115,6 @@ func (h handlers) GetNews() echo.HandlerFunc {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
 
-		h.log.Info("GetByID", zap.String("ReqID", utils.GetRequestID(c)))
-
 		pq, err := utils.GetPaginationFromCtx(c)
 		if err != nil {
 			return utils.ErrResponseWithLog(c, h.log, err)
@@ -160,12 +125,6 @@ func (h handlers) GetNews() echo.HandlerFunc {
 			return utils.ErrResponseWithLog(c, h.log, err)
 		}
 
-		h.log.Info(
-			"GetByID",
-			zap.String("reqID", utils.GetRequestID(c)),
-			zap.Int("Length", len(newsList.News)),
-		)
-
 		return c.JSON(http.StatusOK, newsList)
 	}
 }
@@ -175,8 +134,6 @@ func (h handlers) SearchByTitle() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
-
-		h.log.Info("GetByID", zap.String("ReqID", utils.GetRequestID(c)))
 
 		pq, err := utils.GetPaginationFromCtx(c)
 		if err != nil {
@@ -191,12 +148,6 @@ func (h handlers) SearchByTitle() echo.HandlerFunc {
 		if err != nil {
 			return utils.ErrResponseWithLog(c, h.log, err)
 		}
-
-		h.log.Info(
-			"GetByID",
-			zap.String("reqID", utils.GetRequestID(c)),
-			zap.Int("Length", len(newsList.News)),
-		)
 
 		return c.JSON(http.StatusOK, newsList)
 	}
