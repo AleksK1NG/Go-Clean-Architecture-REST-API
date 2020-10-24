@@ -58,7 +58,6 @@ func AuthSessionMiddleware(sessUC session.UCSession, authUC auth.UseCase, cfg *c
 
 			c.Set("user", user)
 			ctx := context.WithValue(c.Request().Context(), utils.UserCtxKey{}, user)
-			c.Request().WithContext(ctx)
 			c.SetRequest(c.Request().WithContext(ctx))
 
 			log.Info(
