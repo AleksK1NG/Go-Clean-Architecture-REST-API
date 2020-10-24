@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"github.com/AleksK1NG/api-mc/internal/utils"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/labstack/echo/v4"
 	"go.uber.org/zap"
@@ -17,6 +18,7 @@ func RequestLoggerMiddleware(logger *logger.Logger) echo.MiddlewareFunc {
 				zap.String("Method", ctx.Request().Method),
 				zap.String("URI", ctx.Request().RequestURI),
 				zap.Int("Status", ctx.Response().Status),
+				zap.String("RequestID", utils.GetRequestID(ctx)),
 				zap.String("Time", time.Since(start).String()),
 			)
 			return res
