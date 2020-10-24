@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"github.com/AleksK1NG/api-mc/internal/dto"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/news"
@@ -12,7 +11,6 @@ import (
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	"go.uber.org/zap"
 )
 
 const (
@@ -74,17 +72,8 @@ func (r repository) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*dto.New
 
 	n := &dto.NewsWithAuthor{}
 
-	if err := r.redisPool.GetJSONContext(ctx, r.getKeyWithPrefix(newsID.String()), n); err == nil {
-		r.logger.Info("GetJSONContext", zap.String("Status", fmt.Sprintf("%#v", r.redisPool.GetPool().Stats())))
-		return n, nil
-	}
-
 	if err := r.db.GetContext(ctx, n, getNewsByID, newsID); err != nil {
 		return nil, err
-	}
-
-	if err := r.redisPool.SetexJSONContext(ctx, r.getKeyWithPrefix(newsID.String()), 60, n); err != nil {
-		r.logger.Error("SetexJSONContext", zap.String("ERR", err.Error()))
 	}
 
 	return n, nil

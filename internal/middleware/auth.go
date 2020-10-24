@@ -12,7 +12,7 @@ import (
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	"go.uber.org/zap"
 	"net/http"
 	"strings"
