@@ -68,10 +68,10 @@ func newPool(server string) *redis.Pool {
 
 	return &redis.Pool{
 
-		MaxIdle:     3,
-		IdleTimeout: 240 * time.Second,
+		MaxIdle:     100,
+		IdleTimeout: 10 * time.Second,
 		MaxActive:   12000,
-		//Wait:        true,
+		Wait:        true,
 
 		Dial: func() (redis.Conn, error) {
 			c, err := redis.Dial("tcp", server)
@@ -81,10 +81,10 @@ func newPool(server string) *redis.Pool {
 			return c, err
 		},
 
-		TestOnBorrow: func(c redis.Conn, t time.Time) error {
-			_, err := c.Do("PING")
-			return err
-		},
+		//TestOnBorrow: func(c redis.Conn, t time.Time) error {
+		//	_, err := c.Do("PING")
+		//	return err
+		//},
 	}
 }
 
