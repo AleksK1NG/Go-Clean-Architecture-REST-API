@@ -7,7 +7,7 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/middleware"
 	"github.com/AleksK1NG/api-mc/internal/session"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 // Map news routes

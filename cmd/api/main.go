@@ -43,7 +43,6 @@ func main() {
 
 	redisClient := redis.NewRedisClient(cfg)
 
-	//redisPool := redis.NewRedisConnPool(cfg)
 	l.Info("Redis connected", zap.String("Status", fmt.Sprintf("%#v", redisClient.GetPool().Stats())))
 
 	s := server.NewServer(cfg, l, psqlDB, redisClient)

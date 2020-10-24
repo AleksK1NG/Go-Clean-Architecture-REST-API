@@ -1,6 +1,6 @@
 package news
 
-import "github.com/labstack/echo"
+import "github.com/labstack/echo/v4"
 
 // News Http Delivery
 type Handlers interface {

@@ -1,6 +1,6 @@
 package auth
 
-import "github.com/labstack/echo"
+import "github.com/labstack/echo/v4"
 
 // Auth Delivery interface
 type Handlers interface {

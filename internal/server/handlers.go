@@ -15,10 +15,11 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/session/usecase"
 	"github.com/AleksK1NG/api-mc/internal/utils"
 	"github.com/AleksK1NG/api-mc/pkg/metric"
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"go.uber.org/zap"
 	"net/http"
+	_ "net/http/pprof"
 )
 
 const (
@@ -52,9 +53,9 @@ func (s *server) MapHandlers(e *echo.Echo) error {
 	e.Use(middleware.GzipWithConfig(middleware.GzipConfig{
 		Level: 5,
 	}))
-	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format: loggerFormat,
-	}))
+	//e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+	//	Format: loggerFormat,
+	//}))
 	// e.Use(middleware.CSRF())
 	e.Use(middleware.Secure())
 	e.Use(middleware.BodyLimit("2M"))
