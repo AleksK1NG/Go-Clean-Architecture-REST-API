@@ -9,11 +9,6 @@ import (
 
 var sugarLogger *zap.SugaredLogger
 
-//type LoggerConfig struct {
-//	Logfile  string
-//	Loglevel zapcore.Level
-//}
-
 // для соответствия уровня логгирования в конфиге и внутренним уровнем логера
 var loggerLevelMap = map[string]zapcore.Level{
 	"debug":  zapcore.DebugLevel,
@@ -64,6 +59,12 @@ func InitLogger(cfg *config.Config) {
 	}
 
 	var encoder zapcore.Encoder
+	encoderCfg.LevelKey = "LEVEL"
+	encoderCfg.CallerKey = "CALLER"
+	encoderCfg.TimeKey = "TIME"
+	encoderCfg.NameKey = "NAME"
+	encoderCfg.MessageKey = "MESSAGE"
+
 	if cfg.Logger.Encoding == "console" {
 		encoder = zapcore.NewConsoleEncoder(encoderCfg)
 	} else {
@@ -73,36 +74,7 @@ func InitLogger(cfg *config.Config) {
 	encoderCfg.EncodeTime = zapcore.ISO8601TimeEncoder
 	core := zapcore.NewCore(encoder, logWriter, zap.NewAtomicLevelAt(logLevel))
 	logger := zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
-	sugarLogger = logger.Sugar()
-}
 
-func InitLoggerByConfig(cfg *config.Config) {
-	if sugarLogger != nil {
-		return
-	}
-
-	//logFile := config.Logfile
-	logLevel := getLoggerLevel(cfg)
-
-	var logWriter zapcore.WriteSyncer
-
-	//if logFile != "stdout" {
-	//	logWriter = zapcore.AddSync(&lumberjack.Logger{
-	//		Filename: logFile,
-	//		//TODO: подумать как достать из конфига
-	//		MaxSize:   1 << 30, //1G
-	//		LocalTime: true,
-	//		Compress:  true,
-	//	})
-	//} else {
-	logWriter = zapcore.AddSync(os.Stdout)
-	//}
-
-	//encoder := zap.NewProductionEncoderConfig()
-	encoder := zap.NewDevelopmentEncoderConfig()
-	encoder.EncodeTime = zapcore.ISO8601TimeEncoder
-	core := zapcore.NewCore(zapcore.NewConsoleEncoder(encoder), logWriter, zap.NewAtomicLevelAt(logLevel))
-	logger := zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
 	sugarLogger = logger.Sugar()
 }
 
