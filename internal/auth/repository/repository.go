@@ -8,6 +8,7 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/utils"
 	"github.com/AleksK1NG/api-mc/pkg/db/redis"
+	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
@@ -19,14 +20,14 @@ const (
 
 // Auth Repository
 type repository struct {
-	db         *sqlx.DB
-	redisPool  redis.RedisPool
-	basePrefix string
+	db          *sqlx.DB
+	redisClient redis.RedisPool
+	basePrefix  string
 }
 
 // Auth Repository constructor
-func NewAuthRepository(db *sqlx.DB, redisPool redis.RedisPool) auth.Repository {
-	return &repository{db: db, redisPool: redisPool, basePrefix: basePrefix}
+func NewAuthRepository(db *sqlx.DB, redisClient redis.RedisPool) auth.Repository {
+	return &repository{db: db, redisClient: redisClient, basePrefix: basePrefix}
 }
 
 // Create new user
@@ -47,15 +48,18 @@ func (r *repository) Register(ctx context.Context, user *models.User) (*models.U
 // Update existing user
 func (r *repository) Update(ctx context.Context, user *models.UserUpdate) (*models.User, error) {
 
-	var u models.User
-	if err := r.db.GetContext(ctx, &u, updateUserQuery, &user.FirstName, &user.LastName, &user.Email,
+	u := &models.User{}
+	if err := r.db.GetContext(ctx, u, updateUserQuery, &user.FirstName, &user.LastName, &user.Email,
 		&user.Role, &user.About, &user.Avatar, &user.PhoneNumber, &user.Address, &user.City, &user.Gender,
 		&user.Postcode, &user.Birthday, &user.ID,
 	); err != nil {
 		return nil, err
 	}
 
-	return &u, nil
+	if err := r.redisClient.DeleteContext(ctx, r.generateUserKey(u.UserID.String())); err != nil {
+		logger.Errorf("DeleteContext: %s", err.Error())
+	}
+	return u, nil
 }
 
 // Delete existing user
@@ -73,6 +77,10 @@ func (r *repository) Delete(ctx context.Context, userID uuid.UUID) error {
 		return sql.ErrNoRows
 	}
 
+	if err := r.redisClient.DeleteContext(ctx, r.generateUserKey(userID.String())); err != nil {
+		logger.Errorf("DeleteContext: %s", err.Error())
+	}
+
 	return nil
 }
 
@@ -81,8 +89,16 @@ func (r *repository) GetByID(ctx context.Context, userID uuid.UUID) (*models.Use
 
 	user := &models.User{}
 
+	if err := r.redisClient.GetJSONContext(ctx, r.generateUserKey(userID.String()), user); err != nil {
+		logger.Errorf("GetJSONContext: %s", err.Error())
+	}
+
 	if err := r.db.QueryRowxContext(ctx, getUserQuery, userID).StructScan(user); err != nil {
 		return nil, err
+	}
+
+	if err := r.redisClient.SetexJSONContext(ctx, r.generateUserKey(userID.String()), cacheDuration, user); err != nil {
+		logger.Errorf("GetJSONContext: %s", err.Error())
 	}
 
 	return user, nil
@@ -167,8 +183,16 @@ func (r *repository) FindByEmail(ctx context.Context, loginDTO *dto.LoginDTO) (*
 
 	user := &models.User{}
 
+	if err := r.redisClient.GetJSONContext(ctx, r.generateUserKey(loginDTO.Email), user); err != nil {
+		logger.Errorf("GetJSONContext: %s", err.Error())
+	}
+
 	if err := r.db.QueryRowxContext(ctx, findUserByEmail, loginDTO.Email).StructScan(user); err != nil {
 		return nil, err
+	}
+
+	if err := r.redisClient.SetexJSONContext(ctx, r.generateUserKey(loginDTO.Email), cacheDuration, user); err != nil {
+		logger.Errorf("GetJSONContext: %s", err.Error())
 	}
 
 	return user, nil

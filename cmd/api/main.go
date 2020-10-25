@@ -18,12 +18,12 @@ func main() {
 
 	cfgFile, err := config.LoadConfig(configPath)
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Fatalf("LoadConfig: %s", err.Error())
 	}
 
 	cfg, err := config.ParseConfig(cfgFile)
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Fatalf("ParseConfig: %s", err.Error())
 	}
 
 	logger.InitLogger(cfg)
