@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/AleksK1NG/api-mc/internal/dto"
 	"github.com/AleksK1NG/api-mc/internal/models"
-	"github.com/AleksK1NG/api-mc/internal/utils"
+	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
 )
 
