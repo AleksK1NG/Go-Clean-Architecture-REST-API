@@ -14,28 +14,24 @@ import (
 	sessionRepository "github.com/AleksK1NG/api-mc/internal/session/repository"
 	"github.com/AleksK1NG/api-mc/internal/session/usecase"
 	"github.com/AleksK1NG/api-mc/internal/utils"
+	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/AleksK1NG/api-mc/pkg/metric"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"go.uber.org/zap"
 	"net/http"
 	_ "net/http/pprof"
-)
-
-const (
-	loggerFormat = "${time_rfc3339}: ${method} ${uri}, STATUS: ${status} latency: ${latency_human}, bytes_in: ${bytes_in} \n"
 )
 
 // Map Server Handlers
 func (s *server) MapHandlers(e *echo.Echo) error {
 	metrics, err := metric.CreateMetrics(s.config.Metrics.Url, s.config.Metrics.ServiceName)
 	if err != nil {
-		s.logger.Error("CreateMetrics", zap.String("ERROR", err.Error()))
+		logger.Errorf("CreateMetrics Error: %s", err.Error())
 	}
-	s.logger.Info(
-		"Metrics available",
-		zap.String("URL", s.config.Metrics.Url),
-		zap.String("ServiceName", s.config.Metrics.ServiceName),
+	logger.Info(
+		"Metrics available URL: %s, ServiceName: %s",
+		s.config.Metrics.Url,
+		s.config.Metrics.ServiceName,
 	)
 
 	if s.config.Server.SSL {
@@ -61,7 +57,7 @@ func (s *server) MapHandlers(e *echo.Echo) error {
 	e.Use(middleware.Secure())
 	e.Use(middleware.BodyLimit("2M"))
 	if s.config.Server.Debug {
-		e.Use(apiMiddlewares.DebugMiddleware(s.config.Server.Debug, s.logger))
+		e.Use(apiMiddlewares.DebugMiddleware(s.config.Server.Debug))
 	}
 
 	v1 := e.Group("/api/v1")
@@ -72,29 +68,29 @@ func (s *server) MapHandlers(e *echo.Echo) error {
 	commGroup := v1.Group("/comments")
 
 	// Init repositories
-	aRepo := authRepository.NewAuthRepository(s.logger, s.db, s.redisPool)
-	nRepo := newsRepository.NewNewsRepository(s.logger, s.db, s.redisPool)
-	cRepo := commentsRepository.NewCommentsRepository(s.logger, s.db, s.redisPool)
-	sRepo := sessionRepository.NewSessionRepository(s.redisPool, s.logger, s.config)
+	aRepo := authRepository.NewAuthRepository(s.db, s.redisPool)
+	nRepo := newsRepository.NewNewsRepository(s.db, s.redisPool)
+	cRepo := commentsRepository.NewCommentsRepository(s.db, s.redisPool)
+	sRepo := sessionRepository.NewSessionRepository(s.redisPool, s.config)
 
 	// Init useCases
-	authUC := authUseCase.NewAuthUseCase(s.logger, s.config, aRepo)
-	newsUC := newsUseCase.NewNewsUseCase(s.logger, s.config, nRepo)
-	commUC := commentsUseCase.NewCommentsUseCase(s.logger, s.config, cRepo)
-	sessUC := usecase.NewSessionUseCase(sRepo, s.logger, s.config)
+	authUC := authUseCase.NewAuthUseCase(s.config, aRepo)
+	newsUC := newsUseCase.NewNewsUseCase(s.config, nRepo)
+	commUC := commentsUseCase.NewCommentsUseCase(s.config, cRepo)
+	sessUC := usecase.NewSessionUseCase(sRepo, s.config)
 
 	// Init handlers
-	authHandlers := authHttp.NewAuthHandlers(s.config, authUC, sessUC, s.logger)
-	newsHandlers := newsHttp.NewNewsHandlers(s.config, newsUC, s.logger)
-	commHandlers := commentsHttp.NewCommentsHandlers(s.config, commUC, s.logger)
+	authHandlers := authHttp.NewAuthHandlers(s.config, authUC, sessUC)
+	newsHandlers := newsHttp.NewNewsHandlers(s.config, newsUC)
+	commHandlers := commentsHttp.NewCommentsHandlers(s.config, commUC)
 
 	{
-		authHttp.MapAuthRoutes(authGroup, authHandlers, authUC, sessUC, s.config, s.logger)
-		newsHttp.MapNewsRoutes(newsGroup, newsHandlers, authUC, sessUC, s.config, s.logger)
-		commentsHttp.MapCommentsRoutes(commGroup, commHandlers, authUC, sessUC, s.config, s.logger)
+		authHttp.MapAuthRoutes(authGroup, authHandlers, authUC, sessUC, s.config)
+		newsHttp.MapNewsRoutes(newsGroup, newsHandlers, authUC, sessUC, s.config)
+		commentsHttp.MapCommentsRoutes(commGroup, commHandlers, authUC, sessUC, s.config)
 
 		health.GET("", func(c echo.Context) error {
-			s.logger.Info("Health check", zap.String("RequestID", utils.GetRequestID(c)))
+			logger.Infof("Health check RequestID: %s", utils.GetRequestID(c))
 			return c.JSON(http.StatusOK, map[string]string{"status": "OK"})
 		})
 	}

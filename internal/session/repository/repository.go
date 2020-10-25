@@ -6,7 +6,6 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/session"
 	"github.com/AleksK1NG/api-mc/pkg/db/redis"
-	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/google/uuid"
 )
 
@@ -17,14 +16,13 @@ const (
 // Session repository
 type sessionRepository struct {
 	redisPool  redis.RedisPool
-	logger     *logger.Logger
 	basePrefix string
 	cfg        *config.Config
 }
 
 // Session repository constructor
-func NewSessionRepository(redisPool redis.RedisPool, log *logger.Logger, cfg *config.Config) session.SessRepository {
-	return &sessionRepository{redisPool: redisPool, logger: log, basePrefix: basePrefix, cfg: cfg}
+func NewSessionRepository(redisPool redis.RedisPool, cfg *config.Config) session.SessRepository {
+	return &sessionRepository{redisPool: redisPool, basePrefix: basePrefix, cfg: cfg}
 }
 
 func (s *sessionRepository) createKey(sessionId string) string {

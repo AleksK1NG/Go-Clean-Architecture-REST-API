@@ -7,20 +7,18 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/news"
 	"github.com/AleksK1NG/api-mc/internal/utils"
-	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/google/uuid"
 )
 
 // News useCase
 type useCase struct {
-	logger   *logger.Logger
 	cfg      *config.Config
 	newsRepo news.Repository
 }
 
 // News use case constructor
-func NewNewsUseCase(logger *logger.Logger, cfg *config.Config, newsRepo news.Repository) news.UseCase {
-	return &useCase{logger: logger, cfg: cfg, newsRepo: newsRepo}
+func NewNewsUseCase(cfg *config.Config, newsRepo news.Repository) news.UseCase {
+	return &useCase{cfg: cfg, newsRepo: newsRepo}
 }
 
 // Create news
@@ -51,7 +49,7 @@ func (u *useCase) Update(ctx context.Context, news *models.News) (*models.News, 
 		return nil, err
 	}
 
-	if err = utils.ValidateIsOwner(ctx, newsByID.UserID.String(), u.logger); err != nil {
+	if err = utils.ValidateIsOwner(ctx, newsByID.UserID.String()); err != nil {
 		return nil, err
 	}
 
@@ -80,7 +78,7 @@ func (u *useCase) Delete(ctx context.Context, newsID uuid.UUID) error {
 		return err
 	}
 
-	if err := utils.ValidateIsOwner(ctx, newsByID.UserID.String(), u.logger); err != nil {
+	if err := utils.ValidateIsOwner(ctx, newsByID.UserID.String()); err != nil {
 		return err
 	}
 

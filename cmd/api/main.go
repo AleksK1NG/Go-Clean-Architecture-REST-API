@@ -31,22 +31,17 @@ func main() {
 	logger.InitLogger(cfg)
 	logger.Infof("LogLevel: %s, Mode: %s, SSL: %v", cfg.Logger.Level, cfg.Server.Mode, cfg.Server.SSL)
 
-	l, err := logger.NewLogger(cfg)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	psqlDB, err := postgres.NewPsqlDB(cfg)
 	if err != nil {
-		l.Fatal("Init postgres", zap.String("error", err.Error()))
+		logger.Fatal("Init postgres", zap.String("error", err.Error()))
 	} else {
-		l.Info("Postgres connected", zap.String("Status", fmt.Sprintf("%#v", psqlDB.Stats())))
+		logger.Info("Postgres connected", zap.String("Status", fmt.Sprintf("%#v", psqlDB.Stats())))
 	}
 	defer psqlDB.Close()
 
 	redisClient := redis.NewRedisClient(cfg)
-	l.Info("Redis connected", zap.String("Status", fmt.Sprintf("%#v", *redisClient.GetPool().PoolStats())))
+	logger.Info("Redis connected", zap.String("Status", fmt.Sprintf("%#v", *redisClient.GetPool().PoolStats())))
 
-	s := server.NewServer(cfg, l, psqlDB, redisClient)
+	s := server.NewServer(cfg, psqlDB, redisClient)
 	log.Fatal(s.Run())
 }

@@ -8,20 +8,18 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/utils"
 	"github.com/AleksK1NG/api-mc/pkg/httpErrors"
-	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/google/uuid"
 )
 
 // Auth useCase
 type useCase struct {
-	logger   *logger.Logger
 	cfg      *config.Config
 	authRepo auth.Repository
 }
 
 // Auth useCase constructor
-func NewAuthUseCase(logger *logger.Logger, cfg *config.Config, authRepo auth.Repository) auth.UseCase {
-	return &useCase{logger: logger, cfg: cfg, authRepo: authRepo}
+func NewAuthUseCase(cfg *config.Config, authRepo auth.Repository) auth.UseCase {
+	return &useCase{cfg: cfg, authRepo: authRepo}
 }
 
 // Create new user

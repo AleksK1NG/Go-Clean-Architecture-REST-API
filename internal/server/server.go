@@ -7,7 +7,6 @@ import (
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
-	"go.uber.org/zap"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
@@ -26,16 +25,15 @@ const (
 type server struct {
 	echo      *echo.Echo
 	config    *config.Config
-	logger    *logger.Logger
 	db        *sqlx.DB
 	redisPool redis.RedisPool
 }
 
 // New server constructor
-func NewServer(config *config.Config, logger *logger.Logger, db *sqlx.DB, redisPool redis.RedisPool) *server {
+func NewServer(config *config.Config, db *sqlx.DB, redisPool redis.RedisPool) *server {
 	e := echo.New()
 
-	return &server{e, config, logger, db, redisPool}
+	return &server{e, config, db, redisPool}
 }
 
 // Run server depends on config SSL option
@@ -50,20 +48,20 @@ func (s *server) Run() error {
 		s.echo.Server.WriteTimeout = time.Second * s.config.Server.WriteTimeout
 
 		go func() {
-			s.logger.Info("Server is listening", zap.String("PORT", s.config.Server.Port))
+			logger.Infof("Server is listening on PORT: %s", s.config.Server.Port)
 			s.echo.Server.ReadTimeout = time.Second * s.config.Server.ReadTimeout
 			s.echo.Server.WriteTimeout = time.Second * s.config.Server.WriteTimeout
 			s.echo.Server.MaxHeaderBytes = maxHeaderBytes
 			if err := s.echo.StartTLS(s.config.Server.Port, certFile, keyFile); err != nil {
-				s.logger.Fatal("error starting TLS server", zap.String("echo.StartTLS", err.Error()))
+				logger.Fatalf("Error starting TLS server: ", err.Error())
 			}
 
 		}()
 
 		go func() {
-			s.logger.Info("Starting Debug server", zap.String("PORT", s.config.Server.PprofPort))
+			logger.Infof("Starting Debug server on PORT: %s", s.config.Server.PprofPort)
 			if err := http.ListenAndServe(s.config.Server.PprofPort, http.DefaultServeMux); err != nil {
-				s.logger.Error("PPROF", zap.String("PPROF ListenAndServe", err.Error()))
+				logger.Errorf("Error PPROF ListenAndServe: %s", err.Error())
 			}
 		}()
 
@@ -75,7 +73,7 @@ func (s *server) Run() error {
 		ctx, shutdown := context.WithTimeout(context.Background(), 5*time.Second)
 		defer shutdown()
 
-		s.logger.Info("Server Exited Properly")
+		logger.Infof("Server Exited Properly")
 		return s.echo.Server.Shutdown(ctx)
 	} else {
 		e := echo.New()
@@ -91,16 +89,16 @@ func (s *server) Run() error {
 		}
 
 		go func() {
-			s.logger.Info("Server is listening", zap.String("PORT", s.config.Server.Port))
+			logger.Infof("Server is listening on PORT: %s", s.config.Server.Port)
 			if err := e.StartServer(server); err != nil {
-				s.logger.Fatal("error starting TLS server", zap.String("StartServer", err.Error()))
+				logger.Fatalf("Error starting server: ", err.Error())
 			}
 		}()
 
 		go func() {
-			s.logger.Info("Starting Debug server", zap.String("PORT", s.config.Server.PprofPort))
+			logger.Infof("Starting Debug server on PORT: %s", s.config.Server.PprofPort)
 			if err := http.ListenAndServe(s.config.Server.PprofPort, http.DefaultServeMux); err != nil {
-				s.logger.Error("PPROF", zap.String("PPROF ListenAndServe", err.Error()))
+				logger.Errorf("Error PPROF ListenAndServe: %s", err.Error())
 			}
 		}()
 
@@ -112,11 +110,7 @@ func (s *server) Run() error {
 		ctx, shutdown := context.WithTimeout(context.Background(), 5*time.Second)
 		defer shutdown()
 
-		s.logger.Info("Server Exited Properly")
+		logger.Infof("Server Exited Properly")
 		return s.echo.Server.Shutdown(ctx)
 	}
-}
-
-func (s *server) ConfigLayers() {
-
 }

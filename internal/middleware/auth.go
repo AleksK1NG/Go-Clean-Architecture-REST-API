@@ -19,15 +19,14 @@ import (
 )
 
 // Auth by sessions stored in redis
-func AuthSessionMiddleware(sessUC session.UCSession, authUC auth.UseCase, cfg *config.Config, log *logger.Logger) echo.MiddlewareFunc {
+func AuthSessionMiddleware(sessUC session.UCSession, authUC auth.UseCase, cfg *config.Config) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			cookie, err := c.Cookie(cfg.Session.Name)
 			if err != nil {
-				log.Error(
-					"AuthSessionMiddleware",
-					zap.String("reqID", utils.GetRequestID(c)),
-					zap.String("error", err.Error()),
+				logger.Errorf("AuthSessionMiddleware RequestID: %s, Error: %s",
+					utils.GetRequestID(c),
+					err.Error(),
 				)
 				if err == http.ErrNoCookie {
 					return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(err))
@@ -37,21 +36,19 @@ func AuthSessionMiddleware(sessUC session.UCSession, authUC auth.UseCase, cfg *c
 
 			sess, err := sessUC.GetSessionByID(c.Request().Context(), cookie.Value)
 			if err != nil {
-				log.Error(
-					"GetSessionByID",
-					zap.String("reqID", utils.GetRequestID(c)),
-					zap.String("cookieValue", cookie.Value),
-					zap.String("error", err.Error()),
+				logger.Errorf("GetSessionByID RequestID: %s, CookieValue: %s, Error: %s",
+					utils.GetRequestID(c),
+					cookie.Value,
+					err.Error(),
 				)
 				return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
 			}
 
 			user, err := authUC.GetByID(c.Request().Context(), sess.UserID)
 			if err != nil {
-				log.Error(
-					"GetByID",
-					zap.String("reqID", utils.GetRequestID(c)),
-					zap.String("error", err.Error()),
+				logger.Errorf("GetByID RequestID: %s, Error: %s",
+					utils.GetRequestID(c),
+					err.Error(),
 				)
 				return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
 			}
@@ -60,12 +57,17 @@ func AuthSessionMiddleware(sessUC session.UCSession, authUC auth.UseCase, cfg *c
 			ctx := context.WithValue(c.Request().Context(), utils.UserCtxKey{}, user)
 			c.SetRequest(c.Request().WithContext(ctx))
 
-			log.Info(
-				"SessionMiddleware",
-				zap.String("reqID", utils.GetRequestID(c)),
-				zap.String("IP", utils.GetIPAddress(c)),
-				zap.String("userID", user.UserID.String()),
-				zap.String("cookieSessionID", cookie.Value),
+			logger.Info("SessionMiddleware RequestID: %s, CookieValue: %s, Error: %s",
+				utils.GetRequestID(c),
+				err.Error(),
+			)
+
+			logger.Info(
+				"SessionMiddleware, RequestID: %s,  IP: %s, UserID: %s, CookieSessionID: %s",
+				utils.GetRequestID(c),
+				utils.GetIPAddress(c),
+				user.UserID.String(),
+				cookie.Value,
 			)
 
 			return next(c)
@@ -74,12 +76,12 @@ func AuthSessionMiddleware(sessUC session.UCSession, authUC auth.UseCase, cfg *c
 }
 
 // JWT way of auth using cookie or Authorization header
-func AuthJWTMiddleware(authUC auth.UseCase, config *config.Config, logger *logger.Logger) echo.MiddlewareFunc {
+func AuthJWTMiddleware(authUC auth.UseCase, config *config.Config) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			bearerHeader := c.Request().Header.Get("Authorization")
 
-			logger.Info("auth middleware", zap.String("bearerHeader", bearerHeader))
+			logger.Infof("auth middleware bearerHeader %s", bearerHeader)
 
 			if bearerHeader != "" {
 				headerParts := strings.Split(bearerHeader, " ")
@@ -125,7 +127,7 @@ func AdminMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 }
 
 // Role based auth middleware, using ctx user
-func OwnerOrAdminMiddleware(logger *logger.Logger) echo.MiddlewareFunc {
+func OwnerOrAdminMiddleware() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 
@@ -165,7 +167,7 @@ func OwnerOrAdminMiddleware(logger *logger.Logger) echo.MiddlewareFunc {
 }
 
 // Role based auth middleware, using ctx user
-func RoleBasedAuthMiddleware(roles []string, logger *logger.Logger) echo.MiddlewareFunc {
+func RoleBasedAuthMiddleware(roles []string) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 

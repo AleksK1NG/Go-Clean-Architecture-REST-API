@@ -6,7 +6,6 @@ import (
 	"github.com/AleksK1NG/api-mc/pkg/httpErrors"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/labstack/echo"
-	"go.uber.org/zap"
 	"net/http"
 	"time"
 )
@@ -25,17 +24,18 @@ func SetAuthCookieWithToken(c echo.Context, token string, config *config.Config)
 }
 
 // Validate is user from owner of content
-func ValidateIsOwner(ctx context.Context, creatorId string, logger *logger.Logger) error {
+func ValidateIsOwner(ctx context.Context, creatorId string) error {
 	user, err := GetUserFromCtx(ctx)
+
 	if err != nil {
 		return err
 	}
 
 	if user.UserID.String() != creatorId {
-		logger.Error(
-			"ValidateIsOwner",
-			zap.String("userID", user.UserID.String()),
-			zap.String("creatorId", creatorId),
+		logger.Errorf(
+			"ValidateIsOwner, userID: %v, creatorID: %v",
+			user.UserID.String(),
+			creatorId,
 		)
 		return httpErrors.Forbidden
 	}

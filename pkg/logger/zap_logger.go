@@ -88,7 +88,7 @@ func Debugf(template string, args ...interface{}) {
 	sugarLogger.Debugf(template, args...)
 }
 
-func InfoLog(args ...interface{}) {
+func Info(args ...interface{}) {
 	sugarLogger.Info(args...)
 }
 

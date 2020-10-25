@@ -5,19 +5,17 @@ import (
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/session"
-	"github.com/AleksK1NG/api-mc/pkg/logger"
 )
 
 // Session use case
 type useCase struct {
 	sessionRepo session.SessRepository
-	logger      *logger.Logger
 	cfg         *config.Config
 }
 
 // New session use case constructor
-func NewSessionUseCase(sessionRepo session.SessRepository, logger *logger.Logger, cfg *config.Config) session.UCSession {
-	return &useCase{sessionRepo: sessionRepo, logger: logger, cfg: cfg}
+func NewSessionUseCase(sessionRepo session.SessRepository, cfg *config.Config) session.UCSession {
+	return &useCase{sessionRepo: sessionRepo, cfg: cfg}
 }
 
 // Create new session
