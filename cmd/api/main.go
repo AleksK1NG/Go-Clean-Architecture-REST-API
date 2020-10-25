@@ -29,6 +29,7 @@ func main() {
 	}
 
 	logger.InitLogger(cfg)
+	logger.Infof("LogLevel: %s, Mode: %s, SSL: %v", cfg.Logger.Level, cfg.Server.Mode, cfg.Server.SSL)
 
 	l, err := logger.NewLogger(cfg)
 	if err != nil {
