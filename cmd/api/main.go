@@ -28,6 +28,8 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
+	logger.InitLogger(cfg)
+
 	l, err := logger.NewLogger(cfg)
 	if err != nil {
 		log.Fatal(err)
