@@ -3,7 +3,6 @@ package middleware
 import (
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/labstack/echo/v4"
-	"log"
 	"time"
 )
 
@@ -23,7 +22,17 @@ func RequestLoggerMiddleware(logger *logger.Logger) echo.MiddlewareFunc {
 			//logger.Info("12345")
 			//logger.Sync()
 			s := time.Since(start).String()
-			log.Printf("Time: %s", s)
+			logger.Info(s)
+			//log.Printf("Time: %s", s)
+			//logger.Info(fmt.Sprintf("Method: %s, URI: %s, Status: %s, RequestID: %s, Time: %s",
+			//	ctx.Request().Method,
+			//	ctx.Request().RequestURI,
+			//	ctx.Response().Status,
+			//	utils.GetRequestID(ctx),
+			//	s,
+			//))
+			//logger.Info(ctx.Request().Method)
+			//logger.Info(ctx.Request().RequestURI)
 			return res
 		}
 	}
