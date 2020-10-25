@@ -13,19 +13,14 @@ const (
 					    updated_at = now() 
 					RETURNING *`
 
-	getNewsByID = `SELECT u.first_name,
-       u.last_name,
-       u.avatar,
-       u.login_date,
-       u.role,
-       u.user_id,
-       u.updated_at as user_updated_at,
-       n.news_id,
+	getNewsByID = `SELECT n.news_id,
        n.title,
-       n.image_url,
        n.content,
+       n.updated_at,
+       n.image_url,
        n.category,
-       n.updated_at as news_updated_at
+       CONCAT(u.first_name, ' ', u.last_name) as author,
+       u.user_id as author_id
 FROM news n
          LEFT JOIN users u on u.user_id = n.author_id
 WHERE news_id = $1`

@@ -12,7 +12,7 @@ import (
 type Repository interface {
 	Create(ctx context.Context, news *models.News) (*models.News, error)
 	Update(ctx context.Context, news *models.News) (*models.News, error)
-	GetNewsByID(ctx context.Context, newsID uuid.UUID) (*dto.NewsWithAuthor, error)
+	GetNewsByID(ctx context.Context, newsID uuid.UUID) (*models.NewsBase, error)
 	Delete(ctx context.Context, newsID uuid.UUID) error
 	GetNews(ctx context.Context, pq *utils.PaginationQuery) (*models.NewsList, error)
 	SearchByTitle(ctx context.Context, req *dto.FindNewsDTO) (*models.NewsList, error)
