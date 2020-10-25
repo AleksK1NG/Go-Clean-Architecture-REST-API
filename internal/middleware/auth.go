@@ -101,12 +101,12 @@ func AuthJWTMiddleware(authUC auth.UseCase, config *config.Config) echo.Middlewa
 			} else {
 				cookie, err := c.Cookie("jwt-token")
 				if err != nil {
-					logger.Error("middleware cookie", zap.String("cookieJWT", err.Error()))
+					logger.Errorf("c.Cookie", err.Error())
 					return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
 				}
 
 				if err = validateJWTToken(cookie.Value, authUC, c, config); err != nil {
-					logger.Error("cookie JWT validate", zap.String("cookieJWT", err.Error()))
+					logger.Errorf("validateJWTToken", err.Error())
 					return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
 				}
 				return next(c)
@@ -133,30 +133,19 @@ func OwnerOrAdminMiddleware() echo.MiddlewareFunc {
 
 			user, ok := c.Get("user").(*models.User)
 			if !ok {
-				logger.Error(
-					"OwnerOrAdminMiddleware",
-					zap.String("reqID", utils.GetRequestID(c)),
-					zap.String("ERROR", "invalid user ctx"),
-				)
+				logger.Errorf("Error c.Get(user) RequestID: %s, ERROR: %s,", utils.GetRequestID(c), "invalid user ctx")
 				return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
 			}
-
-			logger.Info(
-				"OwnerOrAdminMiddleware",
-				zap.String("reqID", utils.GetRequestID(c)),
-				zap.String("userID", user.UserID.String()),
-			)
 
 			if *user.Role == "admin" {
 				return next(c)
 			}
 
 			if user.UserID.String() != c.Param("user_id") {
-				logger.Error(
-					"OwnerOrAdminMiddleware",
-					zap.String("reqID", utils.GetRequestID(c)),
-					zap.String("userID", user.UserID.String()),
-					zap.String("ERROR", "ctx userID != param /:user_id"),
+				logger.Errorf("Error c.Get(user) RequestID: %s, UserID: %s, ERROR: %s,",
+					utils.GetRequestID(c),
+					user.UserID.String(),
+					"invalid user ctx",
 				)
 				return c.JSON(http.StatusForbidden, httpErrors.NewForbiddenError(httpErrors.Forbidden))
 			}
@@ -171,14 +160,12 @@ func RoleBasedAuthMiddleware(roles []string) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 
-			logger.Info("RoleBasedAuthMiddleware", zap.String("reqID", utils.GetRequestID(c)))
-
 			user, ok := c.Get("user").(*models.User)
 			if !ok {
-				logger.Error(
-					"RoleBasedAuthMiddleware",
-					zap.String("reqID", utils.GetRequestID(c)),
-					zap.String("ERROR", "invalid user ctx"),
+				logger.Errorf("Error c.Get(user) RequestID: %s, UserID: %s, ERROR: %s,",
+					utils.GetRequestID(c),
+					user.UserID.String(),
+					"invalid user ctx",
 				)
 				return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
 			}
@@ -189,11 +176,10 @@ func RoleBasedAuthMiddleware(roles []string) echo.MiddlewareFunc {
 				}
 			}
 
-			logger.Error(
-				"not allowed user role",
-				zap.String("reqID", utils.GetRequestID(c)),
-				zap.String("userID", user.UserID.String()),
-				zap.String("ERROR", "not allowed role"),
+			logger.Errorf("Error c.Get(user) RequestID: %s, UserID: %s, ERROR: %s,",
+				utils.GetRequestID(c),
+				user.UserID.String(),
+				"invalid user ctx",
 			)
 
 			return c.JSON(http.StatusForbidden, httpErrors.NewForbiddenError(httpErrors.PermissionDenied))
