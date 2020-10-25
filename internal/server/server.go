@@ -73,7 +73,7 @@ func (s *server) Run() error {
 		ctx, shutdown := context.WithTimeout(context.Background(), 5*time.Second)
 		defer shutdown()
 
-		logger.Infof("Server Exited Properly")
+		logger.Info("Server Exited Properly")
 		return s.echo.Server.Shutdown(ctx)
 	} else {
 		e := echo.New()
@@ -110,7 +110,7 @@ func (s *server) Run() error {
 		ctx, shutdown := context.WithTimeout(context.Background(), 5*time.Second)
 		defer shutdown()
 
-		logger.Infof("Server Exited Properly")
+		logger.Info("Server Exited Properly")
 		return s.echo.Server.Shutdown(ctx)
 	}
 }
