@@ -29,6 +29,7 @@ func getLoggerLevel(cfg *config.Config) zapcore.Level {
 	return level
 }
 
+// Init logger
 func InitLogger(cfg *config.Config) {
 	if sugarLogger != nil {
 		return
@@ -78,7 +79,7 @@ func InitLogger(cfg *config.Config) {
 	sugarLogger = logger.Sugar()
 }
 
-// набор методов нашего логгера для использования извне
+// Logger methods
 
 func Debug(args ...interface{}) {
 	sugarLogger.Debug(args...)

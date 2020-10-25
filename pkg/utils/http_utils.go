@@ -16,7 +16,7 @@ func GetRequestID(c echo.Context) string {
 	return c.Response().Header().Get(echo.HeaderXRequestID)
 }
 
-// ReqIdCtxKey is a key used for the Request ID in the context
+// ReqIdCtxKey is a key used for the Request ID in context
 type ReqIdCtxKey struct{}
 
 // Get ctx with timeout and request id from echo context
