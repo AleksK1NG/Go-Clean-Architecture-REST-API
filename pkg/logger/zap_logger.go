@@ -56,15 +56,22 @@ func InitLogger(cfg *config.Config) {
 	logWriter = zapcore.AddSync(os.Stdout)
 	//}
 
-	var encoder zapcore.EncoderConfig
+	var encoderCfg zapcore.EncoderConfig
 	if cfg.Server.Mode == "Development" {
-		encoder = zap.NewDevelopmentEncoderConfig()
+		encoderCfg = zap.NewDevelopmentEncoderConfig()
 	} else {
-		encoder = zap.NewProductionEncoderConfig()
+		encoderCfg = zap.NewProductionEncoderConfig()
 	}
 
-	encoder.EncodeTime = zapcore.ISO8601TimeEncoder
-	core := zapcore.NewCore(zapcore.NewConsoleEncoder(encoder), logWriter, zap.NewAtomicLevelAt(logLevel))
+	var encoder zapcore.Encoder
+	if cfg.Logger.Encoding == "console" {
+		encoder = zapcore.NewConsoleEncoder(encoderCfg)
+	} else {
+		encoder = zapcore.NewJSONEncoder(encoderCfg)
+	}
+
+	encoderCfg.EncodeTime = zapcore.ISO8601TimeEncoder
+	core := zapcore.NewCore(encoder, logWriter, zap.NewAtomicLevelAt(logLevel))
 	logger := zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
 	sugarLogger = logger.Sugar()
 }
