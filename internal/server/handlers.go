@@ -38,9 +38,9 @@ func (s *server) MapHandlers(e *echo.Echo) error {
 		zap.String("ServiceName", s.config.Metrics.ServiceName),
 	)
 
-	//if s.config.Server.SSL {
-	//	e.Pre(middleware.HTTPSRedirect())
-	//}
+	if s.config.Server.SSL {
+		e.Pre(middleware.HTTPSRedirect())
+	}
 	e.Use(apiMiddlewares.RequestLoggerMiddleware(s.logger))
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"https://labstack.com", "https://labstack.net"},

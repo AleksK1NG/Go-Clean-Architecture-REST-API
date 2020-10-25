@@ -51,6 +51,9 @@ func (s *server) Run() error {
 
 		go func() {
 			s.logger.Info("Server is listening", zap.String("PORT", s.config.Server.Port))
+			s.echo.Server.ReadTimeout = time.Second * s.config.Server.ReadTimeout
+			s.echo.Server.WriteTimeout = time.Second * s.config.Server.WriteTimeout
+			s.echo.Server.MaxHeaderBytes = maxHeaderBytes
 			if err := s.echo.StartTLS(s.config.Server.Port, certFile, keyFile); err != nil {
 				s.logger.Fatal("error starting TLS server", zap.String("echo.StartTLS", err.Error()))
 			}
