@@ -46,12 +46,12 @@ func (r *repository) Register(ctx context.Context, user *models.User) (*models.U
 }
 
 // Update existing user
-func (r *repository) Update(ctx context.Context, user *models.UserUpdate) (*models.User, error) {
+func (r *repository) Update(ctx context.Context, user *models.User) (*models.User, error) {
 
 	u := &models.User{}
 	if err := r.db.GetContext(ctx, u, updateUserQuery, &user.FirstName, &user.LastName, &user.Email,
 		&user.Role, &user.About, &user.Avatar, &user.PhoneNumber, &user.Address, &user.City, &user.Gender,
-		&user.Postcode, &user.Birthday, &user.ID,
+		&user.Postcode, &user.Birthday, &user.UserID,
 	); err != nil {
 		return nil, err
 	}

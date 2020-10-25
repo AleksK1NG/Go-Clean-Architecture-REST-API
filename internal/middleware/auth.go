@@ -57,11 +57,6 @@ func AuthSessionMiddleware(sessUC session.UCSession, authUC auth.UseCase, cfg *c
 			ctx := context.WithValue(c.Request().Context(), utils.UserCtxKey{}, user)
 			c.SetRequest(c.Request().WithContext(ctx))
 
-			logger.Info("SessionMiddleware RequestID: %s, CookieValue: %s, Error: %s",
-				utils.GetRequestID(c),
-				err.Error(),
-			)
-
 			logger.Info(
 				"SessionMiddleware, RequestID: %s,  IP: %s, UserID: %s, CookieSessionID: %s",
 				utils.GetRequestID(c),

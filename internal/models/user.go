@@ -9,11 +9,11 @@ import (
 
 // User full model
 type User struct {
-	UserID      uuid.UUID  `json:"user_id" db:"user_id" redis:"user_id" validate:"omitempty,uuid"`
+	UserID      uuid.UUID  `json:"user_id" db:"user_id" redis:"user_id" validate:"omitempty"`
 	FirstName   string     `json:"first_name" db:"first_name" redis:"first_name" validate:"required,lte=30"`
 	LastName    string     `json:"last_name" db:"last_name" redis:"last_name" validate:"required,lte=30"`
 	Email       string     `json:"email,omitempty" db:"email" redis:"email" validate:"omitempty,lte=60,email"`
-	Password    string     `json:"password,omitempty" db:"password" redis:"password" validate:"required,gte=6"`
+	Password    string     `json:"password,omitempty" db:"password" redis:"password" validate:"omitempty,required,gte=6"`
 	Role        *string    `json:"role,omitempty" db:"role" redis:"role" validate:"omitempty,lte=10"`
 	About       *string    `json:"about,omitempty" db:"about" redis:"about" validate:"omitempty,lte=1024"`
 	Avatar      *string    `json:"avatar,omitempty" db:"avatar" redis:"avatar" validate:"omitempty,lte=512,url"`
@@ -70,29 +70,8 @@ func (u *User) PrepareCreate() error {
 	return nil
 }
 
-// User full model
-type UserUpdate struct {
-	ID          uuid.UUID  `json:"user_id" db:"user_id" validate:"required,omitempty"`
-	FirstName   string     `json:"first_name" db:"first_name" validate:"lte=30"`
-	LastName    string     `json:"last_name" db:"last_name" validate:"lte=30"`
-	Email       string     `json:"email" db:"email" validate:"omitempty,lte=60,email"`
-	Role        *string    `json:"role,omitempty" db:"role" validate:"omitempty,lte=10"`
-	About       *string    `json:"about,omitempty" db:"about" validate:"omitempty,lte=1024"`
-	Avatar      *string    `json:"avatar,omitempty" db:"avatar" validate:"omitempty,lte=512,url"`
-	PhoneNumber *string    `json:"phone_number,omitempty" db:"phone_number" validate:"omitempty,lte=20"`
-	Address     *string    `json:"address,omitempty" db:"address" validate:"omitempty,lte=250"`
-	City        *string    `json:"city,omitempty" db:"city" validate:"omitempty,lte=24"`
-	Country     *string    `json:"country,omitempty" db:"country" validate:"omitempty,lte=24"`
-	Gender      *string    `json:"gender,omitempty" db:"gender" validate:"omitempty,lte=10"`
-	Postcode    *int       `json:"postcode,omitempty" db:"postcode" validate:"omitempty"`
-	Balance     float64    `json:"balance" db:"balance"`
-	Birthday    *time.Time `json:"birthday,omitempty" db:"birthday" validate:"omitempty,lte=10"`
-	UpdatedAt   time.Time  `json:"updated_at" db:"updated_at"`
-	LoginDate   time.Time  `json:"login_date" db:"login_date"`
-}
-
 // Prepare user for register
-func (u *UserUpdate) PrepareUpdate() error {
+func (u *User) PrepareUpdate() error {
 	u.Email = strings.ToLower(strings.TrimSpace(u.Email))
 
 	if u.PhoneNumber != nil {

@@ -50,7 +50,7 @@ func (u *useCase) Register(ctx context.Context, user *models.User) (*dto.UserWit
 }
 
 // Update existing user
-func (u *useCase) Update(ctx context.Context, user *models.UserUpdate) (*models.User, error) {
+func (u *useCase) Update(ctx context.Context, user *models.User) (*models.User, error) {
 	if err := utils.ValidateStruct(ctx, user); err != nil {
 		return nil, err
 	}

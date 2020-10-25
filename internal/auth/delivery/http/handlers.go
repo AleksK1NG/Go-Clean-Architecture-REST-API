@@ -118,8 +118,8 @@ func (h *handlers) Update() echo.HandlerFunc {
 			return utils.ErrResponseWithLog(c, err)
 		}
 
-		user := &models.UserUpdate{}
-		user.ID = uID
+		user := &models.User{}
+		user.UserID = uID
 
 		if err = c.Bind(user); err != nil {
 			return utils.ErrResponseWithLog(c, err)
