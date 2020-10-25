@@ -1,13 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/server"
 	"github.com/AleksK1NG/api-mc/pkg/db/postgres"
 	"github.com/AleksK1NG/api-mc/pkg/db/redis"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
-	"go.uber.org/zap"
 	"log"
 )
 
@@ -33,14 +31,14 @@ func main() {
 
 	psqlDB, err := postgres.NewPsqlDB(cfg)
 	if err != nil {
-		logger.Fatal("Init postgres", zap.String("error", err.Error()))
+		logger.Fatalf("Postgresql init: %s", err.Error())
 	} else {
-		logger.Info("Postgres connected", zap.String("Status", fmt.Sprintf("%#v", psqlDB.Stats())))
+		logger.Infof("Postgres connected, Status: %#v", psqlDB.Stats())
 	}
 	defer psqlDB.Close()
 
 	redisClient := redis.NewRedisClient(cfg)
-	logger.Info("Redis connected", zap.String("Status", fmt.Sprintf("%#v", *redisClient.GetClient().PoolStats())))
+	logger.Info("Redis connected")
 
 	s := server.NewServer(cfg, psqlDB, redisClient)
 	log.Fatal(s.Run())

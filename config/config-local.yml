@@ -15,7 +15,7 @@ logger:
   DisableCaller: false
   DisableStacktrace: false
   Encoding: json
-  Level: warn
+  Level: info
 
 postgres:
   PostgresqlHost: localhost

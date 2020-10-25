@@ -65,7 +65,9 @@ func cleanupHook(client *redis.Client) {
 	signal.Notify(c, syscall.SIGKILL)
 	go func() {
 		<-c
-		client.Close()
+		if err := client.Close(); err != nil {
+			logger.Errorf("RedisClient Close: %s", err.Error())
+		}
 		os.Exit(0)
 	}()
 }
