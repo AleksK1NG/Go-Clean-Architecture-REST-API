@@ -56,8 +56,13 @@ func InitLogger(cfg *config.Config) {
 	logWriter = zapcore.AddSync(os.Stdout)
 	//}
 
-	//encoder := zap.NewProductionEncoderConfig()
-	encoder := zap.NewDevelopmentEncoderConfig()
+	var encoder zapcore.EncoderConfig
+	if cfg.Server.Mode == "Development" {
+		encoder = zap.NewDevelopmentEncoderConfig()
+	} else {
+		encoder = zap.NewProductionEncoderConfig()
+	}
+
 	encoder.EncodeTime = zapcore.ISO8601TimeEncoder
 	core := zapcore.NewCore(zapcore.NewConsoleEncoder(encoder), logWriter, zap.NewAtomicLevelAt(logLevel))
 	logger := zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))

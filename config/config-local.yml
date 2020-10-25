@@ -1,7 +1,7 @@
 server:
   Port: :5000
   PprofPort: :5555
-  Mode: DEVELOPMENT
+  Mode: Development
   JwtSecretKey: secretkey
   CookieName: jwt-token
   ReadTimeout: 10

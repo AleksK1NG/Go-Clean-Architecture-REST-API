@@ -41,7 +41,7 @@ func (s *server) MapHandlers(e *echo.Echo) error {
 	if s.config.Server.SSL {
 		e.Pre(middleware.HTTPSRedirect())
 	}
-	e.Use(apiMiddlewares.RequestLoggerMiddleware(s.logger))
+	e.Use(apiMiddlewares.RequestLoggerMiddleware())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"https://labstack.com", "https://labstack.net"},
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
