@@ -49,7 +49,7 @@ func (u *useCase) Update(ctx context.Context, news *models.News) (*models.News, 
 		return nil, err
 	}
 
-	if err = utils.ValidateIsOwner(ctx, newsByID.UserID.String()); err != nil {
+	if err = utils.ValidateIsOwner(ctx, newsByID.AuthorID.String()); err != nil {
 		return nil, err
 	}
 
@@ -62,7 +62,7 @@ func (u *useCase) Update(ctx context.Context, news *models.News) (*models.News, 
 }
 
 // Get news by id
-func (u *useCase) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*dto.NewsWithAuthor, error) {
+func (u *useCase) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*models.NewsBase, error) {
 	newsByID, err := u.newsRepo.GetNewsByID(ctx, newsID)
 	if err != nil {
 		return nil, err
@@ -78,7 +78,7 @@ func (u *useCase) Delete(ctx context.Context, newsID uuid.UUID) error {
 		return err
 	}
 
-	if err := utils.ValidateIsOwner(ctx, newsByID.UserID.String()); err != nil {
+	if err := utils.ValidateIsOwner(ctx, newsByID.AuthorID.String()); err != nil {
 		return err
 	}
 

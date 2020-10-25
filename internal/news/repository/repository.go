@@ -67,9 +67,9 @@ func (r repository) Update(ctx context.Context, news *models.News) (*models.News
 }
 
 // Get single news by id
-func (r repository) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*dto.NewsWithAuthor, error) {
+func (r repository) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*models.NewsBase, error) {
 
-	n := &dto.NewsWithAuthor{}
+	n := &models.NewsBase{}
 
 	if err := r.redisPool.GetJSONContext(ctx, r.getKeyWithPrefix(newsID.String()), n); err == nil {
 		return n, nil

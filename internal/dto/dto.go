@@ -36,12 +36,6 @@ type UpdateCommDTO struct {
 	Message string    `json:"message" db:"password" validate:"required,gte=0"`
 }
 
-// News with author
-type NewsWithAuthor struct {
-	models.NewsBase `json:"news"`
-	models.UserBase `json:"author"`
-}
-
 // Find user query DTO
 type CommentsByNewsID struct {
 	NewsID uuid.UUID              `json:"news_id"`
