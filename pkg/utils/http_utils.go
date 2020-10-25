@@ -86,6 +86,6 @@ func GetIPAddress(c echo.Context) string {
 
 // Error response with logging error for echo context
 func ErrResponseWithLog(ctx echo.Context, err error) error {
-	logger.Errorf("RequestID: %s, IPAddress: %s, Error: %s", GetRequestID(ctx), GetIPAddress(ctx), err.Error())
+	logger.Errorf("ErrResponseWithLog, RequestID: %s, IPAddress: %s, Error: %s", GetRequestID(ctx), GetIPAddress(ctx), err.Error())
 	return ctx.JSON(httpErrors.ErrorResponse(err))
 }
