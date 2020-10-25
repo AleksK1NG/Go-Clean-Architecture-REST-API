@@ -11,7 +11,6 @@ import (
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	"go.uber.org/zap"
 )
 
 const (
@@ -21,15 +20,14 @@ const (
 
 // News Repository
 type repository struct {
-	logger     *logger.Logger
 	db         *sqlx.DB
 	redisPool  redis.RedisPool
 	basePrefix string
 }
 
 // News repository constructor
-func NewNewsRepository(logger *logger.Logger, db *sqlx.DB, redisPool redis.RedisPool) news.Repository {
-	return &repository{logger: logger, db: db, redisPool: redisPool, basePrefix: basePrefix}
+func NewNewsRepository(db *sqlx.DB, redisPool redis.RedisPool) news.Repository {
+	return &repository{db: db, redisPool: redisPool, basePrefix: basePrefix}
 }
 
 // Create news
@@ -82,7 +80,7 @@ func (r repository) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*dto.New
 	}
 
 	if err := r.redisPool.SetexJSONContext(ctx, r.getKeyWithPrefix(newsID.String()), cacheDuration, n); err != nil {
-		r.logger.Error("SetexJSONContext", zap.String("ERR", err.Error()))
+		logger.Errorf("SetexJSONContext Error: %s", err.Error())
 	}
 
 	return n, nil

@@ -7,20 +7,18 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/dto"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/utils"
-	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/google/uuid"
 )
 
 // Comments useCase
 type useCase struct {
-	logger   *logger.Logger
 	cfg      *config.Config
 	commRepo comments.Repository
 }
 
 // Auth useCase constructor
-func NewCommentsUseCase(logger *logger.Logger, cfg *config.Config, commRepo comments.Repository) comments.UseCase {
-	return &useCase{logger: logger, cfg: cfg, commRepo: commRepo}
+func NewCommentsUseCase(cfg *config.Config, commRepo comments.Repository) comments.UseCase {
+	return &useCase{cfg: cfg, commRepo: commRepo}
 }
 
 // Create comment
@@ -46,7 +44,7 @@ func (u *useCase) Update(ctx context.Context, comment *dto.UpdateCommDTO) (*mode
 		return nil, err
 	}
 
-	if err := utils.ValidateIsOwner(ctx, comm.AuthorID.String(), u.logger); err != nil {
+	if err := utils.ValidateIsOwner(ctx, comm.AuthorID.String()); err != nil {
 		return nil, err
 	}
 
@@ -60,7 +58,7 @@ func (u *useCase) Delete(ctx context.Context, commentID uuid.UUID) error {
 		return err
 	}
 
-	if err := utils.ValidateIsOwner(ctx, comm.AuthorID.String(), u.logger); err != nil {
+	if err := utils.ValidateIsOwner(ctx, comm.AuthorID.String()); err != nil {
 		return err
 	}
 	return u.commRepo.Delete(ctx, commentID)

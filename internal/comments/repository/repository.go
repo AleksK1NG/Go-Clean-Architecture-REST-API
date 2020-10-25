@@ -8,7 +8,6 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/utils"
 	"github.com/AleksK1NG/api-mc/pkg/db/redis"
-	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
@@ -20,15 +19,14 @@ const (
 
 // Comments repository
 type repository struct {
-	logger     *logger.Logger
 	db         *sqlx.DB
 	redisPool  redis.RedisPool
 	basePrefix string
 }
 
 // Comments Repository constructor
-func NewCommentsRepository(logger *logger.Logger, db *sqlx.DB, redisPool redis.RedisPool) comments.Repository {
-	return &repository{logger: logger, db: db, redisPool: redisPool, basePrefix: basePrefix}
+func NewCommentsRepository(db *sqlx.DB, redisPool redis.RedisPool) comments.Repository {
+	return &repository{db: db, redisPool: redisPool, basePrefix: basePrefix}
 }
 
 // Create comment

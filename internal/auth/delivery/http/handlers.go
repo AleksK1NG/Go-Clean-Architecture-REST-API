@@ -8,7 +8,6 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/session"
 	"github.com/AleksK1NG/api-mc/internal/utils"
 	"github.com/AleksK1NG/api-mc/pkg/httpErrors"
-	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -19,12 +18,11 @@ type handlers struct {
 	cfg    *config.Config
 	authUC auth.UseCase
 	sessUC session.UCSession
-	log    *logger.Logger
 }
 
 // Auth handlers constructor
-func NewAuthHandlers(cfg *config.Config, authUC auth.UseCase, sessUC session.UCSession, log *logger.Logger) auth.Handlers {
-	return &handlers{cfg, authUC, sessUC, log}
+func NewAuthHandlers(cfg *config.Config, authUC auth.UseCase, sessUC session.UCSession) auth.Handlers {
+	return &handlers{cfg, authUC, sessUC}
 }
 
 // Register new user
@@ -35,19 +33,19 @@ func (h *handlers) Register() echo.HandlerFunc {
 
 		user := &models.User{}
 		if err := c.Bind(user); err != nil {
-			return utils.ErrResponseWithLog(c, h.log, err)
+			return utils.ErrResponseWithLog(c, err)
 		}
 
 		createdUser, err := h.authUC.Register(ctx, user)
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.log, err)
+			return utils.ErrResponseWithLog(c, err)
 		}
 
 		sess, err := h.sessUC.CreateSession(ctx, &models.Session{
 			UserID: createdUser.User.UserID,
 		}, h.cfg.Session.Expire)
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.log, err)
+			return utils.ErrResponseWithLog(c, err)
 		}
 
 		c.SetCookie(utils.CreateSessionCookie(h.cfg, sess))
@@ -64,19 +62,19 @@ func (h *handlers) Login() echo.HandlerFunc {
 
 		loginDTO := &dto.LoginDTO{}
 		if err := c.Bind(&loginDTO); err != nil {
-			return utils.ErrResponseWithLog(c, h.log, err)
+			return utils.ErrResponseWithLog(c, err)
 		}
 
 		userWithToken, err := h.authUC.Login(ctx, loginDTO)
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.log, err)
+			return utils.ErrResponseWithLog(c, err)
 		}
 
 		sess, err := h.sessUC.CreateSession(ctx, &models.Session{
 			UserID: userWithToken.User.UserID,
 		}, h.cfg.Session.Expire)
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.log, err)
+			return utils.ErrResponseWithLog(c, err)
 		}
 
 		c.SetCookie(utils.CreateSessionCookie(h.cfg, sess))
@@ -100,7 +98,7 @@ func (h *handlers) Logout() echo.HandlerFunc {
 		}
 
 		if err := h.sessUC.DeleteByID(ctx, cookie.Value); err != nil {
-			return utils.ErrResponseWithLog(c, h.log, err)
+			return utils.ErrResponseWithLog(c, err)
 		}
 
 		utils.DeleteSessionCookie(c, h.cfg.Session.Name)
@@ -117,19 +115,19 @@ func (h *handlers) Update() echo.HandlerFunc {
 
 		uID, err := uuid.Parse(c.Param("user_id"))
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.log, err)
+			return utils.ErrResponseWithLog(c, err)
 		}
 
 		user := &models.UserUpdate{}
 		user.ID = uID
 
 		if err = c.Bind(user); err != nil {
-			return utils.ErrResponseWithLog(c, h.log, err)
+			return utils.ErrResponseWithLog(c, err)
 		}
 
 		updatedUser, err := h.authUC.Update(ctx, user)
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.log, err)
+			return utils.ErrResponseWithLog(c, err)
 		}
 
 		return c.JSON(http.StatusCreated, updatedUser)
@@ -144,12 +142,12 @@ func (h *handlers) GetUserByID() echo.HandlerFunc {
 
 		uID, err := uuid.Parse(c.Param("user_id"))
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.log, err)
+			return utils.ErrResponseWithLog(c, err)
 		}
 
 		user, err := h.authUC.GetByID(ctx, uID)
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.log, err)
+			return utils.ErrResponseWithLog(c, err)
 		}
 
 		return c.JSON(http.StatusOK, user)
@@ -164,11 +162,11 @@ func (h *handlers) Delete() echo.HandlerFunc {
 
 		uID, err := uuid.Parse(c.Param("user_id"))
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.log, err)
+			return utils.ErrResponseWithLog(c, err)
 		}
 
 		if err := h.authUC.Delete(ctx, uID); err != nil {
-			return utils.ErrResponseWithLog(c, h.log, err)
+			return utils.ErrResponseWithLog(c, err)
 		}
 
 		return c.NoContent(http.StatusOK)
@@ -187,7 +185,7 @@ func (h *handlers) FindByName() echo.HandlerFunc {
 
 		paginationQuery, err := utils.GetPaginationFromCtx(c)
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.log, err)
+			return utils.ErrResponseWithLog(c, err)
 		}
 
 		response, err := h.authUC.FindByName(ctx, &dto.FindUserQuery{
@@ -195,7 +193,7 @@ func (h *handlers) FindByName() echo.HandlerFunc {
 			PQ:   *paginationQuery,
 		})
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.log, err)
+			return utils.ErrResponseWithLog(c, err)
 		}
 
 		return c.JSON(http.StatusOK, response)
@@ -210,12 +208,12 @@ func (h *handlers) GetUsers() echo.HandlerFunc {
 
 		paginationQuery, err := utils.GetPaginationFromCtx(c)
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.log, err)
+			return utils.ErrResponseWithLog(c, err)
 		}
 
 		usersList, err := h.authUC.GetUsers(ctx, paginationQuery)
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.log, err)
+			return utils.ErrResponseWithLog(c, err)
 		}
 
 		return c.JSON(http.StatusOK, usersList)
@@ -227,7 +225,7 @@ func (h *handlers) GetMe() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		user, ok := c.Get("user").(*models.User)
 		if !ok {
-			return utils.ErrResponseWithLog(c, h.log, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
+			return utils.ErrResponseWithLog(c, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
 		}
 
 		return c.JSON(http.StatusOK, user)
