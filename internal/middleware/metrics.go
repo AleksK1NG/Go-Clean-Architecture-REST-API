@@ -7,7 +7,7 @@ import (
 )
 
 // Prometheus metrics middleware
-func MetricsMiddleware(metrics metric.Metrics) echo.MiddlewareFunc {
+func (mw *MiddlewareManager) MetricsMiddleware(metrics metric.Metrics) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			start := time.Now()

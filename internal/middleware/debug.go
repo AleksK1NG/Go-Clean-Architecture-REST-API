@@ -9,17 +9,15 @@ import (
 )
 
 // Debug dump request middleware
-func DebugMiddleware(isDebug bool) echo.MiddlewareFunc {
-	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			if isDebug {
-				dump, err := httputil.DumpRequest(c.Request(), true)
-				if err != nil {
-					return c.NoContent(http.StatusInternalServerError)
-				}
-				logger.Info(fmt.Sprintf("\nRequest dump begin :--------------\n\n%s\n\nRequest dump end :--------------", dump))
+func (mw *MiddlewareManager) DebugMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		if mw.cfg.Server.Debug {
+			dump, err := httputil.DumpRequest(c.Request(), true)
+			if err != nil {
+				return c.NoContent(http.StatusInternalServerError)
 			}
-			return next(c)
+			logger.Info(fmt.Sprintf("\nRequest dump begin :--------------\n\n%s\n\nRequest dump end :--------------", dump))
 		}
+		return next(c)
 	}
 }

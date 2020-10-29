@@ -6,7 +6,6 @@ import (
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/auth"
 	"github.com/AleksK1NG/api-mc/internal/models"
-	"github.com/AleksK1NG/api-mc/internal/session"
 	"github.com/AleksK1NG/api-mc/pkg/httpErrors"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
@@ -19,59 +18,57 @@ import (
 )
 
 // Auth by sessions stored in redis
-func AuthSessionMiddleware(sessUC session.UCSession, authUC auth.UseCase, cfg *config.Config) echo.MiddlewareFunc {
-	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			cookie, err := c.Cookie(cfg.Session.Name)
-			if err != nil {
-				logger.Errorf("AuthSessionMiddleware RequestID: %s, Error: %s",
-					utils.GetRequestID(c),
-					err.Error(),
-				)
-				if err == http.ErrNoCookie {
-					return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(err))
-				}
-				return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
-			}
-
-			sess, err := sessUC.GetSessionByID(c.Request().Context(), cookie.Value)
-			if err != nil {
-				logger.Errorf("GetSessionByID RequestID: %s, CookieValue: %s, Error: %s",
-					utils.GetRequestID(c),
-					cookie.Value,
-					err.Error(),
-				)
-				return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
-			}
-
-			user, err := authUC.GetByID(c.Request().Context(), sess.UserID)
-			if err != nil {
-				logger.Errorf("GetByID RequestID: %s, Error: %s",
-					utils.GetRequestID(c),
-					err.Error(),
-				)
-				return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
-			}
-
-			c.Set("user", user)
-			ctx := context.WithValue(c.Request().Context(), utils.UserCtxKey{}, user)
-			c.SetRequest(c.Request().WithContext(ctx))
-
-			logger.Info(
-				"SessionMiddleware, RequestID: %s,  IP: %s, UserID: %s, CookieSessionID: %s",
+func (mw *MiddlewareManager) AuthSessionMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		cookie, err := c.Cookie(mw.cfg.Session.Name)
+		if err != nil {
+			logger.Errorf("AuthSessionMiddleware RequestID: %s, Error: %s",
 				utils.GetRequestID(c),
-				utils.GetIPAddress(c),
-				user.UserID.String(),
-				cookie.Value,
+				err.Error(),
 			)
-
-			return next(c)
+			if err == http.ErrNoCookie {
+				return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(err))
+			}
+			return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
 		}
+
+		sess, err := mw.sessUC.GetSessionByID(c.Request().Context(), cookie.Value)
+		if err != nil {
+			logger.Errorf("GetSessionByID RequestID: %s, CookieValue: %s, Error: %s",
+				utils.GetRequestID(c),
+				cookie.Value,
+				err.Error(),
+			)
+			return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
+		}
+
+		user, err := mw.authUC.GetByID(c.Request().Context(), sess.UserID)
+		if err != nil {
+			logger.Errorf("GetByID RequestID: %s, Error: %s",
+				utils.GetRequestID(c),
+				err.Error(),
+			)
+			return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
+		}
+
+		c.Set("user", user)
+		ctx := context.WithValue(c.Request().Context(), utils.UserCtxKey{}, user)
+		c.SetRequest(c.Request().WithContext(ctx))
+
+		logger.Info(
+			"SessionMiddleware, RequestID: %s,  IP: %s, UserID: %s, CookieSessionID: %s",
+			utils.GetRequestID(c),
+			utils.GetIPAddress(c),
+			user.UserID.String(),
+			cookie.Value,
+		)
+
+		return next(c)
 	}
 }
 
 // JWT way of auth using cookie or Authorization header
-func AuthJWTMiddleware(authUC auth.UseCase, config *config.Config) echo.MiddlewareFunc {
+func (mw *MiddlewareManager) AuthJWTMiddleware(authUC auth.UseCase, config *config.Config) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			bearerHeader := c.Request().Header.Get("Authorization")
@@ -87,7 +84,7 @@ func AuthJWTMiddleware(authUC auth.UseCase, config *config.Config) echo.Middlewa
 
 				tokenString := headerParts[1]
 
-				if err := validateJWTToken(tokenString, authUC, c, config); err != nil {
+				if err := mw.validateJWTToken(tokenString, authUC, c, config); err != nil {
 					logger.Error("middleware validateJWTToken", zap.String("headerJWT", err.Error()))
 					return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
 				}
@@ -100,7 +97,7 @@ func AuthJWTMiddleware(authUC auth.UseCase, config *config.Config) echo.Middlewa
 					return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
 				}
 
-				if err = validateJWTToken(cookie.Value, authUC, c, config); err != nil {
+				if err = mw.validateJWTToken(cookie.Value, authUC, c, config); err != nil {
 					logger.Errorf("validateJWTToken", err.Error())
 					return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
 				}
@@ -111,7 +108,7 @@ func AuthJWTMiddleware(authUC auth.UseCase, config *config.Config) echo.Middlewa
 }
 
 // Admin role
-func AdminMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+func (mw *MiddlewareManager) AdminMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		user, ok := c.Get("user").(*models.User)
 		if !ok || *user.Role != "admin" {
@@ -122,7 +119,7 @@ func AdminMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 }
 
 // Role based auth middleware, using ctx user
-func OwnerOrAdminMiddleware() echo.MiddlewareFunc {
+func (mw *MiddlewareManager) OwnerOrAdminMiddleware() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 
@@ -151,7 +148,7 @@ func OwnerOrAdminMiddleware() echo.MiddlewareFunc {
 }
 
 // Role based auth middleware, using ctx user
-func RoleBasedAuthMiddleware(roles []string) echo.MiddlewareFunc {
+func (mw *MiddlewareManager) RoleBasedAuthMiddleware(roles []string) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 
@@ -182,7 +179,7 @@ func RoleBasedAuthMiddleware(roles []string) echo.MiddlewareFunc {
 	}
 }
 
-func validateJWTToken(tokenString string, authUC auth.UseCase, c echo.Context, config *config.Config) error {
+func (mw *MiddlewareManager) validateJWTToken(tokenString string, authUC auth.UseCase, c echo.Context, config *config.Config) error {
 	if tokenString == "" {
 		return httpErrors.InvalidJWTToken
 	}
