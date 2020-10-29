@@ -8,7 +8,7 @@ import (
 )
 
 // Sanitize and read request body to ctx for next use in easy json
-func Sanitize(next echo.HandlerFunc) echo.HandlerFunc {
+func (mw *MiddlewareManager) Sanitize(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		body, err := ioutil.ReadAll(ctx.Request().Body)
 		if err != nil {
