@@ -1,4 +1,4 @@
-.PHONY: migrate migrate_down migrate_up migrate_version compose_debug compose_hot__reload compose_prod compose_dlv_reload check_install, swagger, local
+.PHONY: migrate migrate_down migrate_up migrate_version debug hot_reload prod delve check_install, swagger, local
 
 force:
 	migrate -database postgres://postgres:postgres@localhost:5432/auth_db?sslmode=disable -path migrations force 1
@@ -12,16 +12,16 @@ migrate_up:
 migrate_down:
 	migrate -database postgres://postgres:postgres@localhost:5432/auth_db?sslmode=disable -path migrations down 1
 
-compose_hot__reload:
+hot_reload:
 	 docker-compose -f docker-compose.HotReload.yml up --build
 
-compose_dlv_reload:
+delve:
 	 docker-compose -f docker-compose.DelveHotReload.yml up --build
 
-compose_debug:
+debug:
 	 docker-compose -f docker-compose.debug.yml up --build
 
-compose_prod:
+prod:
 	 docker-compose -f docker-compose.prod.yml up --build
 
 
