@@ -7,6 +7,7 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/dto"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/pkg/db/redis"
+	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -54,6 +55,10 @@ func (r *repository) Update(ctx context.Context, comment *dto.UpdateCommDTO) (*m
 		return nil, err
 	}
 
+	if err := r.redisPool.Delete(r.createKey(comment.ID.String())); err != nil {
+		logger.Errorf("redisPool.Delete: %s", err.Error())
+	}
+
 	return comm, nil
 }
 
@@ -73,6 +78,10 @@ func (r *repository) Delete(ctx context.Context, commentID uuid.UUID) error {
 		return sql.ErrNoRows
 	}
 
+	if err := r.redisPool.Delete(r.createKey(commentID.String())); err != nil {
+		logger.Errorf("redisPool.Delete: %s", err.Error())
+	}
+
 	return nil
 }
 
@@ -80,8 +89,16 @@ func (r *repository) Delete(ctx context.Context, commentID uuid.UUID) error {
 func (r *repository) GetByID(ctx context.Context, commentID uuid.UUID) (*models.CommentBase, error) {
 	comment := &models.CommentBase{}
 
+	if err := r.redisPool.GetJSONContext(ctx, r.createKey(commentID.String()), comment); err == nil {
+		return comment, nil
+	}
+
 	if err := r.db.GetContext(ctx, comment, getCommentByID, commentID); err != nil {
 		return nil, err
+	}
+
+	if err := r.redisPool.SetexJSONContext(ctx, r.createKey(commentID.String()), 3600, comment); err != nil {
+		logger.Errorf("SetexJSONContext: %s", err.Error())
 	}
 
 	return comment, nil
