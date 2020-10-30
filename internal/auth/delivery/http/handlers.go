@@ -3,7 +3,6 @@ package http
 import (
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/auth"
-	"github.com/AleksK1NG/api-mc/internal/dto"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/session"
 	"github.com/AleksK1NG/api-mc/pkg/httpErrors"
@@ -56,16 +55,25 @@ func (h *handlers) Register() echo.HandlerFunc {
 
 // Login user
 func (h *handlers) Login() echo.HandlerFunc {
+	// Login user, validate email and password input
+	type Login struct {
+		Email    string `json:"email" db:"email" validate:"omitempty,lte=60,email"`
+		Password string `json:"password,omitempty" db:"password" validate:"required,gte=6"`
+	}
+
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
 
-		loginDTO := &dto.LoginDTO{}
-		if err := c.Bind(&loginDTO); err != nil {
+		login := &Login{}
+		if err := c.Bind(&login); err != nil {
 			return utils.ErrResponseWithLog(c, err)
 		}
 
-		userWithToken, err := h.authUC.Login(ctx, loginDTO)
+		userWithToken, err := h.authUC.Login(ctx, &models.User{
+			Email:    login.Email,
+			Password: login.Password,
+		})
 		if err != nil {
 			return utils.ErrResponseWithLog(c, err)
 		}

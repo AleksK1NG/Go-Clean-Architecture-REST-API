@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"github.com/AleksK1NG/api-mc/internal/auth"
-	"github.com/AleksK1NG/api-mc/internal/dto"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/pkg/db/redis"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
@@ -179,23 +178,23 @@ func (r *repository) GetUsers(ctx context.Context, pq *utils.PaginationQuery) (*
 }
 
 // Find user by email
-func (r *repository) FindByEmail(ctx context.Context, loginDTO *dto.LoginDTO) (*models.User, error) {
+func (r *repository) FindByEmail(ctx context.Context, user *models.User) (*models.User, error) {
 
-	user := &models.User{}
+	foundUser := &models.User{}
 
-	if err := r.redisClient.GetJSONContext(ctx, r.generateUserKey(loginDTO.Email), user); err != nil {
+	if err := r.redisClient.GetJSONContext(ctx, r.generateUserKey(user.Email), foundUser); err != nil {
 		logger.Errorf("GetJSONContext: %s", err.Error())
 	}
 
-	if err := r.db.QueryRowxContext(ctx, findUserByEmail, loginDTO.Email).StructScan(user); err != nil {
+	if err := r.db.QueryRowxContext(ctx, findUserByEmail, user.Email).StructScan(foundUser); err != nil {
 		return nil, err
 	}
 
-	if err := r.redisClient.SetexJSONContext(ctx, r.generateUserKey(loginDTO.Email), cacheDuration, user); err != nil {
+	if err := r.redisClient.SetexJSONContext(ctx, r.generateUserKey(user.Email), cacheDuration, foundUser); err != nil {
 		logger.Errorf("GetJSONContext: %s", err.Error())
 	}
 
-	return user, nil
+	return foundUser, nil
 }
 
 func (r *repository) generateUserKey(userID string) string {

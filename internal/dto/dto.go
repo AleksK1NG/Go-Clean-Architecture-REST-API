@@ -5,12 +5,6 @@ import (
 	"github.com/google/uuid"
 )
 
-// Login DTO
-type LoginDTO struct {
-	Email    string `json:"email" db:"email" validate:"omitempty,lte=60,email"`
-	Password string `json:"password,omitempty" db:"password" validate:"required,gte=6"`
-}
-
 // Find user query DTO
 type FindNewsDTO struct {
 	Title string `json:"title" validate:"required"`
