@@ -14,7 +14,7 @@ type Repository interface {
 	Update(ctx context.Context, user *models.User) (*models.User, error)
 	Delete(ctx context.Context, userID uuid.UUID) error
 	GetByID(ctx context.Context, userID uuid.UUID) (*models.User, error)
-	FindByName(ctx context.Context, query *dto.FindUserQuery) (*models.UsersList, error)
+	FindByName(ctx context.Context, name string, query *utils.PaginationQuery) (*models.UsersList, error)
 	FindByEmail(ctx context.Context, loginDTO *dto.LoginDTO) (*models.User, error)
 	GetUsers(ctx context.Context, pq *utils.PaginationQuery) (*models.UsersList, error)
 }
