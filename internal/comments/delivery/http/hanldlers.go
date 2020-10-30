@@ -3,7 +3,6 @@ package http
 import (
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/comments"
-	"github.com/AleksK1NG/api-mc/internal/dto"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
@@ -131,11 +130,7 @@ func (h *handlers) GetAllByNewsID() echo.HandlerFunc {
 			return utils.ErrResponseWithLog(c, err)
 		}
 
-		commentsList, err := h.comUC.GetAllByNewsID(ctx, &dto.CommentsByNewsID{
-			NewsID: newsID,
-			PQ:     pq,
-		})
-
+		commentsList, err := h.comUC.GetAllByNewsID(ctx, newsID, pq)
 		if err != nil {
 			return utils.ErrResponseWithLog(c, err)
 		}

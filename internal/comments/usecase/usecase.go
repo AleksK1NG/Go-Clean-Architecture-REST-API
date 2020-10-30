@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/comments"
-	"github.com/AleksK1NG/api-mc/internal/dto"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
@@ -70,6 +69,6 @@ func (u *useCase) GetByID(ctx context.Context, commentID uuid.UUID) (*models.Com
 }
 
 // GetAllByNewsID comments
-func (u *useCase) GetAllByNewsID(ctx context.Context, query *dto.CommentsByNewsID) (*models.CommentsList, error) {
-	return u.commRepo.GetAllByNewsID(ctx, query)
+func (u *useCase) GetAllByNewsID(ctx context.Context, newsID uuid.UUID, query *utils.PaginationQuery) (*models.CommentsList, error) {
+	return u.commRepo.GetAllByNewsID(ctx, newsID, query)
 }

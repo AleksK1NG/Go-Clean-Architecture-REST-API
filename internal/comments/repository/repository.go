@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"github.com/AleksK1NG/api-mc/internal/comments"
-	"github.com/AleksK1NG/api-mc/internal/dto"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/pkg/db/redis"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
@@ -97,7 +96,7 @@ func (r *repository) GetByID(ctx context.Context, commentID uuid.UUID) (*models.
 		return nil, err
 	}
 
-	if err := r.redisPool.SetexJSONContext(ctx, r.createKey(commentID.String()), 3600, comment); err != nil {
+	if err := r.redisPool.SetexJSONContext(ctx, r.createKey(commentID.String()), durationSeconds, comment); err != nil {
 		logger.Errorf("SetexJSONContext: %s", err.Error())
 	}
 
@@ -105,20 +104,20 @@ func (r *repository) GetByID(ctx context.Context, commentID uuid.UUID) (*models.
 }
 
 // GetAllByNewsID comments
-func (r *repository) GetAllByNewsID(ctx context.Context, query *dto.CommentsByNewsID) (*models.CommentsList, error) {
+func (r *repository) GetAllByNewsID(ctx context.Context, newsID uuid.UUID, query *utils.PaginationQuery) (*models.CommentsList, error) {
 	var totalCount int
 
-	if err := r.db.QueryRowContext(ctx, getTotalCountByNewsId, query.NewsID).Scan(&totalCount); err != nil {
+	if err := r.db.QueryRowContext(ctx, getTotalCountByNewsId, newsID).Scan(&totalCount); err != nil {
 		return nil, err
 	}
 
-	rows, err := r.db.QueryxContext(ctx, getCommentsByNewsId, query.NewsID, query.PQ.GetOffset(), query.PQ.GetLimit())
+	rows, err := r.db.QueryxContext(ctx, getCommentsByNewsId, newsID, query.GetOffset(), query.GetLimit())
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	commentsList := make([]*models.CommentBase, 0, query.PQ.GetSize())
+	commentsList := make([]*models.CommentBase, 0, query.GetSize())
 	for rows.Next() {
 		comment := &models.CommentBase{}
 		if err := rows.StructScan(comment); err != nil {
@@ -133,10 +132,10 @@ func (r *repository) GetAllByNewsID(ctx context.Context, query *dto.CommentsByNe
 
 	return &models.CommentsList{
 		TotalCount: totalCount,
-		TotalPages: utils.GetTotalPages(totalCount, query.PQ.GetSize()),
-		Page:       query.PQ.GetPage(),
-		Size:       query.PQ.GetSize(),
-		HasMore:    utils.GetHasMore(query.PQ.GetPage(), totalCount, query.PQ.GetSize()),
+		TotalPages: utils.GetTotalPages(totalCount, query.GetSize()),
+		Page:       query.GetPage(),
+		Size:       query.GetSize(),
+		HasMore:    utils.GetHasMore(query.GetPage(), totalCount, query.GetSize()),
 		Comments:   commentsList,
 	}, nil
 
