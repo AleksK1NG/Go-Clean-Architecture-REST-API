@@ -3,7 +3,6 @@ package usecase
 import (
 	"context"
 	"github.com/AleksK1NG/api-mc/config"
-	"github.com/AleksK1NG/api-mc/internal/dto"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/news"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
@@ -100,11 +99,6 @@ func (u *useCase) GetNews(ctx context.Context, pq *utils.PaginationQuery) (*mode
 }
 
 // Find nes by title
-func (u *useCase) SearchByTitle(ctx context.Context, req *dto.FindNewsDTO) (*models.NewsList, error) {
-	newsList, err := u.newsRepo.SearchByTitle(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-
-	return newsList, nil
+func (u *useCase) SearchByTitle(ctx context.Context, title string, query *utils.PaginationQuery) (*models.NewsList, error) {
+	return u.newsRepo.SearchByTitle(ctx, title, query)
 }

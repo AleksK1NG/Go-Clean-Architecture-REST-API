@@ -2,7 +2,6 @@ package news
 
 import (
 	"context"
-	"github.com/AleksK1NG/api-mc/internal/dto"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
@@ -15,5 +14,5 @@ type UseCase interface {
 	GetNewsByID(ctx context.Context, newsID uuid.UUID) (*models.NewsBase, error)
 	Delete(ctx context.Context, newsID uuid.UUID) error
 	GetNews(ctx context.Context, pq *utils.PaginationQuery) (*models.NewsList, error)
-	SearchByTitle(ctx context.Context, req *dto.FindNewsDTO) (*models.NewsList, error)
+	SearchByTitle(ctx context.Context, title string, query *utils.PaginationQuery) (*models.NewsList, error)
 }
