@@ -24,7 +24,7 @@ func NewAuthUseCase(cfg *config.Config, authRepo auth.Repository) auth.UseCase {
 }
 
 // Create new user
-func (u *useCase) Register(ctx context.Context, user *models.User) (*dto.UserWithToken, error) {
+func (u *useCase) Register(ctx context.Context, user *models.User) (*models.UserWithToken, error) {
 	if err := utils.ValidateStruct(ctx, user); err != nil {
 		return nil, err
 	}
@@ -44,7 +44,7 @@ func (u *useCase) Register(ctx context.Context, user *models.User) (*dto.UserWit
 		return nil, err
 	}
 
-	return &dto.UserWithToken{
+	return &models.UserWithToken{
 		User:  createdUser,
 		Token: token,
 	}, nil
@@ -104,7 +104,7 @@ func (u *useCase) GetUsers(ctx context.Context, pq *utils.PaginationQuery) (*mod
 }
 
 // Login user, returns user model with jwt token
-func (u *useCase) Login(ctx context.Context, loginDTO *dto.LoginDTO) (*dto.UserWithToken, error) {
+func (u *useCase) Login(ctx context.Context, loginDTO *dto.LoginDTO) (*models.UserWithToken, error) {
 	user, err := u.authRepo.FindByEmail(ctx, loginDTO)
 	if err != nil {
 		return nil, err
@@ -121,7 +121,7 @@ func (u *useCase) Login(ctx context.Context, loginDTO *dto.LoginDTO) (*dto.UserW
 		return nil, err
 	}
 
-	return &dto.UserWithToken{
+	return &models.UserWithToken{
 		User:  user,
 		Token: token,
 	}, nil

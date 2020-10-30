@@ -92,3 +92,9 @@ type UsersList struct {
 	HasMore    bool    `json:"has_more"`
 	Users      []*User `json:"users"`
 }
+
+// Find user query
+type UserWithToken struct {
+	User  *User  `json:"user"`
+	Token string `json:"token"`
+}

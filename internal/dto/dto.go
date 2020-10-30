@@ -1,16 +1,9 @@
 package dto
 
 import (
-	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
 )
-
-// Find user query DTO
-type UserWithToken struct {
-	User  *models.User `json:"user"`
-	Token string       `json:"token"`
-}
 
 // Login DTO
 type LoginDTO struct {
