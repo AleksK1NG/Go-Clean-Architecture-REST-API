@@ -18,7 +18,7 @@ func (mw *MiddlewareManager) RequestLoggerMiddleware(next echo.HandlerFunc) echo
 		size := res.Size
 		s := time.Since(start).String()
 
-		logger.Infof("TimeSince: %s, Method: %s, URI: %s, Status: %v, Size: %v", s, req.Method, req.URL, status, size)
+		logger.Infof("Method: %s, URI: %s, Status: %v, Size: %v, Time: %s", req.Method, req.URL, status, size, s)
 		return err
 	}
 }
