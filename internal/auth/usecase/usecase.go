@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/auth"
-	"github.com/AleksK1NG/api-mc/internal/dto"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/pkg/httpErrors"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
@@ -104,25 +103,25 @@ func (u *useCase) GetUsers(ctx context.Context, pq *utils.PaginationQuery) (*mod
 }
 
 // Login user, returns user model with jwt token
-func (u *useCase) Login(ctx context.Context, loginDTO *dto.LoginDTO) (*models.UserWithToken, error) {
-	user, err := u.authRepo.FindByEmail(ctx, loginDTO)
+func (u *useCase) Login(ctx context.Context, user *models.User) (*models.UserWithToken, error) {
+	foundUser, err := u.authRepo.FindByEmail(ctx, user)
 	if err != nil {
 		return nil, err
 	}
 
-	if err = user.ComparePasswords(loginDTO.Password); err != nil {
+	if err = foundUser.ComparePasswords(user.Password); err != nil {
 		return nil, err
 	}
 
-	user.SanitizePassword()
+	foundUser.SanitizePassword()
 
-	token, err := jwt.GenerateJWTToken(user, u.cfg)
+	token, err := jwt.GenerateJWTToken(foundUser, u.cfg)
 	if err != nil {
 		return nil, err
 	}
 
 	return &models.UserWithToken{
-		User:  user,
+		User:  foundUser,
 		Token: token,
 	}, nil
 }
