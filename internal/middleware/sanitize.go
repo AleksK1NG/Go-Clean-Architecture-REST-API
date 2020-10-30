@@ -15,10 +15,12 @@ func (mw *MiddlewareManager) Sanitize(next echo.HandlerFunc) echo.HandlerFunc {
 			return ctx.NoContent(http.StatusBadRequest)
 		}
 		defer ctx.Request().Body.Close()
+
 		sanBody, err := sanitize.SanitizeJSON(body)
 		if err != nil {
 			return ctx.NoContent(http.StatusBadRequest)
 		}
+
 		ctx.Set("body", sanBody)
 		return next(ctx)
 	}

@@ -7,7 +7,6 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/pkg/httpErrors"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
-	"github.com/AleksK1NG/api-mc/pkg/utils/jwt"
 	"github.com/google/uuid"
 )
 
@@ -38,7 +37,7 @@ func (u *useCase) Register(ctx context.Context, user *models.User) (*models.User
 	}
 	createdUser.SanitizePassword()
 
-	token, err := jwt.GenerateJWTToken(createdUser, u.cfg)
+	token, err := utils.GenerateJWTToken(createdUser, u.cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +114,7 @@ func (u *useCase) Login(ctx context.Context, user *models.User) (*models.UserWit
 
 	foundUser.SanitizePassword()
 
-	token, err := jwt.GenerateJWTToken(foundUser, u.cfg)
+	token, err := utils.GenerateJWTToken(foundUser, u.cfg)
 	if err != nil {
 		return nil, err
 	}
