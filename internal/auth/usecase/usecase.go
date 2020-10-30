@@ -8,6 +8,7 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/pkg/httpErrors"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
+	"github.com/AleksK1NG/api-mc/pkg/utils/jwt"
 	"github.com/google/uuid"
 )
 
@@ -38,7 +39,7 @@ func (u *useCase) Register(ctx context.Context, user *models.User) (*dto.UserWit
 	}
 	createdUser.SanitizePassword()
 
-	token, err := utils.GenerateJWTToken(createdUser, u.cfg)
+	token, err := jwt.GenerateJWTToken(createdUser, u.cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -89,13 +90,8 @@ func (u *useCase) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, 
 }
 
 // Find users by name
-func (u *useCase) FindByName(ctx context.Context, query *dto.FindUserQuery) (*models.UsersList, error) {
-	users, err := u.authRepo.FindByName(ctx, query)
-	if err != nil {
-		return nil, err
-	}
-
-	return users, nil
+func (u *useCase) FindByName(ctx context.Context, name string, query *utils.PaginationQuery) (*models.UsersList, error) {
+	return u.authRepo.FindByName(ctx, name, query)
 }
 
 // Get users with pagination
@@ -120,7 +116,7 @@ func (u *useCase) Login(ctx context.Context, loginDTO *dto.LoginDTO) (*dto.UserW
 
 	user.SanitizePassword()
 
-	token, err := utils.GenerateJWTToken(user, u.cfg)
+	token, err := jwt.GenerateJWTToken(user, u.cfg)
 	if err != nil {
 		return nil, err
 	}

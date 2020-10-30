@@ -7,12 +7,6 @@ import (
 )
 
 // Find user query DTO
-type FindUserQuery struct {
-	Name string `json:"name" validate:"required"`
-	PQ   utils.PaginationQuery
-}
-
-// Find user query DTO
 type UserWithToken struct {
 	User  *models.User `json:"user"`
 	Token string       `json:"token"`

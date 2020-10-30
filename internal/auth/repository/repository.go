@@ -105,14 +105,14 @@ func (r *repository) GetByID(ctx context.Context, userID uuid.UUID) (*models.Use
 }
 
 // Find users by name
-func (r *repository) FindByName(ctx context.Context, query *dto.FindUserQuery) (*models.UsersList, error) {
+func (r *repository) FindByName(ctx context.Context, name string, query *utils.PaginationQuery) (*models.UsersList, error) {
 
 	var totalCount int
-	if err := r.db.GetContext(ctx, &totalCount, getTotalCount, query.Name); err != nil {
+	if err := r.db.GetContext(ctx, &totalCount, getTotalCount, name); err != nil {
 		return nil, err
 	}
 
-	rows, err := r.db.QueryxContext(ctx, findUsers, query.Name, query.PQ.GetOffset(), query.PQ.GetLimit())
+	rows, err := r.db.QueryxContext(ctx, findUsers, name, query.GetOffset(), query.GetLimit())
 	if err != nil {
 		return nil, err
 	}
@@ -125,7 +125,7 @@ func (r *repository) FindByName(ctx context.Context, query *dto.FindUserQuery) (
 		}
 	}()
 
-	var users = make([]*models.User, 0, query.PQ.GetSize())
+	var users = make([]*models.User, 0, query.GetSize())
 	for rows.Next() {
 		var user models.User
 		if err = rows.StructScan(&user); err != nil {
@@ -140,10 +140,10 @@ func (r *repository) FindByName(ctx context.Context, query *dto.FindUserQuery) (
 
 	return &models.UsersList{
 		TotalCount: totalCount,
-		TotalPages: utils.GetTotalPages(totalCount, query.PQ.GetSize()),
-		Page:       query.PQ.GetPage(),
-		Size:       query.PQ.GetSize(),
-		HasMore:    utils.GetHasMore(query.PQ.GetPage(), totalCount, query.PQ.GetSize()),
+		TotalPages: utils.GetTotalPages(totalCount, query.GetSize()),
+		Page:       query.GetPage(),
+		Size:       query.GetSize(),
+		HasMore:    utils.GetHasMore(query.GetPage(), totalCount, query.GetSize()),
 		Users:      users,
 	}, nil
 }

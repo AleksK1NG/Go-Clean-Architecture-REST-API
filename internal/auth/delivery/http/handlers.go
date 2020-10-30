@@ -188,10 +188,7 @@ func (h *handlers) FindByName() echo.HandlerFunc {
 			return utils.ErrResponseWithLog(c, err)
 		}
 
-		response, err := h.authUC.FindByName(ctx, &dto.FindUserQuery{
-			Name: c.QueryParam("name"),
-			PQ:   *paginationQuery,
-		})
+		response, err := h.authUC.FindByName(ctx, c.QueryParam("name"), paginationQuery)
 		if err != nil {
 			return utils.ErrResponseWithLog(c, err)
 		}
