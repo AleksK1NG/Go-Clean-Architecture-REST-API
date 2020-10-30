@@ -38,8 +38,8 @@ func (u *useCase) Create(ctx context.Context, comment *models.Comment) (*models.
 }
 
 // Update comment
-func (u *useCase) Update(ctx context.Context, comment *dto.UpdateCommDTO) (*models.Comment, error) {
-	comm, err := u.commRepo.GetByID(ctx, comment.ID)
+func (u *useCase) Update(ctx context.Context, comment *models.Comment) (*models.Comment, error) {
+	comm, err := u.commRepo.GetByID(ctx, comment.CommentID)
 	if err != nil {
 		return nil, err
 	}

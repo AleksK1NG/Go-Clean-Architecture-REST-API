@@ -10,7 +10,7 @@ import (
 // Comments repository interface
 type Repository interface {
 	Create(ctx context.Context, comment *models.Comment) (*models.Comment, error)
-	Update(ctx context.Context, comment *dto.UpdateCommDTO) (*models.Comment, error)
+	Update(ctx context.Context, comment *models.Comment) (*models.Comment, error)
 	Delete(ctx context.Context, commentID uuid.UUID) error
 	GetByID(ctx context.Context, commentID uuid.UUID) (*models.CommentBase, error)
 	GetAllByNewsID(ctx context.Context, query *dto.CommentsByNewsID) (*models.CommentsList, error)

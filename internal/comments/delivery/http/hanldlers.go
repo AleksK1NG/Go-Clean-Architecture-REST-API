@@ -44,6 +44,11 @@ func (h *handlers) Create() echo.HandlerFunc {
 
 // Update comment
 func (h *handlers) Update() echo.HandlerFunc {
+	// Update Comment
+	type UpdateComment struct {
+		Message string `json:"message" db:"message" validate:"required,gte=0"`
+		Likes   int64  `json:"likes" db:"likes" validate:"omitempty"`
+	}
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
@@ -53,13 +58,16 @@ func (h *handlers) Update() echo.HandlerFunc {
 			return utils.ErrResponseWithLog(c, err)
 		}
 
-		comm := &dto.UpdateCommDTO{}
+		comm := &UpdateComment{}
 		if err = c.Bind(comm); err != nil {
 			return utils.ErrResponseWithLog(c, err)
 		}
-		comm.ID = commID
 
-		updatedComment, err := h.comUC.Update(ctx, comm)
+		updatedComment, err := h.comUC.Update(ctx, &models.Comment{
+			CommentID: commID,
+			Message:   comm.Message,
+			Likes:     comm.Likes,
+		})
 		if err != nil {
 			return utils.ErrResponseWithLog(c, err)
 		}
