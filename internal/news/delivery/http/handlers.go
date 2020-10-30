@@ -2,7 +2,6 @@ package http
 
 import (
 	"github.com/AleksK1NG/api-mc/config"
-	"github.com/AleksK1NG/api-mc/internal/dto"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/news"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
@@ -138,10 +137,7 @@ func (h handlers) SearchByTitle() echo.HandlerFunc {
 			return utils.ErrResponseWithLog(c, err)
 		}
 
-		newsList, err := h.newsUC.SearchByTitle(ctx, &dto.FindNewsDTO{
-			Title: c.QueryParam("title"),
-			PQ:    pq,
-		})
+		newsList, err := h.newsUC.SearchByTitle(ctx, c.QueryParam("title"), pq)
 
 		if err != nil {
 			return utils.ErrResponseWithLog(c, err)
