@@ -48,14 +48,14 @@ func (r *repository) Create(ctx context.Context, comment *models.Comment) (*mode
 }
 
 // Update comment
-func (r *repository) Update(ctx context.Context, comment *dto.UpdateCommDTO) (*models.Comment, error) {
+func (r *repository) Update(ctx context.Context, comment *models.Comment) (*models.Comment, error) {
 
 	comm := &models.Comment{}
-	if err := r.db.QueryRowxContext(ctx, updateComment, comment.Message, comment.ID).StructScan(comm); err != nil {
+	if err := r.db.QueryRowxContext(ctx, updateComment, comment.Message, comment.CommentID).StructScan(comm); err != nil {
 		return nil, err
 	}
 
-	if err := r.redisPool.Delete(r.createKey(comment.ID.String())); err != nil {
+	if err := r.redisPool.Delete(r.createKey(comment.CommentID.String())); err != nil {
 		logger.Errorf("redisPool.Delete: %s", err.Error())
 	}
 
