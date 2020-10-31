@@ -9,7 +9,9 @@ import (
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/AleksK1NG/api-mc/pkg/sanitize"
 	"github.com/labstack/echo/v4"
+	"github.com/pkg/errors"
 	"io/ioutil"
+	"mime/multipart"
 	"net/http"
 	"time"
 )
@@ -104,6 +106,20 @@ func ReadRequest(ctx echo.Context, request interface{}) error {
 		return err
 	}
 	return validate.StructCtx(ctx.Request().Context(), request)
+}
+
+func ReadImage(ctx echo.Context, field string) (*multipart.FileHeader, error) {
+	image, err := ctx.FormFile(field)
+	if err != nil {
+		return nil, errors.WithMessage(err, "ctx.FormFile")
+	}
+
+	// Check content type of image
+	if err := CheckImageContentType(image); err != nil {
+		return nil, err
+	}
+
+	return image, nil
 }
 
 // Read sanitize and validate request
