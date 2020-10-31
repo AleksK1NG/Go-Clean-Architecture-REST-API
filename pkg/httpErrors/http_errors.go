@@ -38,7 +38,7 @@ var (
 	ExistsEmailError        = errors.New("User with given email already exists")
 	InvalidJWTToken         = errors.New("Invalid JWT token")
 	InvalidJWTClaims        = errors.New("Invalid JWT claims")
-	NotExists               = errors.New("Not Exists ")
+	NotAllowedImageHeader   = errors.New("Not allowed image header")
 )
 
 type RestErr interface {
