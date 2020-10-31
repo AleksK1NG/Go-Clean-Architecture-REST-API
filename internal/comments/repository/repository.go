@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"github.com/AleksK1NG/api-mc/internal/comments"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/pkg/db/redis"
@@ -142,5 +143,5 @@ func (r *repository) GetAllByNewsID(ctx context.Context, newsID uuid.UUID, query
 }
 
 func (r *repository) createKey(commentID string) string {
-	return r.basePrefix + commentID
+	return fmt.Sprintf("%s: %s", r.basePrefix, commentID)
 }

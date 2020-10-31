@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/news"
 	"github.com/AleksK1NG/api-mc/pkg/db/redis"
@@ -179,5 +180,5 @@ func (r repository) SearchByTitle(ctx context.Context, title string, query *util
 }
 
 func (r *repository) getKeyWithPrefix(newsID string) string {
-	return r.basePrefix + newsID
+	return fmt.Sprintf("%s: %s", r.basePrefix, newsID)
 }

@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"github.com/AleksK1NG/api-mc/internal/auth"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/pkg/db/redis"
@@ -32,7 +33,7 @@ func NewAuthRepository(db *sqlx.DB, redisClient redis.RedisPool) auth.Repository
 // Create new user
 func (r *repository) Register(ctx context.Context, user *models.User) (*models.User, error) {
 
-	var u models.User
+	u := &models.User{}
 	if err := r.db.QueryRowxContext(ctx, createUserQuery, &user.FirstName, &user.LastName, &user.Email,
 		&user.Password, &user.Role, &user.About, &user.Avatar, &user.PhoneNumber, &user.Address, &user.City,
 		&user.Gender, &user.Postcode, &user.Birthday,
@@ -40,7 +41,7 @@ func (r *repository) Register(ctx context.Context, user *models.User) (*models.U
 		return nil, err
 	}
 
-	return &u, nil
+	return u, nil
 
 }
 
@@ -198,5 +199,5 @@ func (r *repository) FindByEmail(ctx context.Context, user *models.User) (*model
 }
 
 func (r *repository) generateUserKey(userID string) string {
-	return r.basePrefix + userID
+	return fmt.Sprintf("%s: %s", r.basePrefix, userID)
 }
