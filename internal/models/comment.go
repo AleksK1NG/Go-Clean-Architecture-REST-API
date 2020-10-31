@@ -16,7 +16,7 @@ type Comment struct {
 	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
 }
 
-// Base Comment response DTO
+// Base Comment response
 type CommentBase struct {
 	CommentID uuid.UUID `json:"comment_id" db:"comment_id" validate:"omitempty,uuid"`
 	AuthorID  uuid.UUID `json:"author_id" db:"author_id" validate:"required"`

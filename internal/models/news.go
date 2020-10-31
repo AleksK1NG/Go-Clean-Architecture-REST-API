@@ -27,7 +27,7 @@ type NewsList struct {
 	News       []*News `json:"news"`
 }
 
-// News base object
+// News base
 type NewsBase struct {
 	NewsID    uuid.UUID `json:"news_id" db:"news_id" validate:"omitempty,uuid"`
 	AuthorID  uuid.UUID `json:"author_id" db:"author_id" validate:"omitempty,uuid"`

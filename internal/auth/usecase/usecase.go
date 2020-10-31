@@ -23,9 +23,6 @@ func NewAuthUseCase(cfg *config.Config, authRepo auth.Repository) auth.UseCase {
 
 // Create new user
 func (u *useCase) Register(ctx context.Context, user *models.User) (*models.UserWithToken, error) {
-	if err := utils.ValidateStruct(ctx, user); err != nil {
-		return nil, err
-	}
 
 	if err := user.PrepareCreate(); err != nil {
 		return nil, httpErrors.NewBadRequestError(err.Error())
@@ -50,9 +47,6 @@ func (u *useCase) Register(ctx context.Context, user *models.User) (*models.User
 
 // Update existing user
 func (u *useCase) Update(ctx context.Context, user *models.User) (*models.User, error) {
-	if err := utils.ValidateStruct(ctx, user); err != nil {
-		return nil, err
-	}
 
 	if err := user.PrepareUpdate(); err != nil {
 		return nil, err
