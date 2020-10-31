@@ -9,6 +9,7 @@ import (
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"log"
 	"net/http"
 )
 
@@ -31,7 +32,9 @@ func (h *handlers) Register() echo.HandlerFunc {
 		defer cancel()
 
 		user := &models.User{}
-		if err := c.Bind(user); err != nil {
+
+		if err := utils.ReadRequest(c, user); err != nil {
+			log.Println(111111)
 			return utils.ErrResponseWithLog(c, err)
 		}
 
@@ -60,13 +63,13 @@ func (h *handlers) Login() echo.HandlerFunc {
 		Email    string `json:"email" db:"email" validate:"omitempty,lte=60,email"`
 		Password string `json:"password,omitempty" db:"password" validate:"required,gte=6"`
 	}
-
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
 
 		login := &Login{}
-		if err := c.Bind(&login); err != nil {
+
+		if err := utils.ReadRequest(c, login); err != nil {
 			return utils.ErrResponseWithLog(c, err)
 		}
 
@@ -129,7 +132,7 @@ func (h *handlers) Update() echo.HandlerFunc {
 		user := &models.User{}
 		user.UserID = uID
 
-		if err = c.Bind(user); err != nil {
+		if err := utils.ReadRequest(c, user); err != nil {
 			return utils.ErrResponseWithLog(c, err)
 		}
 
@@ -138,7 +141,7 @@ func (h *handlers) Update() echo.HandlerFunc {
 			return utils.ErrResponseWithLog(c, err)
 		}
 
-		return c.JSON(http.StatusCreated, updatedUser)
+		return c.JSON(http.StatusOK, updatedUser)
 	}
 }
 
