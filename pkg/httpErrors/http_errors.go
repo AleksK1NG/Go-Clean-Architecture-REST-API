@@ -146,7 +146,7 @@ func ParseErrors(err error) RestErr {
 		return NewRestError(http.StatusBadRequest, BadRequest.Error(), err)
 	default:
 		if restErr, ok := err.(RestErr); ok {
-			return ParseRestErrors(restErr)
+			return restErr
 		}
 		return NewInternalServerError(err)
 	}
@@ -170,58 +170,6 @@ func parseValidatorError(err error) RestErr {
 	}
 
 	return NewRestError(http.StatusBadRequest, BadRequest.Error(), err)
-}
-
-func ParseRestErrors(err RestErr) RestErr {
-	if err != nil {
-		switch err {
-		case PermissionDenied:
-			return NewUnauthorizedError(err)
-		case BadRequest:
-			return NewBadRequestError(err)
-		case NotFound:
-			return NewNotFoundError(err)
-		case NoSuchUser:
-			return NewBadRequestError(err)
-		case WrongCredentials:
-			return NewBadRequestError(err)
-		case Unauthorized:
-			return NewUnauthorizedError(err)
-		case NotRequiredFields:
-			return NewBadRequestError(err)
-		case BadQueryParams:
-			return NewBadRequestError(err)
-		case SessionStoreError:
-			return NewBadRequestError(err)
-		case NoSuchSession:
-			return NewUnauthorizedError(err)
-		case DeleteSessionError:
-			return NewUnauthorizedError(err)
-		case SessionTypeAssertionErr:
-			return NewUnauthorizedError(err)
-		case PermissionsError:
-			return NewUnauthorizedError(err)
-		case UserTypeAssertionErr:
-			return NewInternalServerError(err)
-		case ExpiredCSRFError:
-			return NewUnauthorizedError(err)
-		case WrongCSRFtoken:
-			return NewUnauthorizedError(err)
-		case CSRFNotPresented:
-			return NewUnauthorizedError(err)
-		case HashingError:
-			return NewInternalServerError(err)
-		case ErrorRequestValidation:
-			return NewBadRequestError(err)
-		case ApiAnswerEmptyResult:
-			return NewInternalServerError(err)
-		case ApiResponseStatusNotOK:
-			return NewInternalServerError(err)
-		default:
-			return NewInternalServerError(err)
-		}
-	}
-	return NewInternalServerError(err)
 }
 
 // Error response

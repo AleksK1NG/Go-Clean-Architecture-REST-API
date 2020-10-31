@@ -9,7 +9,6 @@ import (
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
-	"log"
 	"net/http"
 )
 
@@ -34,7 +33,6 @@ func (h *handlers) Register() echo.HandlerFunc {
 		user := &models.User{}
 
 		if err := utils.ReadRequest(c, user); err != nil {
-			log.Println(111111)
 			return utils.ErrResponseWithLog(c, err)
 		}
 

@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/session"
@@ -23,10 +24,6 @@ type sessionRepository struct {
 // Session repository constructor
 func NewSessionRepository(redisPool redis.RedisPool, cfg *config.Config) session.SessRepository {
 	return &sessionRepository{redisPool: redisPool, basePrefix: basePrefix, cfg: cfg}
-}
-
-func (s *sessionRepository) createKey(sessionId string) string {
-	return s.basePrefix + sessionId
 }
 
 // Create session in redis
@@ -53,4 +50,8 @@ func (s *sessionRepository) GetSessionByID(ctx context.Context, sessionId string
 // Delete session by id
 func (s *sessionRepository) DeleteByID(ctx context.Context, sessionId string) error {
 	return s.redisPool.DeleteContext(ctx, sessionId)
+}
+
+func (s *sessionRepository) createKey(sessionId string) string {
+	return fmt.Sprintf("%s: %s", s.basePrefix, sessionId)
 }
