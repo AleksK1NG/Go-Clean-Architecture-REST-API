@@ -27,8 +27,15 @@ func (h *handlers) Create() echo.HandlerFunc {
 		ctx, cancel := utils.GetCtxWithReqID(c)
 		defer cancel()
 
+		user, err := utils.GetUserFromCtx(ctx)
+		if err != nil {
+			return utils.ErrResponseWithLog(c, err)
+		}
+
 		comment := &models.Comment{}
-		if err := c.Bind(comment); err != nil {
+		comment.AuthorID = user.UserID
+
+		if err := utils.SanitizeRequest(c, comment); err != nil {
 			return utils.ErrResponseWithLog(c, err)
 		}
 
@@ -58,7 +65,7 @@ func (h *handlers) Update() echo.HandlerFunc {
 		}
 
 		comm := &UpdateComment{}
-		if err = c.Bind(comm); err != nil {
+		if err := utils.SanitizeRequest(c, comm); err != nil {
 			return utils.ErrResponseWithLog(c, err)
 		}
 

@@ -2,11 +2,14 @@ package utils
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/pkg/httpErrors"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
+	"github.com/AleksK1NG/api-mc/pkg/sanitize"
 	"github.com/labstack/echo/v4"
+	"io/ioutil"
 	"net/http"
 	"time"
 )
@@ -100,5 +103,25 @@ func ReadRequest(ctx echo.Context, request interface{}) error {
 	if err := ctx.Bind(request); err != nil {
 		return err
 	}
+	return validate.StructCtx(ctx.Request().Context(), request)
+}
+
+// Read sanitize and validate request
+func SanitizeRequest(ctx echo.Context, request interface{}) error {
+	body, err := ioutil.ReadAll(ctx.Request().Body)
+	if err != nil {
+		return err
+	}
+	defer ctx.Request().Body.Close()
+
+	sanBody, err := sanitize.SanitizeJSON(body)
+	if err != nil {
+		return ctx.NoContent(http.StatusBadRequest)
+	}
+
+	if err := json.Unmarshal(sanBody, request); err != nil {
+		return err
+	}
+
 	return validate.StructCtx(ctx.Request().Context(), request)
 }
