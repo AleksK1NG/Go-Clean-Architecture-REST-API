@@ -22,11 +22,6 @@ func NewCommentsUseCase(cfg *config.Config, commRepo comments.Repository) commen
 
 // Create comment
 func (u *useCase) Create(ctx context.Context, comment *models.Comment) (*models.Comment, error) {
-	user, err := utils.GetUserFromCtx(ctx)
-	if err != nil {
-		return nil, err
-	}
-	comment.AuthorID = user.UserID
 
 	createdComment, err := u.commRepo.Create(ctx, comment)
 	if err != nil {
