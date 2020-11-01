@@ -7,7 +7,6 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/textproto"
-	"strconv"
 )
 
 var allowedImagesContentType = map[string]string{
@@ -81,7 +80,7 @@ func IsAllowedImageContentType(image []byte) bool {
 	return allowed
 }
 
-func GetUniqFileName(userID uint64, fileExtension string) string {
+func GetUniqFileName(userID string, fileExtension string) string {
 	randString := uuid.New().String()
-	return "userid_" + strconv.Itoa(int(userID)) + "_" + randString + "." + fileExtension
+	return "userid_" + userID + "_" + randString + "." + fileExtension
 }

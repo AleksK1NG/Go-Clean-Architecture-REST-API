@@ -37,7 +37,7 @@ func (h handlers) Create() echo.HandlerFunc {
 			return utils.ErrResponseWithLog(c, err)
 		}
 
-		return c.JSON(http.StatusOK, createdNews)
+		return c.JSON(http.StatusCreated, createdNews)
 	}
 }
 

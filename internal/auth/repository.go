@@ -16,4 +16,5 @@ type Repository interface {
 	FindByName(ctx context.Context, name string, query *utils.PaginationQuery) (*models.UsersList, error)
 	FindByEmail(ctx context.Context, user *models.User) (*models.User, error)
 	GetUsers(ctx context.Context, pq *utils.PaginationQuery) (*models.UsersList, error)
+	UploadAvatar(ctx context.Context, fileName string, fileData []byte) error
 }
