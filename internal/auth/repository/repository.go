@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
 	"fmt"
@@ -11,11 +12,14 @@ import (
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"io"
+	"os"
 )
 
 const (
 	basePrefix    = "api-auth:"
 	cacheDuration = 3600
+	avatarsDir    = "avatars/"
 )
 
 // Auth Repository
@@ -200,4 +204,32 @@ func (r *repository) FindByEmail(ctx context.Context, user *models.User) (*model
 
 func (r *repository) generateUserKey(userID string) string {
 	return fmt.Sprintf("%s: %s", r.basePrefix, userID)
+}
+
+// Upload user avatar
+func (r *repository) UploadAvatar(ctx context.Context, fileName string, fileData []byte) error {
+	user, err := utils.GetUserFromCtx(ctx)
+	if err != nil {
+		return err
+	}
+
+	newAvatarFileName := utils.GetUniqFileName(user.UserID.String(), fileName)
+	avatarFilePath := fmt.Sprintf("%s%s", avatarsDir, newAvatarFileName)
+
+	newAvatarFile, err := os.OpenFile(avatarFilePath, os.O_WRONLY|os.O_CREATE, os.FileMode(0777))
+	if err != nil {
+		return err
+	}
+	defer newAvatarFile.Close()
+
+	buffer := bytes.NewBuffer(fileData)
+
+	written, err := io.Copy(newAvatarFile, buffer)
+	if err != nil {
+		return err
+	}
+
+	logger.Infof("written: %v", written)
+
+	return nil
 }

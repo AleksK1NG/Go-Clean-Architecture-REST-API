@@ -1,6 +1,7 @@
 package http
 
 import (
+	"bytes"
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/auth"
 	"github.com/AleksK1NG/api-mc/internal/models"
@@ -9,6 +10,7 @@ import (
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"io"
 	"net/http"
 )
 
@@ -235,5 +237,40 @@ func (h *handlers) GetMe() echo.HandlerFunc {
 		}
 
 		return c.JSON(http.StatusOK, user)
+	}
+}
+
+// Upload user avatar
+func (h *handlers) UploadAvatar() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		ctx, cancel := utils.GetCtxWithReqID(c)
+		defer cancel()
+
+		image, err := utils.ReadImage(c, "avatar")
+		if err != nil {
+			return httpErrors.NewInternalServerError(err)
+		}
+
+		file, err := image.Open()
+		if err != nil {
+			return httpErrors.NewInternalServerError(err)
+		}
+		defer file.Close()
+
+		binaryImage := bytes.NewBuffer(nil)
+
+		if _, err := io.Copy(binaryImage, file); err != nil {
+			return httpErrors.NewInternalServerError(err)
+		}
+
+		if _, err := utils.CheckImageFileContentType(binaryImage.Bytes()); err != nil {
+			return httpErrors.NewBadRequestError(err)
+		}
+
+		if err := h.authUC.UploadAvatar(ctx, image.Filename, binaryImage.Bytes()); err != nil {
+			return utils.ErrResponseWithLog(c, err)
+		}
+
+		return c.NoContent(http.StatusOK)
 	}
 }

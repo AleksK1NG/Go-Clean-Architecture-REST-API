@@ -118,3 +118,8 @@ func (u *useCase) Login(ctx context.Context, user *models.User) (*models.UserWit
 		Token: token,
 	}, nil
 }
+
+// Upload user avatar
+func (u *useCase) UploadAvatar(ctx context.Context, fileName string, fileData []byte) error {
+	return u.authRepo.UploadAvatar(ctx, fileName, fileData)
+}

@@ -141,3 +141,26 @@ func SanitizeRequest(ctx echo.Context, request interface{}) error {
 
 	return validate.StructCtx(ctx.Request().Context(), request)
 }
+
+var allowedImagesContentTypes = map[string]string{
+	"image/bmp":                "bmp",
+	"image/gif":                "gif",
+	"image/png":                "png",
+	"image/jpeg":               "jpeg",
+	"image/jpg":                "jpg",
+	"image/svg+xml":            "svg",
+	"image/webp":               "webp",
+	"image/tiff":               "tiff",
+	"image/vnd.microsoft.icon": "ico",
+}
+
+func CheckImageFileContentType(fileContent []byte) (string, error) {
+	contentType := http.DetectContentType(fileContent)
+
+	extension, ok := allowedImagesContentTypes[contentType]
+	if !ok {
+		return "", errors.New("this content type is not allowed")
+	}
+
+	return extension, nil
+}
