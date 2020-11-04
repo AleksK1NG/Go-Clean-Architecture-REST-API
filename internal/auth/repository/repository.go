@@ -116,6 +116,17 @@ func (r *repository) FindByName(ctx context.Context, name string, query *utils.P
 		return nil, err
 	}
 
+	if totalCount == 0 {
+		return &models.UsersList{
+			TotalCount: totalCount,
+			TotalPages: utils.GetTotalPages(totalCount, query.GetSize()),
+			Page:       query.GetPage(),
+			Size:       query.GetSize(),
+			HasMore:    utils.GetHasMore(query.GetPage(), totalCount, query.GetSize()),
+			Users:      make([]*models.User, 0),
+		}, nil
+	}
+
 	rows, err := r.db.QueryxContext(ctx, findUsers, name, query.GetOffset(), query.GetLimit())
 	if err != nil {
 		return nil, err
@@ -158,6 +169,17 @@ func (r *repository) GetUsers(ctx context.Context, pq *utils.PaginationQuery) (*
 	var totalCount int
 	if err := r.db.GetContext(ctx, &totalCount, getTotal); err != nil {
 		return nil, err
+	}
+
+	if totalCount == 0 {
+		return &models.UsersList{
+			TotalCount: totalCount,
+			TotalPages: utils.GetTotalPages(totalCount, pq.GetSize()),
+			Page:       pq.GetPage(),
+			Size:       pq.GetSize(),
+			HasMore:    utils.GetHasMore(pq.GetPage(), totalCount, pq.GetSize()),
+			Users:      make([]*models.User, 0),
+		}, nil
 	}
 
 	var users = make([]*models.User, 0, pq.GetSize())

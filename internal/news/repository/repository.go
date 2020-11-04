@@ -113,6 +113,17 @@ func (r repository) GetNews(ctx context.Context, pq *utils.PaginationQuery) (*mo
 		return nil, err
 	}
 
+	if totalCount == 0 {
+		return &models.NewsList{
+			TotalCount: totalCount,
+			TotalPages: utils.GetTotalPages(totalCount, pq.GetSize()),
+			Page:       pq.GetPage(),
+			Size:       pq.GetSize(),
+			HasMore:    utils.GetHasMore(pq.GetPage(), totalCount, pq.GetSize()),
+			News:       make([]*models.News, 0),
+		}, nil
+	}
+
 	var newsList = make([]*models.News, 0, pq.GetSize())
 	rows, err := r.db.QueryxContext(ctx, getNews, pq.GetOffset(), pq.GetLimit())
 	if err != nil {
@@ -148,6 +159,16 @@ func (r repository) SearchByTitle(ctx context.Context, title string, query *util
 	var totalCount int
 	if err := r.db.GetContext(ctx, &totalCount, findByTitleCount, title); err != nil {
 		return nil, err
+	}
+	if totalCount == 0 {
+		return &models.NewsList{
+			TotalCount: totalCount,
+			TotalPages: utils.GetTotalPages(totalCount, query.GetSize()),
+			Page:       query.GetPage(),
+			Size:       query.GetSize(),
+			HasMore:    utils.GetHasMore(query.GetPage(), totalCount, query.GetSize()),
+			News:       make([]*models.News, 0),
+		}, nil
 	}
 
 	var newsList = make([]*models.News, 0, query.GetSize())
