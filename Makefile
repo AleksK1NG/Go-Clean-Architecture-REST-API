@@ -31,7 +31,7 @@ check_install:
 swagger: check_install
 	swagger generate spec -o ./swagger/swagger.yaml --scan-models
 
-# линтер
+# linter
 run-linter:
 	golangci-lint -c .golangci.yml run ./...
 
