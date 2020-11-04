@@ -7,6 +7,7 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
 )
 
 // Comments useCase
@@ -22,13 +23,7 @@ func NewCommentsUseCase(cfg *config.Config, commRepo comments.Repository) commen
 
 // Create comment
 func (u *useCase) Create(ctx context.Context, comment *models.Comment) (*models.Comment, error) {
-
-	createdComment, err := u.commRepo.Create(ctx, comment)
-	if err != nil {
-		return nil, err
-	}
-
-	return createdComment, nil
+	return u.commRepo.Create(ctx, comment)
 }
 
 // Update comment
@@ -39,7 +34,7 @@ func (u *useCase) Update(ctx context.Context, comment *models.Comment) (*models.
 	}
 
 	if err := utils.ValidateIsOwner(ctx, comm.AuthorID.String()); err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "commentsUC Update ValidateIsOwner")
 	}
 
 	return u.commRepo.Update(ctx, comment)
@@ -53,7 +48,7 @@ func (u *useCase) Delete(ctx context.Context, commentID uuid.UUID) error {
 	}
 
 	if err := utils.ValidateIsOwner(ctx, comm.AuthorID.String()); err != nil {
-		return err
+		return errors.WithMessage(err, "commentsUC Delete ValidateIsOwner")
 	}
 	return u.commRepo.Delete(ctx, commentID)
 }

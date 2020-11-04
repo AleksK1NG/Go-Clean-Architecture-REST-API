@@ -11,6 +11,7 @@ import (
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -41,7 +42,7 @@ func (r *repository) Create(ctx context.Context, comment *models.Comment) (*mode
 		&comment.NewsID,
 		&comment.Message,
 	).StructScan(c); err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "commentsRepo Create StructScan")
 	}
 
 	return c, nil
@@ -52,7 +53,7 @@ func (r *repository) Update(ctx context.Context, comment *models.Comment) (*mode
 
 	comm := &models.Comment{}
 	if err := r.db.QueryRowxContext(ctx, updateComment, comment.Message, comment.CommentID).StructScan(comm); err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "commentsRepo Update QueryRowxContext")
 	}
 
 	if err := r.redisPool.Delete(r.createKey(comment.CommentID.String())); err != nil {
@@ -67,15 +68,15 @@ func (r *repository) Delete(ctx context.Context, commentID uuid.UUID) error {
 
 	result, err := r.db.ExecContext(ctx, deleteComment, commentID)
 	if err != nil {
-		return err
+		return errors.WithMessage(err, "commentsRepo Delete ExecContext")
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return err
+		return errors.WithMessage(err, "commentsRepo Delete RowsAffected")
 	}
 
 	if rowsAffected == 0 {
-		return sql.ErrNoRows
+		return errors.WithMessage(sql.ErrNoRows, "commentsRepo Delete no rowsAffected")
 	}
 
 	if err := r.redisPool.Delete(r.createKey(commentID.String())); err != nil {
@@ -94,7 +95,7 @@ func (r *repository) GetByID(ctx context.Context, commentID uuid.UUID) (*models.
 	}
 
 	if err := r.db.GetContext(ctx, comment, getCommentByID, commentID); err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "commentsRepo GetByID GetContext")
 	}
 
 	if err := r.redisPool.SetexJSONContext(ctx, r.createKey(commentID.String()), durationSeconds, comment); err != nil {
@@ -109,7 +110,7 @@ func (r *repository) GetAllByNewsID(ctx context.Context, newsID uuid.UUID, query
 
 	var totalCount int
 	if err := r.db.QueryRowContext(ctx, getTotalCountByNewsId, newsID).Scan(&totalCount); err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "commentsRepo GetAllByNewsID QueryRowContext")
 	}
 	if totalCount == 0 {
 		return &models.CommentsList{
@@ -124,7 +125,7 @@ func (r *repository) GetAllByNewsID(ctx context.Context, newsID uuid.UUID, query
 
 	rows, err := r.db.QueryxContext(ctx, getCommentsByNewsId, newsID, query.GetOffset(), query.GetLimit())
 	if err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "commentsRepo GetAllByNewsID QueryxContext")
 	}
 	defer rows.Close()
 
@@ -132,13 +133,13 @@ func (r *repository) GetAllByNewsID(ctx context.Context, newsID uuid.UUID, query
 	for rows.Next() {
 		comment := &models.CommentBase{}
 		if err := rows.StructScan(comment); err != nil {
-			return nil, err
+			return nil, errors.WithMessage(err, "commentsRepo GetAllByNewsID StructScan")
 		}
 		commentsList = append(commentsList, comment)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "commentsRepo GetAllByNewsID rows.Err")
 	}
 
 	return &models.CommentsList{
