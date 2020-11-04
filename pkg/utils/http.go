@@ -95,7 +95,7 @@ func ErrResponseWithLog(ctx echo.Context, err error) error {
 		"ErrResponseWithLog, RequestID: %s, IPAddress: %s, Error: %s",
 		GetRequestID(ctx),
 		GetIPAddress(ctx),
-		err.Error(),
+		err,
 	)
 	return ctx.JSON(httpErrors.ErrorResponse(err))
 }

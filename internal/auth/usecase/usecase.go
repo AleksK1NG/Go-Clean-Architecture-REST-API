@@ -8,6 +8,7 @@ import (
 	"github.com/AleksK1NG/api-mc/pkg/httpErrors"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
 )
 
 // Auth useCase
@@ -25,7 +26,7 @@ func NewAuthUseCase(cfg *config.Config, authRepo auth.Repository) auth.UseCase {
 func (u *useCase) Register(ctx context.Context, user *models.User) (*models.UserWithToken, error) {
 
 	if err := user.PrepareCreate(); err != nil {
-		return nil, httpErrors.NewBadRequestError(err.Error())
+		return nil, httpErrors.NewBadRequestError(errors.WithMessage(err, "authUC Register PrepareCreate"))
 	}
 
 	createdUser, err := u.authRepo.Register(ctx, user)
@@ -36,7 +37,7 @@ func (u *useCase) Register(ctx context.Context, user *models.User) (*models.User
 
 	token, err := utils.GenerateJWTToken(createdUser, u.cfg)
 	if err != nil {
-		return nil, err
+		return nil, httpErrors.NewInternalServerError(errors.WithMessage(err, "authUC Register GenerateJWTToken"))
 	}
 
 	return &models.UserWithToken{
@@ -49,7 +50,7 @@ func (u *useCase) Register(ctx context.Context, user *models.User) (*models.User
 func (u *useCase) Update(ctx context.Context, user *models.User) (*models.User, error) {
 
 	if err := user.PrepareUpdate(); err != nil {
-		return nil, err
+		return nil, httpErrors.NewBadRequestError(errors.WithMessage(err, "authUC Register PrepareUpdate"))
 	}
 
 	updatedUser, err := u.authRepo.Update(ctx, user)
@@ -63,10 +64,7 @@ func (u *useCase) Update(ctx context.Context, user *models.User) (*models.User, 
 
 // Delete new user
 func (u *useCase) Delete(ctx context.Context, userID uuid.UUID) error {
-	if err := u.authRepo.Delete(ctx, userID); err != nil {
-		return err
-	}
-	return nil
+	return u.authRepo.Delete(ctx, userID)
 }
 
 // Get user by id
@@ -88,11 +86,7 @@ func (u *useCase) FindByName(ctx context.Context, name string, query *utils.Pagi
 
 // Get users with pagination
 func (u *useCase) GetUsers(ctx context.Context, pq *utils.PaginationQuery) (*models.UsersList, error) {
-	users, err := u.authRepo.GetUsers(ctx, pq)
-	if err != nil {
-		return nil, err
-	}
-	return users, nil
+	return u.authRepo.GetUsers(ctx, pq)
 }
 
 // Login user, returns user model with jwt token
@@ -103,14 +97,14 @@ func (u *useCase) Login(ctx context.Context, user *models.User) (*models.UserWit
 	}
 
 	if err = foundUser.ComparePasswords(user.Password); err != nil {
-		return nil, err
+		return nil, httpErrors.NewUnauthorizedError(errors.WithMessage(err, "authUC GetUsers ComparePasswords"))
 	}
 
 	foundUser.SanitizePassword()
 
 	token, err := utils.GenerateJWTToken(foundUser, u.cfg)
 	if err != nil {
-		return nil, err
+		return nil, httpErrors.NewInternalServerError(errors.WithMessage(err, "authUC GetUsers GenerateJWTToken"))
 	}
 
 	return &models.UserWithToken{
