@@ -10,6 +10,7 @@ import (
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/pkg/errors"
 	"io"
 	"net/http"
 )
@@ -102,7 +103,7 @@ func (h *handlers) Logout() echo.HandlerFunc {
 
 		cookie, err := c.Cookie("session-id")
 		if err != nil {
-			if err == http.ErrNoCookie {
+			if errors.Is(err, http.ErrNoCookie) {
 				return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(err))
 			}
 			return c.JSON(http.StatusInternalServerError, httpErrors.NewInternalServerError(err))

@@ -58,7 +58,7 @@ func ExtractJWTFromRequest(r *http.Request) (map[string]interface{}, error) {
 	})
 
 	if err != nil {
-		if err == jwt.ErrSignatureInvalid {
+		if errors.Is(err, jwt.ErrSignatureInvalid) {
 			return nil, errors.New("invalid token signature")
 		}
 		return nil, err
