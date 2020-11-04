@@ -7,14 +7,21 @@ import (
 	"github.com/AleksK1NG/api-mc/pkg/db/redis"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"log"
+	"os"
 )
 
-const (
-	configPath = "./config/config-local"
+var (
+	configPath = os.Getenv("config")
 )
 
 func main() {
 	log.Println("Starting api server")
+
+	if configPath == "docker" {
+		configPath = "./config/config-docker"
+	} else {
+		configPath = "./config/config-local"
+	}
 
 	cfgFile, err := config.LoadConfig(configPath)
 	if err != nil {

@@ -45,7 +45,7 @@ func NewRedisClient(config *config.Config) *RedisClient {
 	}
 
 	client := redis.NewClient(&redis.Options{
-		Addr:         "localhost:6379",
+		Addr:         redisHost,
 		MinIdleConns: 200,
 		PoolSize:     12000,
 		PoolTimeout:  240 * time.Second,
