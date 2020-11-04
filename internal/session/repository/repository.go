@@ -8,6 +8,7 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/session"
 	"github.com/AleksK1NG/api-mc/pkg/db/redis"
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -32,7 +33,7 @@ func (s *sessionRepository) CreateSession(ctx context.Context, session *models.S
 	sessionKey := s.createKey(session.SessionID)
 
 	if err := s.redisPool.SetexJSONContext(ctx, sessionKey, expire, session); err != nil {
-		return "", err
+		return "", errors.WithMessage(err, "sessRepo CreateSession SetexJSONContext")
 	}
 
 	return sessionKey, nil
@@ -42,7 +43,7 @@ func (s *sessionRepository) CreateSession(ctx context.Context, session *models.S
 func (s *sessionRepository) GetSessionByID(ctx context.Context, sessionId string) (*models.Session, error) {
 	sess := &models.Session{}
 	if err := s.redisPool.GetJSONContext(ctx, sessionId, sess); err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "sessRepo GetSessionByID GetJSONContext")
 	}
 	return sess, nil
 }
