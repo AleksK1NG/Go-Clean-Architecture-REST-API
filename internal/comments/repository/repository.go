@@ -106,10 +106,20 @@ func (r *repository) GetByID(ctx context.Context, commentID uuid.UUID) (*models.
 
 // GetAllByNewsID comments
 func (r *repository) GetAllByNewsID(ctx context.Context, newsID uuid.UUID, query *utils.PaginationQuery) (*models.CommentsList, error) {
-	var totalCount int
 
+	var totalCount int
 	if err := r.db.QueryRowContext(ctx, getTotalCountByNewsId, newsID).Scan(&totalCount); err != nil {
 		return nil, err
+	}
+	if totalCount == 0 {
+		return &models.CommentsList{
+			TotalCount: totalCount,
+			TotalPages: utils.GetTotalPages(totalCount, query.GetSize()),
+			Page:       query.GetPage(),
+			Size:       query.GetSize(),
+			HasMore:    utils.GetHasMore(query.GetPage(), totalCount, query.GetSize()),
+			Comments:   make([]*models.CommentBase, 0),
+		}, nil
 	}
 
 	rows, err := r.db.QueryxContext(ctx, getCommentsByNewsId, newsID, query.GetOffset(), query.GetLimit())
