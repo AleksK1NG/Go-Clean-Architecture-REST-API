@@ -12,6 +12,7 @@ import (
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"github.com/pkg/errors"
 	"io"
 	"os"
 )
@@ -42,7 +43,7 @@ func (r *repository) Register(ctx context.Context, user *models.User) (*models.U
 		&user.Password, &user.Role, &user.About, &user.Avatar, &user.PhoneNumber, &user.Address, &user.City,
 		&user.Gender, &user.Postcode, &user.Birthday,
 	).StructScan(&u); err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "authRepo Register StructScan")
 	}
 
 	return u, nil
@@ -57,7 +58,7 @@ func (r *repository) Update(ctx context.Context, user *models.User) (*models.Use
 		&user.Role, &user.About, &user.Avatar, &user.PhoneNumber, &user.Address, &user.City, &user.Gender,
 		&user.Postcode, &user.Birthday, &user.UserID,
 	); err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "authRepo Update GetContext")
 	}
 
 	if err := r.redisClient.DeleteContext(ctx, r.generateUserKey(u.UserID.String())); err != nil {
@@ -71,14 +72,14 @@ func (r *repository) Delete(ctx context.Context, userID uuid.UUID) error {
 
 	result, err := r.db.ExecContext(ctx, deleteUserQuery, userID)
 	if err != nil {
-		return err
+		return errors.WithMessage(err, "authRepo Delete ExecContext")
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return err
+		return errors.WithMessage(err, "authRepo Delete RowsAffected")
 	}
 	if rowsAffected == 0 {
-		return sql.ErrNoRows
+		return errors.WithMessage(sql.ErrNoRows, "authRepo Delete rowsAffected == 0")
 	}
 
 	if err := r.redisClient.DeleteContext(ctx, r.generateUserKey(userID.String())); err != nil {
@@ -98,7 +99,7 @@ func (r *repository) GetByID(ctx context.Context, userID uuid.UUID) (*models.Use
 	}
 
 	if err := r.db.QueryRowxContext(ctx, getUserQuery, userID).StructScan(user); err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "authRepo GetByID QueryRowxContext")
 	}
 
 	if err := r.redisClient.SetexJSONContext(ctx, r.generateUserKey(userID.String()), cacheDuration, user); err != nil {
@@ -113,7 +114,7 @@ func (r *repository) FindByName(ctx context.Context, name string, query *utils.P
 
 	var totalCount int
 	if err := r.db.GetContext(ctx, &totalCount, getTotalCount, name); err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "authRepo FindByName totalCount GetContext")
 	}
 
 	if totalCount == 0 {
@@ -129,13 +130,13 @@ func (r *repository) FindByName(ctx context.Context, name string, query *utils.P
 
 	rows, err := r.db.QueryxContext(ctx, findUsers, name, query.GetOffset(), query.GetLimit())
 	if err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "authRepo FindByName QueryxContext")
 	}
 
 	defer func() {
 		if closeErr := rows.Close(); closeErr != nil {
 			if err == nil {
-				err = closeErr
+				err = errors.WithMessage(closeErr, "authRepo FindByName rows.Close()")
 			}
 		}
 	}()
@@ -144,13 +145,13 @@ func (r *repository) FindByName(ctx context.Context, name string, query *utils.P
 	for rows.Next() {
 		var user models.User
 		if err = rows.StructScan(&user); err != nil {
-			return nil, err
+			return nil, errors.WithMessage(err, "authRepo FindByName StructScan")
 		}
 		users = append(users, &user)
 	}
 
 	if err = rows.Err(); err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "authRepo FindByName rows.Err()")
 	}
 
 	return &models.UsersList{
@@ -168,7 +169,7 @@ func (r *repository) GetUsers(ctx context.Context, pq *utils.PaginationQuery) (*
 
 	var totalCount int
 	if err := r.db.GetContext(ctx, &totalCount, getTotal); err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "authRepo GetUsers totalCount GetContext")
 	}
 
 	if totalCount == 0 {
@@ -191,7 +192,7 @@ func (r *repository) GetUsers(ctx context.Context, pq *utils.PaginationQuery) (*
 		pq.GetOffset(),
 		pq.GetLimit(),
 	); err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "authRepo GetUsers SelectContext")
 	}
 
 	return &models.UsersList{
@@ -214,7 +215,7 @@ func (r *repository) FindByEmail(ctx context.Context, user *models.User) (*model
 	}
 
 	if err := r.db.QueryRowxContext(ctx, findUserByEmail, user.Email).StructScan(foundUser); err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "authRepo FindByEmail QueryRowxContext")
 	}
 
 	if err := r.redisClient.SetexJSONContext(ctx, r.generateUserKey(user.Email), cacheDuration, foundUser); err != nil {
@@ -232,7 +233,7 @@ func (r *repository) generateUserKey(userID string) string {
 func (r *repository) UploadAvatar(ctx context.Context, fileName string, fileData []byte) error {
 	user, err := utils.GetUserFromCtx(ctx)
 	if err != nil {
-		return err
+		return errors.WithMessage(err, "authRepo UploadAvatar GetUserFromCtx")
 	}
 
 	newAvatarFileName := utils.GetUniqFileName(user.UserID.String(), fileName)
@@ -240,14 +241,14 @@ func (r *repository) UploadAvatar(ctx context.Context, fileName string, fileData
 
 	newAvatarFile, err := os.OpenFile(avatarFilePath, os.O_WRONLY|os.O_CREATE, os.FileMode(0777))
 	if err != nil {
-		return err
+		return errors.WithMessage(err, "authRepo UploadAvatar OpenFile")
 	}
 	defer newAvatarFile.Close()
 
 	buffer := bytes.NewBuffer(fileData)
 
 	if _, err := io.Copy(newAvatarFile, buffer); err != nil {
-		return err
+		return errors.WithMessage(err, "authRepo UploadAvatar Copy")
 	}
 
 	return nil
