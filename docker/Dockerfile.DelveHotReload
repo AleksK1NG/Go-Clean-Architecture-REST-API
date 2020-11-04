@@ -4,6 +4,8 @@ RUN go get github.com/githubnemo/CompileDaemon && \
   go get github.com/go-delve/delve/cmd/dlv
 WORKDIR /app
 
+ENV config=docker
+
 COPY .. /app
 
 RUN go mod download

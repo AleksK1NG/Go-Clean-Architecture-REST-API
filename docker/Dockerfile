@@ -10,6 +10,8 @@ FROM golang:1.15.2 as builder
 
 COPY --from=modules /go/pkg /go/pkg
 
+ENV config=docker
+
 # add a non-privileged user
 RUN useradd -u 10001 myapp
 

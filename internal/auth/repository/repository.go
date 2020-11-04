@@ -224,12 +224,9 @@ func (r *repository) UploadAvatar(ctx context.Context, fileName string, fileData
 
 	buffer := bytes.NewBuffer(fileData)
 
-	written, err := io.Copy(newAvatarFile, buffer)
-	if err != nil {
+	if _, err := io.Copy(newAvatarFile, buffer); err != nil {
 		return err
 	}
-
-	logger.Infof("written: %v", written)
 
 	return nil
 }
