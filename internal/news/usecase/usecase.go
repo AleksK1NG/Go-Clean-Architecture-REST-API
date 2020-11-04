@@ -7,6 +7,7 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/news"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
 )
 
 // News useCase
@@ -24,13 +25,13 @@ func NewNewsUseCase(cfg *config.Config, newsRepo news.Repository) news.UseCase {
 func (u *useCase) Create(ctx context.Context, news *models.News) (*models.News, error) {
 	user, err := utils.GetUserFromCtx(ctx)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "newsUC Create GetUserFromCtx")
 	}
 
 	news.AuthorID = user.UserID
 
 	if err = utils.ValidateStruct(ctx, news); err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "newsUC Create ValidateStruct")
 	}
 
 	n, err := u.newsRepo.Create(ctx, news)
@@ -49,7 +50,7 @@ func (u *useCase) Update(ctx context.Context, news *models.News) (*models.News, 
 	}
 
 	if err = utils.ValidateIsOwner(ctx, newsByID.AuthorID.String()); err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "newsUC Update ValidateIsOwner")
 	}
 
 	updatedUser, err := u.newsRepo.Update(ctx, news)
@@ -62,12 +63,7 @@ func (u *useCase) Update(ctx context.Context, news *models.News) (*models.News, 
 
 // Get news by id
 func (u *useCase) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*models.NewsBase, error) {
-	newsByID, err := u.newsRepo.GetNewsByID(ctx, newsID)
-	if err != nil {
-		return nil, err
-	}
-
-	return newsByID, nil
+	return u.newsRepo.GetNewsByID(ctx, newsID)
 }
 
 // Delete news
@@ -78,7 +74,7 @@ func (u *useCase) Delete(ctx context.Context, newsID uuid.UUID) error {
 	}
 
 	if err := utils.ValidateIsOwner(ctx, newsByID.AuthorID.String()); err != nil {
-		return err
+		return errors.WithMessage(err, "newsUC Update ValidateIsOwner")
 	}
 
 	if err := u.newsRepo.Delete(ctx, newsID); err != nil {
@@ -90,12 +86,7 @@ func (u *useCase) Delete(ctx context.Context, newsID uuid.UUID) error {
 
 // Get news
 func (u *useCase) GetNews(ctx context.Context, pq *utils.PaginationQuery) (*models.NewsList, error) {
-	newsList, err := u.newsRepo.GetNews(ctx, pq)
-	if err != nil {
-		return nil, err
-	}
-
-	return newsList, nil
+	return u.newsRepo.GetNews(ctx, pq)
 }
 
 // Find nes by title

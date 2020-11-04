@@ -11,6 +11,7 @@ import (
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -42,7 +43,7 @@ func (r repository) Create(ctx context.Context, news *models.News) (*models.News
 		&news.Content,
 		&news.Category,
 	).StructScan(&n); err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "newsRepo Create QueryRowxContext")
 	}
 
 	return &n, nil
@@ -60,7 +61,7 @@ func (r repository) Update(ctx context.Context, news *models.News) (*models.News
 		&news.ImageURL,
 		&news.Category,
 	).StructScan(&n); err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "newsRepo Update QueryRowxContext")
 	}
 
 	return &n, nil
@@ -76,7 +77,7 @@ func (r repository) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*models.
 	}
 
 	if err := r.db.GetContext(ctx, n, getNewsByID, newsID); err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "newsRepo GetNewsByID GetContext")
 	}
 
 	if err := r.redisPool.SetexJSONContext(ctx, r.getKeyWithPrefix(newsID.String()), cacheDuration, n); err != nil {
@@ -91,15 +92,15 @@ func (r repository) Delete(ctx context.Context, newsID uuid.UUID) error {
 
 	result, err := r.db.ExecContext(ctx, deleteNews, newsID)
 	if err != nil {
-		return err
+		return errors.WithMessage(err, "newsRepo Delete ExecContext")
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return err
+		return errors.WithMessage(err, "newsRepo Delete RowsAffected")
 	}
 	if rowsAffected == 0 {
-		return sql.ErrNoRows
+		return errors.WithMessage(sql.ErrNoRows, "newsRepo Deleteno no rowsAffected")
 	}
 
 	return nil
@@ -110,7 +111,7 @@ func (r repository) GetNews(ctx context.Context, pq *utils.PaginationQuery) (*mo
 
 	var totalCount int
 	if err := r.db.GetContext(ctx, &totalCount, getTotalCount); err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "newsRepo GetNews GetContext")
 	}
 
 	if totalCount == 0 {
@@ -127,20 +128,20 @@ func (r repository) GetNews(ctx context.Context, pq *utils.PaginationQuery) (*mo
 	var newsList = make([]*models.News, 0, pq.GetSize())
 	rows, err := r.db.QueryxContext(ctx, getNews, pq.GetOffset(), pq.GetLimit())
 	if err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "newsRepo GetNews QueryxContext")
 	}
 	defer rows.Close()
 
 	for rows.Next() {
 		n := &models.News{}
 		if err := rows.StructScan(n); err != nil {
-			return nil, err
+			return nil, errors.WithMessage(err, "newsRepo GetNews StructScan")
 		}
 		newsList = append(newsList, n)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "newsRepo GetNews rows.Err")
 	}
 
 	return &models.NewsList{
@@ -158,7 +159,7 @@ func (r repository) SearchByTitle(ctx context.Context, title string, query *util
 
 	var totalCount int
 	if err := r.db.GetContext(ctx, &totalCount, findByTitleCount, title); err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "newsRepo SearchByTitle GetContext")
 	}
 	if totalCount == 0 {
 		return &models.NewsList{
@@ -174,20 +175,20 @@ func (r repository) SearchByTitle(ctx context.Context, title string, query *util
 	var newsList = make([]*models.News, 0, query.GetSize())
 	rows, err := r.db.QueryxContext(ctx, findByTitle, title, query.GetOffset(), query.GetLimit())
 	if err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "newsRepo SearchByTitle QueryxContext")
 	}
 	defer rows.Close()
 
 	for rows.Next() {
 		n := &models.News{}
 		if err := rows.StructScan(n); err != nil {
-			return nil, err
+			return nil, errors.WithMessage(err, "newsRepo SearchByTitle StructScan")
 		}
 		newsList = append(newsList, n)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "newsRepo SearchByTitle rows.Err")
 	}
 
 	return &models.NewsList{
