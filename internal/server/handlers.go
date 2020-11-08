@@ -1,6 +1,8 @@
 package server
 
 import (
+	"github.com/AleksK1NG/api-mc/docs"
+	//_ "github.com/AleksK1NG/api-mc/docs"
 	authHttp "github.com/AleksK1NG/api-mc/internal/auth/delivery/http"
 	authRepository "github.com/AleksK1NG/api-mc/internal/auth/repository"
 	authUseCase "github.com/AleksK1NG/api-mc/internal/auth/usecase"
@@ -18,6 +20,7 @@ import (
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	echoSwagger "github.com/swaggo/echo-swagger"
 	"net/http"
 	_ "net/http/pprof"
 )
@@ -53,10 +56,15 @@ func (s *server) MapHandlers(e *echo.Echo) error {
 
 	mw := apiMiddlewares.NewMiddlewareManager(sessUC, authUC, s.config, []string{"*"})
 
+	e.Use(mw.RequestLoggerMiddleware)
+
+	docs.SwaggerInfo.Title = "Swagger Example API"
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
+
 	if s.config.Server.SSL {
 		e.Pre(middleware.HTTPSRedirect())
 	}
-	e.Use(mw.RequestLoggerMiddleware)
+
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"https://labstack.com", "https://labstack.net"},
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},

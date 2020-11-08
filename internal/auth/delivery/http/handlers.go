@@ -27,7 +27,13 @@ func NewAuthHandlers(cfg *config.Config, authUC auth.UseCase, sessUC session.UCS
 	return &handlers{cfg, authUC, sessUC}
 }
 
-// Register new user
+// Register godoc
+// @Summary Register new user
+// @Description register new user, returns user and token
+// @Accept json
+// @Produce json
+// @Success 201 {object} models.User
+// @Router /auth/register [post]
 func (h *handlers) Register() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
@@ -57,7 +63,13 @@ func (h *handlers) Register() echo.HandlerFunc {
 	}
 }
 
-// Login user
+// Login godoc
+// @Summary Login new user
+// @Description login user, returns user and set session
+// @Accept json
+// @Produce json
+// @Success 200 {object} models.User
+// @Router /auth/login [post]
 func (h *handlers) Login() echo.HandlerFunc {
 	// Login user, validate email and password input
 	type Login struct {
@@ -95,7 +107,13 @@ func (h *handlers) Login() echo.HandlerFunc {
 	}
 }
 
-// Logout user
+// Logout godoc
+// @Summary Logout user
+// @Description logout user removing session
+// @Accept  json
+// @Produce  json
+// @Success 200 {string} string	"ok"
+// @Router /auth/logout [post]
 func (h *handlers) Logout() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
@@ -119,7 +137,14 @@ func (h *handlers) Logout() echo.HandlerFunc {
 	}
 }
 
-// Update existing user
+// Update godoc
+// @Summary Update user
+// @Description update existing user
+// @Accept json
+// @Param id path int true "user_id"
+// @Produce json
+// @Success 200 {object} models.User
+// @Router /auth/{id} [put]
 func (h *handlers) Update() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
@@ -146,7 +171,14 @@ func (h *handlers) Update() echo.HandlerFunc {
 	}
 }
 
-// Get user by id
+// GetUserByID godoc
+// @Summary get user by id
+// @Description get string by ID
+// @Accept  json
+// @Produce  json
+// @Param id path int true "user_id"
+// @Success 200 {object} models.User
+// @Router /auth/{id} [get]
 func (h *handlers) GetUserByID() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
@@ -166,7 +198,13 @@ func (h *handlers) GetUserByID() echo.HandlerFunc {
 	}
 }
 
-// Delete user handler
+// @Summary Delete
+// @Description some description
+// @Accept json
+// @Param id path int true "user_id"
+// @Produce json
+// @Success 200 {string} string	"ok"
+// @Router /auth/{id} [delete]
 func (h *handlers) Delete() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
@@ -185,7 +223,14 @@ func (h *handlers) Delete() echo.HandlerFunc {
 	}
 }
 
-// Find users by name
+// FindByName godoc
+// @Summary Find by name
+// @Description Find user by name
+// @Accept json
+// @Param name query string false "name search" Format(email)
+// @Produce json
+// @Success 200 {array} models.User
+// @Router /auth/find [get]
 func (h *handlers) FindByName() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
@@ -209,7 +254,14 @@ func (h *handlers) FindByName() echo.HandlerFunc {
 	}
 }
 
-// Gat all users with pagination page and size query params
+// GetUsers godoc
+// @Summary Get users
+// @Description Get the list of all users
+// @Accept json
+// @Param name query string false "name search" Format(email)
+// @Produce json
+// @Success 200 {array} models.User
+// @Router /auth/find [get]
 func (h *handlers) GetUsers() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
@@ -229,7 +281,13 @@ func (h *handlers) GetUsers() echo.HandlerFunc {
 	}
 }
 
-// Load current user from ctx with auth middleware
+// GetMe godoc
+// @Summary Get user by id
+// @Description Get current user by id
+// @Accept json
+// @Produce json
+// @Success 200 {object} models.User
+// @Router /auth/me [get]
 func (h *handlers) GetMe() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		user, ok := c.Get("user").(*models.User)
@@ -241,7 +299,13 @@ func (h *handlers) GetMe() echo.HandlerFunc {
 	}
 }
 
-// Upload user avatar
+// UploadAvatar godoc
+// @Summary Post avatar
+// @Description Post user avatar image
+// @Accept json
+// @Produce json
+// @Success 200 {string} string	"ok"
+// @Router /auth/avatar [post]
 func (h *handlers) UploadAvatar() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)

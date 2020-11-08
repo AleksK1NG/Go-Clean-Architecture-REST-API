@@ -37,3 +37,6 @@ run-linter:
 
 local:
 	 docker-compose -f docker-compose.local.yml up --build
+
+swaggo:
+	swag init -g **/**/*.go

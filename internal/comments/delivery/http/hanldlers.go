@@ -21,7 +21,13 @@ func NewCommentsHandlers(cfg *config.Config, comUC comments.UseCase) comments.Ha
 	return &handlers{cfg: cfg, comUC: comUC}
 }
 
-// Create comment
+// @Summary Create new comment
+// @Description create new comment
+// @Accept  json
+// @Produce  json
+// @Success 201 {object} models.Comment
+// @Failure 500 {object} httpErrors.RestErr
+// @Router /comments [post]
 func (h *handlers) Create() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
@@ -48,7 +54,14 @@ func (h *handlers) Create() echo.HandlerFunc {
 	}
 }
 
-// Update comment
+// @Summary Update comment
+// @Description update new comment
+// @Accept  json
+// @Produce  json
+// @Param id path int true "comment_id"
+// @Success 200 {object} models.Comment
+// @Failure 500 {object} httpErrors.RestErr
+// @Router /comments/{id} [put]
 func (h *handlers) Update() echo.HandlerFunc {
 	// Update Comment
 	type UpdateComment struct {
@@ -82,7 +95,14 @@ func (h *handlers) Update() echo.HandlerFunc {
 	}
 }
 
-// Delete comment
+// @Summary Delete comment
+// @Description delete comment
+// @Accept  json
+// @Produce  json
+// @Param id path int true "comment_id"
+// @Success 200 {string} string	"ok"
+// @Failure 500 {object} httpErrors.RestErr
+// @Router /comments/{id} [delete]
 func (h *handlers) Delete() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
@@ -101,7 +121,14 @@ func (h *handlers) Delete() echo.HandlerFunc {
 	}
 }
 
-// GetByID comment
+// @Summary Get comment
+// @Description Get comment by id
+// @Accept  json
+// @Produce  json
+// @Param id path int true "comment_id"
+// @Success 200 {object} models.Comment
+// @Failure 500 {object} httpErrors.RestErr
+// @Router /comments/{id} [get]
 func (h *handlers) GetByID() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
@@ -121,7 +148,14 @@ func (h *handlers) GetByID() echo.HandlerFunc {
 	}
 }
 
-// GetAllByNewsID comments
+// @Summary Get comments by news
+// @Description Get all comment by news id
+// @Accept  json
+// @Produce  json
+// @Param id path int true "news_id"
+// @Success 200 {array} models.Comment
+// @Failure 500 {object} httpErrors.RestErr
+// @Router /comments/byNewsId/{id} [get]
 func (h *handlers) GetAllByNewsID() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
