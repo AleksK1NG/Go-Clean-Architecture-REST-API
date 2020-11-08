@@ -23,6 +23,84 @@ definitions:
     - message
     - news_id
     type: object
+  models.CommentBase:
+    properties:
+      author:
+        type: string
+      author_id:
+        type: string
+      avatar_url:
+        type: string
+      comment_id:
+        type: string
+      likes:
+        type: integer
+      message:
+        type: string
+      updated_at:
+        type: string
+    required:
+    - author
+    - author_id
+    - message
+    type: object
+  models.CommentsList:
+    properties:
+      comments:
+        items:
+          $ref: '#/definitions/models.CommentBase'
+        type: array
+      has_more:
+        type: boolean
+      page:
+        type: integer
+      size:
+        type: integer
+      total_count:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+  models.News:
+    properties:
+      author_id:
+        type: string
+      category:
+        type: string
+      content:
+        type: string
+      created_at:
+        type: string
+      image_url:
+        type: string
+      news_id:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+    required:
+    - author_id
+    - content
+    - title
+    type: object
+  models.NewsList:
+    properties:
+      has_more:
+        type: boolean
+      news:
+        items:
+          $ref: '#/definitions/models.News'
+        type: array
+      page:
+        type: integer
+      size:
+        type: integer
+      total_count:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
   models.User:
     properties:
       about:
@@ -65,6 +143,23 @@ definitions:
     - first_name
     - last_name
     - password
+    type: object
+  models.UsersList:
+    properties:
+      has_more:
+        type: boolean
+      page:
+        type: integer
+      size:
+        type: integer
+      total_count:
+        type: integer
+      total_pages:
+        type: integer
+      users:
+        items:
+          $ref: '#/definitions/models.User'
+        type: array
     type: object
 info:
   contact:
@@ -160,9 +255,7 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/models.User'
-            type: array
+            $ref: '#/definitions/models.UsersList'
       summary: Get users
   /auth/login:
     post:
@@ -317,12 +410,104 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/models.Comment'
-            type: array
+            $ref: '#/definitions/models.CommentsList'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/httpErrors.RestErr'
       summary: Get comments by news
+  /news:
+    get:
+      consumes:
+      - application/json
+      description: Get all news with pagination
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.NewsList'
+      summary: Get all news
+  /news/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete by id news handler
+      parameters:
+      - description: news_id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+      summary: Delete news
+    get:
+      consumes:
+      - application/json
+      description: Get by id news handler
+      parameters:
+      - description: news_id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.News'
+      summary: Get by id news
+    put:
+      consumes:
+      - application/json
+      description: Update news handler
+      parameters:
+      - description: news_id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.News'
+      summary: Update news
+  /news/create:
+    post:
+      consumes:
+      - application/json
+      description: Create news handler
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.News'
+      summary: Create news
+  /news/search:
+    get:
+      consumes:
+      - application/json
+      description: Search news by title
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.NewsList'
+      summary: Search by title
 swagger: "2.0"

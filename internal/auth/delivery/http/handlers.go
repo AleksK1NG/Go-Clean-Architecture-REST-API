@@ -229,7 +229,7 @@ func (h *handlers) Delete() echo.HandlerFunc {
 // @Accept json
 // @Param name query string false "name search" Format(email)
 // @Produce json
-// @Success 200 {array} models.User
+// @Success 200 {object} models.UsersList
 // @Router /auth/find [get]
 func (h *handlers) FindByName() echo.HandlerFunc {
 	return func(c echo.Context) error {
@@ -260,7 +260,7 @@ func (h *handlers) FindByName() echo.HandlerFunc {
 // @Accept json
 // @Param name query string false "name search" Format(email)
 // @Produce json
-// @Success 200 {array} models.User
+// @Success 200 {object} models.UsersList
 // @Router /auth/find [get]
 func (h *handlers) GetUsers() echo.HandlerFunc {
 	return func(c echo.Context) error {

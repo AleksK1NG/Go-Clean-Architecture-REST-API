@@ -21,7 +21,13 @@ func NewNewsHandlers(cfg *config.Config, newsUC news.UseCase) news.Handlers {
 	return &handlers{cfg, newsUC}
 }
 
-// Create news handler
+// Create godoc
+// @Summary Create news
+// @Description Create news handler
+// @Accept json
+// @Produce json
+// @Success 201 {object} models.News
+// @Router /news/create [post]
 func (h handlers) Create() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
@@ -41,7 +47,14 @@ func (h handlers) Create() echo.HandlerFunc {
 	}
 }
 
-// Update news item handler
+// Update godoc
+// @Summary Update news
+// @Description Update news handler
+// @Accept json
+// @Produce json
+// @Param id path int true "news_id"
+// @Success 200 {object} models.News
+// @Router /news/{id} [put]
 func (h handlers) Update() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
@@ -67,7 +80,14 @@ func (h handlers) Update() echo.HandlerFunc {
 	}
 }
 
-// Get news by id
+// GetByID godoc
+// @Summary Get by id news
+// @Description Get by id news handler
+// @Accept json
+// @Produce json
+// @Param id path int true "news_id"
+// @Success 200 {object} models.News
+// @Router /news/{id} [get]
 func (h handlers) GetByID() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
@@ -87,7 +107,14 @@ func (h handlers) GetByID() echo.HandlerFunc {
 	}
 }
 
-// Delete news handler
+// Delete godoc
+// @Summary Delete news
+// @Description Delete by id news handler
+// @Accept json
+// @Produce json
+// @Param id path int true "news_id"
+// @Success 200 {string} string	"ok"
+// @Router /news/{id} [delete]
 func (h handlers) Delete() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
@@ -106,7 +133,13 @@ func (h handlers) Delete() echo.HandlerFunc {
 	}
 }
 
-// Get all news with pagination
+// GetNews godoc
+// @Summary Get all news
+// @Description Get all news with pagination
+// @Accept json
+// @Produce json
+// @Success 200 {object} models.NewsList
+// @Router /news [get]
 func (h handlers) GetNews() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
@@ -126,7 +159,13 @@ func (h handlers) GetNews() echo.HandlerFunc {
 	}
 }
 
-// Search by title
+// SearchByTitle godoc
+// @Summary Search by title
+// @Description Search news by title
+// @Accept json
+// @Produce json
+// @Success 200 {object} models.NewsList
+// @Router /news/search [get]
 func (h handlers) SearchByTitle() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx, cancel := utils.GetCtxWithReqID(c)
