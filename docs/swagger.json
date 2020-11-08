@@ -28,6 +28,12 @@
                         "schema": {
                             "type": "string"
                         }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/httpErrors.RestError"
+                        }
                     }
                 }
             }
@@ -56,6 +62,12 @@
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/models.UsersList"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/httpErrors.RestError"
                         }
                     }
                 }
@@ -117,6 +129,12 @@
                         "schema": {
                             "$ref": "#/definitions/models.User"
                         }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/httpErrors.RestError"
+                        }
                     }
                 }
             }
@@ -165,6 +183,12 @@
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/models.User"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/httpErrors.RestError"
                         }
                     }
                 }
@@ -219,6 +243,12 @@
                         "description": "ok",
                         "schema": {
                             "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/httpErrors.RestError"
                         }
                     }
                 }
@@ -533,6 +563,17 @@
     "definitions": {
         "httpErrors.RestErr": {
             "type": "object"
+        },
+        "httpErrors.RestError": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
         },
         "models.Comment": {
             "type": "object",

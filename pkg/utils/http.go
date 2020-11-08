@@ -31,6 +31,11 @@ func GetCtxWithReqID(c echo.Context) (context.Context, context.CancelFunc) {
 	return ctx, cancel
 }
 
+// Get context  with request id
+func GetRequestCtx(c echo.Context) context.Context {
+	return context.WithValue(c.Request().Context(), ReqIdCtxKey{}, GetRequestID(c))
+}
+
 // Configure jwt cookie
 func ConfigureJWTCookie(cfg *config.Config, jwtToken string) *http.Cookie {
 	return &http.Cookie{

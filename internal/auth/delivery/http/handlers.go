@@ -36,8 +36,7 @@ func NewAuthHandlers(cfg *config.Config, authUC auth.UseCase, sessUC session.UCS
 // @Router /auth/register [post]
 func (h *handlers) Register() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx, cancel := utils.GetCtxWithReqID(c)
-		defer cancel()
+		ctx := utils.GetRequestCtx(c)
 
 		user := &models.User{}
 
@@ -77,8 +76,7 @@ func (h *handlers) Login() echo.HandlerFunc {
 		Password string `json:"password,omitempty" db:"password" validate:"required,gte=6"`
 	}
 	return func(c echo.Context) error {
-		ctx, cancel := utils.GetCtxWithReqID(c)
-		defer cancel()
+		ctx := utils.GetRequestCtx(c)
 
 		login := &Login{}
 
@@ -116,8 +114,7 @@ func (h *handlers) Login() echo.HandlerFunc {
 // @Router /auth/logout [post]
 func (h *handlers) Logout() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx, cancel := utils.GetCtxWithReqID(c)
-		defer cancel()
+		ctx := utils.GetRequestCtx(c)
 
 		cookie, err := c.Cookie("session-id")
 		if err != nil {
@@ -147,8 +144,7 @@ func (h *handlers) Logout() echo.HandlerFunc {
 // @Router /auth/{id} [put]
 func (h *handlers) Update() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx, cancel := utils.GetCtxWithReqID(c)
-		defer cancel()
+		ctx := utils.GetRequestCtx(c)
 
 		uID, err := uuid.Parse(c.Param("user_id"))
 		if err != nil {
@@ -178,11 +174,11 @@ func (h *handlers) Update() echo.HandlerFunc {
 // @Produce  json
 // @Param id path int true "user_id"
 // @Success 200 {object} models.User
+// @Failure 500 {object} httpErrors.RestError
 // @Router /auth/{id} [get]
 func (h *handlers) GetUserByID() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx, cancel := utils.GetCtxWithReqID(c)
-		defer cancel()
+		ctx := utils.GetRequestCtx(c)
 
 		uID, err := uuid.Parse(c.Param("user_id"))
 		if err != nil {
@@ -204,11 +200,11 @@ func (h *handlers) GetUserByID() echo.HandlerFunc {
 // @Param id path int true "user_id"
 // @Produce json
 // @Success 200 {string} string	"ok"
+// @Failure 500 {object} httpErrors.RestError
 // @Router /auth/{id} [delete]
 func (h *handlers) Delete() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx, cancel := utils.GetCtxWithReqID(c)
-		defer cancel()
+		ctx := utils.GetRequestCtx(c)
 
 		uID, err := uuid.Parse(c.Param("user_id"))
 		if err != nil {
@@ -230,11 +226,11 @@ func (h *handlers) Delete() echo.HandlerFunc {
 // @Param name query string false "name search" Format(email)
 // @Produce json
 // @Success 200 {object} models.UsersList
+// @Failure 500 {object} httpErrors.RestError
 // @Router /auth/find [get]
 func (h *handlers) FindByName() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx, cancel := utils.GetCtxWithReqID(c)
-		defer cancel()
+		ctx := utils.GetRequestCtx(c)
 
 		if c.QueryParam("name") == "" {
 			return c.JSON(http.StatusBadRequest, httpErrors.NewBadRequestError("name is required"))
@@ -261,11 +257,11 @@ func (h *handlers) FindByName() echo.HandlerFunc {
 // @Param name query string false "name search" Format(email)
 // @Produce json
 // @Success 200 {object} models.UsersList
+// @Failure 500 {object} httpErrors.RestError
 // @Router /auth/find [get]
 func (h *handlers) GetUsers() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx, cancel := utils.GetCtxWithReqID(c)
-		defer cancel()
+		ctx := utils.GetRequestCtx(c)
 
 		paginationQuery, err := utils.GetPaginationFromCtx(c)
 		if err != nil {
@@ -287,6 +283,7 @@ func (h *handlers) GetUsers() echo.HandlerFunc {
 // @Accept json
 // @Produce json
 // @Success 200 {object} models.User
+// @Failure 500 {object} httpErrors.RestError
 // @Router /auth/me [get]
 func (h *handlers) GetMe() echo.HandlerFunc {
 	return func(c echo.Context) error {
@@ -305,11 +302,11 @@ func (h *handlers) GetMe() echo.HandlerFunc {
 // @Accept json
 // @Produce json
 // @Success 200 {string} string	"ok"
+// @Failure 500 {object} httpErrors.RestError
 // @Router /auth/avatar [post]
 func (h *handlers) UploadAvatar() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx, cancel := utils.GetCtxWithReqID(c)
-		defer cancel()
+		ctx := utils.GetRequestCtx(c)
 
 		image, err := utils.ReadImage(c, "avatar")
 		if err != nil {

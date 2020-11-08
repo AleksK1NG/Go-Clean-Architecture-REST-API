@@ -2,6 +2,13 @@ basePath: /api/v1
 definitions:
   httpErrors.RestErr:
     type: object
+  httpErrors.RestError:
+    properties:
+      error:
+        type: string
+      status:
+        type: integer
+    type: object
   models.Comment:
     properties:
       author_id:
@@ -188,6 +195,10 @@ paths:
           description: ok
           schema:
             type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httpErrors.RestError'
       summary: Delete
     get:
       consumes:
@@ -206,6 +217,10 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.User'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httpErrors.RestError'
       summary: get user by id
     put:
       consumes:
@@ -237,6 +252,10 @@ paths:
           description: ok
           schema:
             type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httpErrors.RestError'
       summary: Post avatar
   /auth/find:
     get:
@@ -256,6 +275,10 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.UsersList'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httpErrors.RestError'
       summary: Get users
   /auth/login:
     post:
@@ -295,6 +318,10 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.User'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httpErrors.RestError'
       summary: Get user by id
   /auth/register:
     post:
