@@ -30,8 +30,7 @@ func NewNewsHandlers(cfg *config.Config, newsUC news.UseCase) news.Handlers {
 // @Router /news/create [post]
 func (h handlers) Create() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx, cancel := utils.GetCtxWithReqID(c)
-		defer cancel()
+		ctx := utils.GetRequestCtx(c)
 
 		n := &models.News{}
 		if err := c.Bind(n); err != nil {
@@ -57,8 +56,7 @@ func (h handlers) Create() echo.HandlerFunc {
 // @Router /news/{id} [put]
 func (h handlers) Update() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx, cancel := utils.GetCtxWithReqID(c)
-		defer cancel()
+		ctx := utils.GetRequestCtx(c)
 
 		newsUUID, err := uuid.Parse(c.Param("news_id"))
 		if err != nil {
@@ -90,8 +88,7 @@ func (h handlers) Update() echo.HandlerFunc {
 // @Router /news/{id} [get]
 func (h handlers) GetByID() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx, cancel := utils.GetCtxWithReqID(c)
-		defer cancel()
+		ctx := utils.GetRequestCtx(c)
 
 		newsUUID, err := uuid.Parse(c.Param("news_id"))
 		if err != nil {
@@ -117,8 +114,7 @@ func (h handlers) GetByID() echo.HandlerFunc {
 // @Router /news/{id} [delete]
 func (h handlers) Delete() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx, cancel := utils.GetCtxWithReqID(c)
-		defer cancel()
+		ctx := utils.GetRequestCtx(c)
 
 		newsUUID, err := uuid.Parse(c.Param("news_id"))
 		if err != nil {
@@ -142,8 +138,7 @@ func (h handlers) Delete() echo.HandlerFunc {
 // @Router /news [get]
 func (h handlers) GetNews() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx, cancel := utils.GetCtxWithReqID(c)
-		defer cancel()
+		ctx := utils.GetRequestCtx(c)
 
 		pq, err := utils.GetPaginationFromCtx(c)
 		if err != nil {
@@ -168,8 +163,7 @@ func (h handlers) GetNews() echo.HandlerFunc {
 // @Router /news/search [get]
 func (h handlers) SearchByTitle() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx, cancel := utils.GetCtxWithReqID(c)
-		defer cancel()
+		ctx := utils.GetRequestCtx(c)
 
 		pq, err := utils.GetPaginationFromCtx(c)
 		if err != nil {
