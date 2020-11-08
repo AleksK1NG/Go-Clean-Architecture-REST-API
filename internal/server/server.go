@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"github.com/AleksK1NG/api-mc/config"
+	_ "github.com/AleksK1NG/api-mc/docs"
 	"github.com/AleksK1NG/api-mc/pkg/db/redis"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/jmoiron/sqlx"
@@ -36,7 +37,6 @@ func NewServer(config *config.Config, db *sqlx.DB, redisPool redis.RedisPool) *s
 	return &server{e, config, db, redisPool}
 }
 
-// Run server depends on config SSL option
 func (s *server) Run() error {
 	if s.config.Server.SSL {
 

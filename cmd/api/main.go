@@ -14,6 +14,13 @@ var (
 	configPath = os.Getenv("config")
 )
 
+// @title Go Example API
+// @version 1.0
+// @description This is a example Golang REST API.
+// @contact.name Alexander Bryksin
+// @contact.url http://www.swagger.io/support
+// @contact.email alexander.bryksin@yandex.ru
+// @BasePath /api/v1
 func main() {
 	log.Println("Starting api server")
 
