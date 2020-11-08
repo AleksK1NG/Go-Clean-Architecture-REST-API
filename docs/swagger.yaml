@@ -1,0 +1,328 @@
+basePath: /api/v1
+definitions:
+  httpErrors.RestErr:
+    type: object
+  models.Comment:
+    properties:
+      author_id:
+        type: string
+      comment_id:
+        type: string
+      created_at:
+        type: string
+      likes:
+        type: integer
+      message:
+        type: string
+      news_id:
+        type: string
+      updated_at:
+        type: string
+    required:
+    - author_id
+    - message
+    - news_id
+    type: object
+  models.User:
+    properties:
+      about:
+        type: string
+      address:
+        type: string
+      avatar:
+        type: string
+      birthday:
+        type: string
+      city:
+        type: string
+      country:
+        type: string
+      created_at:
+        type: string
+      email:
+        type: string
+      first_name:
+        type: string
+      gender:
+        type: string
+      last_name:
+        type: string
+      login_date:
+        type: string
+      password:
+        type: string
+      phone_number:
+        type: string
+      postcode:
+        type: integer
+      role:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    required:
+    - first_name
+    - last_name
+    - password
+    type: object
+info:
+  contact:
+    email: alexander.bryksin@yandex.ru
+    name: Alexander Bryksin
+    url: http://www.swagger.io/support
+  description: This is a example Golang REST API.
+  title: Go Example API
+  version: "1.0"
+paths:
+  /auth/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: some description
+      parameters:
+      - description: user_id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+      summary: Delete
+    get:
+      consumes:
+      - application/json
+      description: get string by ID
+      parameters:
+      - description: user_id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+      summary: get user by id
+    put:
+      consumes:
+      - application/json
+      description: update existing user
+      parameters:
+      - description: user_id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+      summary: Update user
+  /auth/avatar:
+    post:
+      consumes:
+      - application/json
+      description: Post user avatar image
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+      summary: Post avatar
+  /auth/find:
+    get:
+      consumes:
+      - application/json
+      description: Get the list of all users
+      parameters:
+      - description: name search
+        format: email
+        in: query
+        name: name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.User'
+            type: array
+      summary: Get users
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: login user, returns user and set session
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+      summary: Login new user
+  /auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: logout user removing session
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+      summary: Logout user
+  /auth/me:
+    get:
+      consumes:
+      - application/json
+      description: Get current user by id
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+      summary: Get user by id
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: register new user, returns user and token
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.User'
+      summary: Register new user
+  /comments:
+    post:
+      consumes:
+      - application/json
+      description: create new comment
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Comment'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httpErrors.RestErr'
+      summary: Create new comment
+  /comments/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: delete comment
+      parameters:
+      - description: comment_id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httpErrors.RestErr'
+      summary: Delete comment
+    get:
+      consumes:
+      - application/json
+      description: Get comment by id
+      parameters:
+      - description: comment_id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Comment'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httpErrors.RestErr'
+      summary: Get comment
+    put:
+      consumes:
+      - application/json
+      description: update new comment
+      parameters:
+      - description: comment_id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Comment'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httpErrors.RestErr'
+      summary: Update comment
+  /comments/byNewsId/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get all comment by news id
+      parameters:
+      - description: news_id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Comment'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httpErrors.RestErr'
+      summary: Get comments by news
+swagger: "2.0"
