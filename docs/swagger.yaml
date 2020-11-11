@@ -245,6 +245,12 @@ paths:
       consumes:
       - application/json
       description: Post user avatar image
+      parameters:
+      - description: Body with image file
+        in: formData
+        name: file
+        required: true
+        type: file
       produces:
       - application/json
       responses:
