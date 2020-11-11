@@ -301,8 +301,9 @@ func (h *handlers) GetMe() echo.HandlerFunc {
 // UploadAvatar godoc
 // @Summary Post avatar
 // @Description Post user avatar image
-// @Accept json
-// @Produce json
+// @Accept  json
+// @Produce  json
+// @Param file formData file true "Body with image file"
 // @Success 200 {string} string	"ok"
 // @Failure 500 {object} httpErrors.RestError
 // @Router /auth/avatar [post]
@@ -310,7 +311,7 @@ func (h *handlers) UploadAvatar() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx := utils.GetRequestCtx(c)
 
-		image, err := utils.ReadImage(c, "avatar")
+		image, err := utils.ReadImage(c, "file")
 		if err != nil {
 			return httpErrors.NewInternalServerError(err)
 		}

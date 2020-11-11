@@ -38,6 +38,15 @@ var doc = `{
                     "application/json"
                 ],
                 "summary": "Post avatar",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "Body with image file",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "ok",
