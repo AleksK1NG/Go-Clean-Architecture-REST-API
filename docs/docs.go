@@ -20,7 +20,7 @@ var doc = `{
         "title": "{{.Title}}",
         "contact": {
             "name": "Alexander Bryksin",
-            "url": "http://www.swagger.io/support",
+            "url": "https://github.com/AleksK1NG",
             "email": "alexander.bryksin@yandex.ru"
         },
         "version": "{{.Version}}"
@@ -66,10 +66,24 @@ var doc = `{
                 "summary": "Get users",
                 "parameters": [
                     {
-                        "type": "string",
-                        "format": "email",
-                        "description": "name search",
-                        "name": "name",
+                        "type": "integer",
+                        "format": "page",
+                        "description": "page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "format": "size",
+                        "description": "size",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "format": "orderBy",
+                        "description": "order by",
+                        "name": "orderBy",
                         "in": "query"
                     }
                 ],
@@ -313,6 +327,27 @@ var doc = `{
                         "name": "id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "format": "page",
+                        "description": "page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "format": "size",
+                        "description": "size",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "format": "orderBy",
+                        "description": "order by",
+                        "name": "orderBy",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -442,6 +477,29 @@ var doc = `{
                     "application/json"
                 ],
                 "summary": "Get all news",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "format": "page",
+                        "description": "page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "format": "size",
+                        "description": "size",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "format": "orderBy",
+                        "description": "order by",
+                        "name": "orderBy",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -482,6 +540,29 @@ var doc = `{
                     "application/json"
                 ],
                 "summary": "Search by title",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "format": "page",
+                        "description": "page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "format": "size",
+                        "description": "size",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "format": "orderBy",
+                        "description": "order by",
+                        "name": "orderBy",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",

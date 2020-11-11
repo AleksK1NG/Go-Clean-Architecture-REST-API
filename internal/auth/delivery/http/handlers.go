@@ -223,7 +223,7 @@ func (h *handlers) Delete() echo.HandlerFunc {
 // @Summary Find by name
 // @Description Find user by name
 // @Accept json
-// @Param name query string false "name search" Format(email)
+// @Param name query string false "username" Format(username)
 // @Produce json
 // @Success 200 {object} models.UsersList
 // @Failure 500 {object} httpErrors.RestError
@@ -254,7 +254,9 @@ func (h *handlers) FindByName() echo.HandlerFunc {
 // @Summary Get users
 // @Description Get the list of all users
 // @Accept json
-// @Param name query string false "name search" Format(email)
+// @Param page query int false "page" Format(page)
+// @Param size query int false "size" Format(size)
+// @Param orderBy query int false "order by" Format(orderBy)
 // @Produce json
 // @Success 200 {object} models.UsersList
 // @Failure 500 {object} httpErrors.RestError
