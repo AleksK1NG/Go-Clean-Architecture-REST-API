@@ -36,6 +36,14 @@ func GetRequestCtx(c echo.Context) context.Context {
 	return context.WithValue(c.Request().Context(), ReqIdCtxKey{}, GetRequestID(c))
 }
 
+// Get config path for local or docker
+func GetConfigPath(configPath string) string {
+	if configPath == "docker" {
+		return "./config/config-docker"
+	}
+	return "./config/config-local"
+}
+
 // Configure jwt cookie
 func ConfigureJWTCookie(cfg *config.Config, jwtToken string) *http.Cookie {
 	return &http.Cookie{

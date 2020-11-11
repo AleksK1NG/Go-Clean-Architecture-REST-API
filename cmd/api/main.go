@@ -6,12 +6,9 @@ import (
 	"github.com/AleksK1NG/api-mc/pkg/db/postgres"
 	"github.com/AleksK1NG/api-mc/pkg/db/redis"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
+	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"log"
 	"os"
-)
-
-var (
-	configPath = os.Getenv("config")
 )
 
 // @title Go Example API
@@ -24,11 +21,7 @@ var (
 func main() {
 	log.Println("Starting api server")
 
-	if configPath == "docker" {
-		configPath = "./config/config-docker"
-	} else {
-		configPath = "./config/config-local"
-	}
+	configPath := utils.GetConfigPath(os.Getenv("config"))
 
 	cfgFile, err := config.LoadConfig(configPath)
 	if err != nil {
