@@ -12,9 +12,9 @@ const (
         				LEFT JOIN users u on c.author_id = u.user_id
 						WHERE c.comment_id = $1`
 
-	getTotalCountByNewsId = `SELECT COUNT(comment_id) FROM comments WHERE news_id = $1`
+	getTotalCountByNewsID = `SELECT COUNT(comment_id) FROM comments WHERE news_id = $1`
 
-	getCommentsByNewsId = `SELECT concat(u.first_name, ' ', u.last_name) as author, u.avatar as avatar_url, c.message, c.likes, c.updated_at, c.author_id, c.comment_id
+	getCommentsByNewsID = `SELECT concat(u.first_name, ' ', u.last_name) as author, u.avatar as avatar_url, c.message, c.likes, c.updated_at, c.author_id, c.comment_id
 							FROM comments c
         					LEFT JOIN users u on c.author_id = u.user_id
         					WHERE c.news_id = $1 

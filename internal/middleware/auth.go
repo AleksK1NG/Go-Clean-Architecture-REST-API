@@ -90,19 +90,19 @@ func (mw *MiddlewareManager) AuthJWTMiddleware(authUC auth.UseCase, config *conf
 				}
 
 				return next(c)
-			} else {
-				cookie, err := c.Cookie("jwt-token")
-				if err != nil {
-					logger.Errorf("c.Cookie", err.Error())
-					return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
-				}
-
-				if err = mw.validateJWTToken(cookie.Value, authUC, c, config); err != nil {
-					logger.Errorf("validateJWTToken", err.Error())
-					return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
-				}
-				return next(c)
 			}
+
+			cookie, err := c.Cookie("jwt-token")
+			if err != nil {
+				logger.Errorf("c.Cookie", err.Error())
+				return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
+			}
+
+			if err = mw.validateJWTToken(cookie.Value, authUC, c, config); err != nil {
+				logger.Errorf("validateJWTToken", err.Error())
+				return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
+			}
+			return next(c)
 		}
 	}
 }

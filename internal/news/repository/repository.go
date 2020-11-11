@@ -156,7 +156,6 @@ func (r repository) GetNews(ctx context.Context, pq *utils.PaginationQuery) (*mo
 
 // Find news by title
 func (r repository) SearchByTitle(ctx context.Context, title string, query *utils.PaginationQuery) (*models.NewsList, error) {
-
 	var totalCount int
 	if err := r.db.GetContext(ctx, &totalCount, findByTitleCount, title); err != nil {
 		return nil, errors.WithMessage(err, "newsRepo SearchByTitle GetContext")

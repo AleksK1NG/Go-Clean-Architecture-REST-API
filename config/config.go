@@ -58,7 +58,7 @@ type PostgresConfig struct {
 type RedisConfig struct {
 	RedisAddr      string
 	RedisPassword  string
-	RedisDb        string
+	RedisDB        string
 	RedisDefaultdb string
 }
 
@@ -72,7 +72,7 @@ type Cookie struct {
 	Name     string
 	MaxAge   int
 	Secure   bool
-	HttpOnly bool
+	HTTPOnly bool
 }
 
 // Session config
@@ -84,7 +84,7 @@ type Session struct {
 
 // Metrics config
 type Metrics struct {
-	Url         string
+	URL         string
 	ServiceName string
 }
 
@@ -103,9 +103,8 @@ func LoadConfig(filename string) (*viper.Viper, error) {
 	if err := v.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 			return nil, errors.New("config file not found")
-		} else {
-			return nil, err
 		}
+		return nil, err
 	}
 
 	return v, nil

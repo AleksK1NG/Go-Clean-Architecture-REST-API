@@ -37,7 +37,6 @@ func NewAuthRepository(db *sqlx.DB, redisClient redis.RedisPool) auth.Repository
 
 // Create new user
 func (r *repository) Register(ctx context.Context, user *models.User) (*models.User, error) {
-
 	u := &models.User{}
 	if err := r.db.QueryRowxContext(ctx, createUserQuery, &user.FirstName, &user.LastName, &user.Email,
 		&user.Password, &user.Role, &user.About, &user.Avatar, &user.PhoneNumber, &user.Address, &user.City,
@@ -47,7 +46,6 @@ func (r *repository) Register(ctx context.Context, user *models.User) (*models.U
 	}
 
 	return u, nil
-
 }
 
 // Update existing user
@@ -111,7 +109,6 @@ func (r *repository) GetByID(ctx context.Context, userID uuid.UUID) (*models.Use
 
 // Find users by name
 func (r *repository) FindByName(ctx context.Context, name string, query *utils.PaginationQuery) (*models.UsersList, error) {
-
 	var totalCount int
 	if err := r.db.GetContext(ctx, &totalCount, getTotalCount, name); err != nil {
 		return nil, errors.WithMessage(err, "authRepo FindByName totalCount GetContext")

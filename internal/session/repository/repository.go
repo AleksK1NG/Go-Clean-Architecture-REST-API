@@ -40,19 +40,19 @@ func (s *sessionRepository) CreateSession(ctx context.Context, session *models.S
 }
 
 // Get session by id
-func (s *sessionRepository) GetSessionByID(ctx context.Context, sessionId string) (*models.Session, error) {
+func (s *sessionRepository) GetSessionByID(ctx context.Context, sessionID string) (*models.Session, error) {
 	sess := &models.Session{}
-	if err := s.redisPool.GetJSONContext(ctx, sessionId, sess); err != nil {
+	if err := s.redisPool.GetJSONContext(ctx, sessionID, sess); err != nil {
 		return nil, errors.WithMessage(err, "sessRepo GetSessionByID GetJSONContext")
 	}
 	return sess, nil
 }
 
 // Delete session by id
-func (s *sessionRepository) DeleteByID(ctx context.Context, sessionId string) error {
-	return s.redisPool.DeleteContext(ctx, sessionId)
+func (s *sessionRepository) DeleteByID(ctx context.Context, sessionID string) error {
+	return s.redisPool.DeleteContext(ctx, sessionID)
 }
 
-func (s *sessionRepository) createKey(sessionId string) string {
-	return fmt.Sprintf("%s: %s", s.basePrefix, sessionId)
+func (s *sessionRepository) createKey(sessionID string) string {
+	return fmt.Sprintf("%s: %s", s.basePrefix, sessionID)
 }

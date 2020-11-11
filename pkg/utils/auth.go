@@ -7,18 +7,18 @@ import (
 )
 
 // Validate is user from owner of content
-func ValidateIsOwner(ctx context.Context, creatorId string) error {
+func ValidateIsOwner(ctx context.Context, creatorID string) error {
 	user, err := GetUserFromCtx(ctx)
 
 	if err != nil {
 		return err
 	}
 
-	if user.UserID.String() != creatorId {
+	if user.UserID.String() != creatorID {
 		logger.Errorf(
 			"ValidateIsOwner, userID: %v, creatorID: %v",
 			user.UserID.String(),
-			creatorId,
+			creatorID,
 		)
 		return httpErrors.Forbidden
 	}
