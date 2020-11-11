@@ -21,19 +21,19 @@ func GetRequestID(c echo.Context) string {
 	return c.Response().Header().Get(echo.HeaderXRequestID)
 }
 
-// ReqIdCtxKey is a key used for the Request ID in context
-type ReqIdCtxKey struct{}
+// ReqIDCtxKey is a key used for the Request ID in context
+type ReqIDCtxKey struct{}
 
 // Get ctx with timeout and request id from echo context
 func GetCtxWithReqID(c echo.Context) (context.Context, context.CancelFunc) {
 	ctx, cancel := context.WithTimeout(c.Request().Context(), time.Second*15)
-	ctx = context.WithValue(ctx, ReqIdCtxKey{}, GetRequestID(c))
+	ctx = context.WithValue(ctx, ReqIDCtxKey{}, GetRequestID(c))
 	return ctx, cancel
 }
 
 // Get context  with request id
 func GetRequestCtx(c echo.Context) context.Context {
-	return context.WithValue(c.Request().Context(), ReqIdCtxKey{}, GetRequestID(c))
+	return context.WithValue(c.Request().Context(), ReqIDCtxKey{}, GetRequestID(c))
 }
 
 // Get config path for local or docker
@@ -53,7 +53,7 @@ func ConfigureJWTCookie(cfg *config.Config, jwtToken string) *http.Cookie {
 		RawExpires: "",
 		MaxAge:     cfg.Cookie.MaxAge,
 		Secure:     cfg.Cookie.Secure,
-		HttpOnly:   cfg.Cookie.HttpOnly,
+		HttpOnly:   cfg.Cookie.HTTPOnly,
 		SameSite:   0,
 	}
 }
@@ -69,7 +69,7 @@ func CreateSessionCookie(cfg *config.Config, session string) *http.Cookie {
 		RawExpires: "",
 		MaxAge:     cfg.Session.Expire,
 		Secure:     cfg.Cookie.Secure,
-		HttpOnly:   cfg.Cookie.HttpOnly,
+		HttpOnly:   cfg.Cookie.HTTPOnly,
 		SameSite:   0,
 	}
 }

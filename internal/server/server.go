@@ -75,42 +75,42 @@ func (s *server) Run() error {
 
 		logger.Info("Server Exited Properly")
 		return s.echo.Server.Shutdown(ctx)
-	} else {
-		e := echo.New()
-		if err := s.MapHandlers(s.echo); err != nil {
-			return err
-		}
-
-		server := &http.Server{
-			Addr:           s.config.Server.Port,
-			ReadTimeout:    time.Second * s.config.Server.ReadTimeout,
-			WriteTimeout:   time.Second * s.config.Server.WriteTimeout,
-			MaxHeaderBytes: maxHeaderBytes,
-		}
-
-		go func() {
-			logger.Infof("Server is listening on PORT: %s", s.config.Server.Port)
-			if err := e.StartServer(server); err != nil {
-				logger.Fatalf("Error starting server: ", err.Error())
-			}
-		}()
-
-		go func() {
-			logger.Infof("Starting Debug server on PORT: %s", s.config.Server.PprofPort)
-			if err := http.ListenAndServe(s.config.Server.PprofPort, http.DefaultServeMux); err != nil {
-				logger.Errorf("Error PPROF ListenAndServe: %s", err.Error())
-			}
-		}()
-
-		quit := make(chan os.Signal, 1)
-		signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
-
-		<-quit
-
-		ctx, shutdown := context.WithTimeout(context.Background(), 5*time.Second)
-		defer shutdown()
-
-		logger.Info("Server Exited Properly")
-		return s.echo.Server.Shutdown(ctx)
 	}
+
+	e := echo.New()
+	if err := s.MapHandlers(s.echo); err != nil {
+		return err
+	}
+
+	server := &http.Server{
+		Addr:           s.config.Server.Port,
+		ReadTimeout:    time.Second * s.config.Server.ReadTimeout,
+		WriteTimeout:   time.Second * s.config.Server.WriteTimeout,
+		MaxHeaderBytes: maxHeaderBytes,
+	}
+
+	go func() {
+		logger.Infof("Server is listening on PORT: %s", s.config.Server.Port)
+		if err := e.StartServer(server); err != nil {
+			logger.Fatalf("Error starting server: ", err.Error())
+		}
+	}()
+
+	go func() {
+		logger.Infof("Starting Debug server on PORT: %s", s.config.Server.PprofPort)
+		if err := http.ListenAndServe(s.config.Server.PprofPort, http.DefaultServeMux); err != nil {
+			logger.Errorf("Error PPROF ListenAndServe: %s", err.Error())
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+
+	<-quit
+
+	ctx, shutdown := context.WithTimeout(context.Background(), 5*time.Second)
+	defer shutdown()
+
+	logger.Info("Server Exited Properly")
+	return s.echo.Server.Shutdown(ctx)
 }

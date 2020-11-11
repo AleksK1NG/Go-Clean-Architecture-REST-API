@@ -107,9 +107,8 @@ func (r *repository) GetByID(ctx context.Context, commentID uuid.UUID) (*models.
 
 // GetAllByNewsID comments
 func (r *repository) GetAllByNewsID(ctx context.Context, newsID uuid.UUID, query *utils.PaginationQuery) (*models.CommentsList, error) {
-
 	var totalCount int
-	if err := r.db.QueryRowContext(ctx, getTotalCountByNewsId, newsID).Scan(&totalCount); err != nil {
+	if err := r.db.QueryRowContext(ctx, getTotalCountByNewsID, newsID).Scan(&totalCount); err != nil {
 		return nil, errors.WithMessage(err, "commentsRepo GetAllByNewsID QueryRowContext")
 	}
 	if totalCount == 0 {
@@ -123,7 +122,7 @@ func (r *repository) GetAllByNewsID(ctx context.Context, newsID uuid.UUID, query
 		}, nil
 	}
 
-	rows, err := r.db.QueryxContext(ctx, getCommentsByNewsId, newsID, query.GetOffset(), query.GetLimit())
+	rows, err := r.db.QueryxContext(ctx, getCommentsByNewsID, newsID, query.GetOffset(), query.GetLimit())
 	if err != nil {
 		return nil, errors.WithMessage(err, "commentsRepo GetAllByNewsID QueryxContext")
 	}
@@ -150,7 +149,6 @@ func (r *repository) GetAllByNewsID(ctx context.Context, newsID uuid.UUID, query
 		HasMore:    utils.GetHasMore(query.GetPage(), totalCount, query.GetSize()),
 		Comments:   commentsList,
 	}, nil
-
 }
 
 func (r *repository) createKey(commentID string) string {

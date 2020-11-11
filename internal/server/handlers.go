@@ -24,18 +24,18 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
 	"net/http"
-	_ "net/http/pprof"
+	_ "net/http/pprof" //prof
 )
 
 // Map Server Handlers
 func (s *server) MapHandlers(e *echo.Echo) error {
-	metrics, err := metric.CreateMetrics(s.config.Metrics.Url, s.config.Metrics.ServiceName)
+	metrics, err := metric.CreateMetrics(s.config.Metrics.URL, s.config.Metrics.ServiceName)
 	if err != nil {
 		logger.Errorf("CreateMetrics Error: %s", err.Error())
 	}
 	logger.Info(
 		"Metrics available URL: %s, ServiceName: %s",
-		s.config.Metrics.Url,
+		s.config.Metrics.URL,
 		s.config.Metrics.ServiceName,
 	)
 
@@ -82,10 +82,7 @@ func (s *server) MapHandlers(e *echo.Echo) error {
 	e.Use(middleware.GzipWithConfig(middleware.GzipConfig{
 		Level: 5,
 		Skipper: func(c echo.Context) bool {
-			if strings.Contains(c.Request().URL.Path, "swagger") {
-				return true
-			}
-			return false
+			return strings.Contains(c.Request().URL.Path, "swagger")
 		},
 	}))
 	// e.Use(middleware.CSRF())

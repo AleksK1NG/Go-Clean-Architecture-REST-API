@@ -31,7 +31,8 @@ const (
 					 FROM users 
 					 WHERE user_id = $1`
 
-	getTotalCount = `SELECT COUNT(user_id) FROM users WHERE first_name ILIKE '%' || $1 || '%' or last_name ILIKE '%' || $1 || '%'`
+	getTotalCount = `SELECT COUNT(user_id) FROM users 
+						WHERE first_name ILIKE '%' || $1 || '%' or last_name ILIKE '%' || $1 || '%'`
 
 	findUsers = `SELECT user_id, first_name, last_name, email, role, about, avatar, phone_number, address,
 	              city, gender, postcode, birthday, created_at, updated_at, login_date 

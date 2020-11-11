@@ -58,11 +58,9 @@ func NewRedisClient(config *config.Config) *RedisClient {
 }
 
 func cleanupHook(client *redis.Client) {
-
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	signal.Notify(c, syscall.SIGTERM)
-	signal.Notify(c, syscall.SIGKILL)
 	go func() {
 		<-c
 		if err := client.Close(); err != nil {
