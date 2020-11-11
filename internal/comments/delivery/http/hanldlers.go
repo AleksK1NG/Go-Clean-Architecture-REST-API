@@ -149,6 +149,9 @@ func (h *handlers) GetByID() echo.HandlerFunc {
 // @Accept  json
 // @Produce  json
 // @Param id path int true "news_id"
+// @Param page query int false "page" Format(page)
+// @Param size query int false "size" Format(size)
+// @Param orderBy query int false "order by" Format(orderBy)
 // @Success 200 {object} models.CommentsList
 // @Failure 500 {object} httpErrors.RestErr
 // @Router /comments/byNewsId/{id} [get]
