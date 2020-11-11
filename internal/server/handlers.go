@@ -2,6 +2,8 @@ package server
 
 import (
 	"github.com/AleksK1NG/api-mc/docs"
+	"strings"
+
 	//_ "github.com/AleksK1NG/api-mc/docs"
 	authHttp "github.com/AleksK1NG/api-mc/internal/auth/delivery/http"
 	authRepository "github.com/AleksK1NG/api-mc/internal/auth/repository"
@@ -79,6 +81,12 @@ func (s *server) MapHandlers(e *echo.Echo) error {
 
 	e.Use(middleware.GzipWithConfig(middleware.GzipConfig{
 		Level: 5,
+		Skipper: func(c echo.Context) bool {
+			if strings.Contains(c.Request().URL.Path, "swagger") {
+				return true
+			}
+			return false
+		},
 	}))
 	// e.Use(middleware.CSRF())
 	e.Use(middleware.Secure())
