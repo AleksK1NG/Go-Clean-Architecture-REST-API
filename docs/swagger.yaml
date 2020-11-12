@@ -173,8 +173,8 @@ info:
     email: alexander.bryksin@yandex.ru
     name: Alexander Bryksin
     url: https://github.com/AleksK1NG
-  description: This is a example Golang REST API.
-  title: Go Example API
+  description: Example Golang REST API
+  title: Go Example REST API
   version: "1.0"
 paths:
   /auth/{id}:
