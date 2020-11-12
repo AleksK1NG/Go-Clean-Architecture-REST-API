@@ -16,7 +16,7 @@ const (
 )
 
 // Session repository
-type sessionRepository struct {
+type sessionRepo struct {
 	redisPool  redis.RedisPool
 	basePrefix string
 	cfg        *config.Config
@@ -24,11 +24,11 @@ type sessionRepository struct {
 
 // Session repository constructor
 func NewSessionRepository(redisPool redis.RedisPool, cfg *config.Config) session.SessRepository {
-	return &sessionRepository{redisPool: redisPool, basePrefix: basePrefix, cfg: cfg}
+	return &sessionRepo{redisPool: redisPool, basePrefix: basePrefix, cfg: cfg}
 }
 
 // Create session in redis
-func (s *sessionRepository) CreateSession(ctx context.Context, session *models.Session, expire int) (string, error) {
+func (s *sessionRepo) CreateSession(ctx context.Context, session *models.Session, expire int) (string, error) {
 	session.SessionID = uuid.New().String()
 	sessionKey := s.createKey(session.SessionID)
 
@@ -40,7 +40,7 @@ func (s *sessionRepository) CreateSession(ctx context.Context, session *models.S
 }
 
 // Get session by id
-func (s *sessionRepository) GetSessionByID(ctx context.Context, sessionID string) (*models.Session, error) {
+func (s *sessionRepo) GetSessionByID(ctx context.Context, sessionID string) (*models.Session, error) {
 	sess := &models.Session{}
 	if err := s.redisPool.GetJSONContext(ctx, sessionID, sess); err != nil {
 		return nil, errors.WithMessage(err, "sessRepo GetSessionByID GetJSONContext")
@@ -49,10 +49,10 @@ func (s *sessionRepository) GetSessionByID(ctx context.Context, sessionID string
 }
 
 // Delete session by id
-func (s *sessionRepository) DeleteByID(ctx context.Context, sessionID string) error {
+func (s *sessionRepo) DeleteByID(ctx context.Context, sessionID string) error {
 	return s.redisPool.DeleteContext(ctx, sessionID)
 }
 
-func (s *sessionRepository) createKey(sessionID string) string {
+func (s *sessionRepo) createKey(sessionID string) string {
 	return fmt.Sprintf("%s: %s", s.basePrefix, sessionID)
 }

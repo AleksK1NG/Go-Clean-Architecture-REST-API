@@ -11,14 +11,14 @@ import (
 )
 
 // News handlers
-type handlers struct {
+type newsHandlers struct {
 	cfg    *config.Config
 	newsUC news.UseCase
 }
 
 // News handlers constructor
 func NewNewsHandlers(cfg *config.Config, newsUC news.UseCase) news.Handlers {
-	return &handlers{cfg, newsUC}
+	return &newsHandlers{cfg, newsUC}
 }
 
 // Create godoc
@@ -28,7 +28,7 @@ func NewNewsHandlers(cfg *config.Config, newsUC news.UseCase) news.Handlers {
 // @Produce json
 // @Success 201 {object} models.News
 // @Router /news/create [post]
-func (h handlers) Create() echo.HandlerFunc {
+func (h newsHandlers) Create() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx := utils.GetRequestCtx(c)
 
@@ -54,7 +54,7 @@ func (h handlers) Create() echo.HandlerFunc {
 // @Param id path int true "news_id"
 // @Success 200 {object} models.News
 // @Router /news/{id} [put]
-func (h handlers) Update() echo.HandlerFunc {
+func (h newsHandlers) Update() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx := utils.GetRequestCtx(c)
 
@@ -86,7 +86,7 @@ func (h handlers) Update() echo.HandlerFunc {
 // @Param id path int true "news_id"
 // @Success 200 {object} models.News
 // @Router /news/{id} [get]
-func (h handlers) GetByID() echo.HandlerFunc {
+func (h newsHandlers) GetByID() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx := utils.GetRequestCtx(c)
 
@@ -112,7 +112,7 @@ func (h handlers) GetByID() echo.HandlerFunc {
 // @Param id path int true "news_id"
 // @Success 200 {string} string	"ok"
 // @Router /news/{id} [delete]
-func (h handlers) Delete() echo.HandlerFunc {
+func (h newsHandlers) Delete() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx := utils.GetRequestCtx(c)
 
@@ -139,7 +139,7 @@ func (h handlers) Delete() echo.HandlerFunc {
 // @Param orderBy query int false "order by" Format(orderBy)
 // @Success 200 {object} models.NewsList
 // @Router /news [get]
-func (h handlers) GetNews() echo.HandlerFunc {
+func (h newsHandlers) GetNews() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx := utils.GetRequestCtx(c)
 
@@ -167,7 +167,7 @@ func (h handlers) GetNews() echo.HandlerFunc {
 // @Param orderBy query int false "order by" Format(orderBy)
 // @Success 200 {object} models.NewsList
 // @Router /news/search [get]
-func (h handlers) SearchByTitle() echo.HandlerFunc {
+func (h newsHandlers) SearchByTitle() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx := utils.GetRequestCtx(c)
 

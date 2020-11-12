@@ -17,7 +17,7 @@ import (
 	"strings"
 )
 
-// Auth by sessions stored in redis
+// Auth sessions middleware using redis
 func (mw *MiddlewareManager) AuthSessionMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		cookie, err := c.Cookie(mw.cfg.Session.Name)

@@ -20,7 +20,7 @@ const (
 )
 
 // News Repository
-type repository struct {
+type newsRepo struct {
 	db         *sqlx.DB
 	redisPool  redis.RedisPool
 	basePrefix string
@@ -28,11 +28,11 @@ type repository struct {
 
 // News repository constructor
 func NewNewsRepository(db *sqlx.DB, redisPool redis.RedisPool) news.Repository {
-	return &repository{db: db, redisPool: redisPool, basePrefix: basePrefix}
+	return &newsRepo{db: db, redisPool: redisPool, basePrefix: basePrefix}
 }
 
 // Create news
-func (r repository) Create(ctx context.Context, news *models.News) (*models.News, error) {
+func (r newsRepo) Create(ctx context.Context, news *models.News) (*models.News, error) {
 	var n models.News
 
 	if err := r.db.QueryRowxContext(
@@ -50,7 +50,7 @@ func (r repository) Create(ctx context.Context, news *models.News) (*models.News
 }
 
 // Update news item
-func (r repository) Update(ctx context.Context, news *models.News) (*models.News, error) {
+func (r newsRepo) Update(ctx context.Context, news *models.News) (*models.News, error) {
 
 	var n models.News
 	if err := r.db.QueryRowxContext(
@@ -68,7 +68,7 @@ func (r repository) Update(ctx context.Context, news *models.News) (*models.News
 }
 
 // Get single news by id
-func (r repository) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*models.NewsBase, error) {
+func (r newsRepo) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*models.NewsBase, error) {
 
 	n := &models.NewsBase{}
 
@@ -88,7 +88,7 @@ func (r repository) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*models.
 }
 
 // Delete news by id
-func (r repository) Delete(ctx context.Context, newsID uuid.UUID) error {
+func (r newsRepo) Delete(ctx context.Context, newsID uuid.UUID) error {
 
 	result, err := r.db.ExecContext(ctx, deleteNews, newsID)
 	if err != nil {
@@ -107,7 +107,7 @@ func (r repository) Delete(ctx context.Context, newsID uuid.UUID) error {
 }
 
 // Get news
-func (r repository) GetNews(ctx context.Context, pq *utils.PaginationQuery) (*models.NewsList, error) {
+func (r newsRepo) GetNews(ctx context.Context, pq *utils.PaginationQuery) (*models.NewsList, error) {
 
 	var totalCount int
 	if err := r.db.GetContext(ctx, &totalCount, getTotalCount); err != nil {
@@ -155,7 +155,7 @@ func (r repository) GetNews(ctx context.Context, pq *utils.PaginationQuery) (*mo
 }
 
 // Find news by title
-func (r repository) SearchByTitle(ctx context.Context, title string, query *utils.PaginationQuery) (*models.NewsList, error) {
+func (r newsRepo) SearchByTitle(ctx context.Context, title string, query *utils.PaginationQuery) (*models.NewsList, error) {
 	var totalCount int
 	if err := r.db.GetContext(ctx, &totalCount, findByTitleCount, title); err != nil {
 		return nil, errors.WithMessage(err, "newsRepo SearchByTitle GetContext")
@@ -200,6 +200,6 @@ func (r repository) SearchByTitle(ctx context.Context, title string, query *util
 	}, nil
 }
 
-func (r *repository) getKeyWithPrefix(newsID string) string {
+func (r *newsRepo) getKeyWithPrefix(newsID string) string {
 	return fmt.Sprintf("%s: %s", r.basePrefix, newsID)
 }

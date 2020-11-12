@@ -11,14 +11,14 @@ import (
 )
 
 // Comments handlers
-type handlers struct {
+type commentsHandlers struct {
 	cfg   *config.Config
 	comUC comments.UseCase
 }
 
 // Comments handlers constructor
 func NewCommentsHandlers(cfg *config.Config, comUC comments.UseCase) comments.Handlers {
-	return &handlers{cfg: cfg, comUC: comUC}
+	return &commentsHandlers{cfg: cfg, comUC: comUC}
 }
 
 // @Summary Create new comment
@@ -28,7 +28,7 @@ func NewCommentsHandlers(cfg *config.Config, comUC comments.UseCase) comments.Ha
 // @Success 201 {object} models.Comment
 // @Failure 500 {object} httpErrors.RestErr
 // @Router /comments [post]
-func (h *handlers) Create() echo.HandlerFunc {
+func (h *commentsHandlers) Create() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx := utils.GetRequestCtx(c)
 
@@ -61,7 +61,7 @@ func (h *handlers) Create() echo.HandlerFunc {
 // @Success 200 {object} models.Comment
 // @Failure 500 {object} httpErrors.RestErr
 // @Router /comments/{id} [put]
-func (h *handlers) Update() echo.HandlerFunc {
+func (h *commentsHandlers) Update() echo.HandlerFunc {
 	// Update Comment
 	type UpdateComment struct {
 		Message string `json:"message" db:"message" validate:"required,gte=0"`
@@ -101,7 +101,7 @@ func (h *handlers) Update() echo.HandlerFunc {
 // @Success 200 {string} string	"ok"
 // @Failure 500 {object} httpErrors.RestErr
 // @Router /comments/{id} [delete]
-func (h *handlers) Delete() echo.HandlerFunc {
+func (h *commentsHandlers) Delete() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx := utils.GetRequestCtx(c)
 
@@ -126,7 +126,7 @@ func (h *handlers) Delete() echo.HandlerFunc {
 // @Success 200 {object} models.Comment
 // @Failure 500 {object} httpErrors.RestErr
 // @Router /comments/{id} [get]
-func (h *handlers) GetByID() echo.HandlerFunc {
+func (h *commentsHandlers) GetByID() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx := utils.GetRequestCtx(c)
 
@@ -155,7 +155,7 @@ func (h *handlers) GetByID() echo.HandlerFunc {
 // @Success 200 {object} models.CommentsList
 // @Failure 500 {object} httpErrors.RestErr
 // @Router /comments/byNewsId/{id} [get]
-func (h *handlers) GetAllByNewsID() echo.HandlerFunc {
+func (h *commentsHandlers) GetAllByNewsID() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx := utils.GetRequestCtx(c)
 
