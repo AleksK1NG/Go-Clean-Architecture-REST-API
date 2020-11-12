@@ -40,15 +40,15 @@ func (s *server) MapHandlers(e *echo.Echo) error {
 	)
 
 	// Init repositories
-	aRepo := authRepository.NewAuthRepository(s.db, s.redisPool)
-	nRepo := newsRepository.NewNewsRepository(s.db, s.redisPool)
-	cRepo := commentsRepository.NewCommentsRepository(s.db, s.redisPool)
+	aRepo := authRepository.NewAuthRepository(s.db)
+	nRepo := newsRepository.NewNewsRepository(s.db)
+	cRepo := commentsRepository.NewCommentsRepository(s.db)
 	sRepo := sessionRepository.NewSessionRepository(s.redisPool, s.config)
 
 	// Init useCases
-	authUC := authUseCase.NewAuthUseCase(s.config, aRepo)
-	newsUC := newsUseCase.NewNewsUseCase(s.config, nRepo)
-	commUC := commentsUseCase.NewCommentsUseCase(s.config, cRepo)
+	authUC := authUseCase.NewAuthUseCase(s.config, aRepo, s.redisPool)
+	newsUC := newsUseCase.NewNewsUseCase(s.config, nRepo, s.redisPool)
+	commUC := commentsUseCase.NewCommentsUseCase(s.config, cRepo, s.redisPool)
 	sessUC := usecase.NewSessionUseCase(sRepo, s.config)
 
 	// Init handlers

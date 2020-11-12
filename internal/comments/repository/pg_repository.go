@@ -3,32 +3,22 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"github.com/AleksK1NG/api-mc/internal/comments"
 	"github.com/AleksK1NG/api-mc/internal/models"
-	"github.com/AleksK1NG/api-mc/pkg/db/redis"
-	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 )
 
-const (
-	basePrefix      = "api-comments:"
-	durationSeconds = 3600
-)
-
 // Comments Repository
 type commentsRepo struct {
-	db         *sqlx.DB
-	redisPool  redis.RedisPool
-	basePrefix string
+	db *sqlx.DB
 }
 
 // Comments Repository constructor
-func NewCommentsRepository(db *sqlx.DB, redisPool redis.RedisPool) comments.Repository {
-	return &commentsRepo{db: db, redisPool: redisPool, basePrefix: basePrefix}
+func NewCommentsRepository(db *sqlx.DB) comments.Repository {
+	return &commentsRepo{db: db}
 }
 
 // Create comment
@@ -50,14 +40,9 @@ func (r *commentsRepo) Create(ctx context.Context, comment *models.Comment) (*mo
 
 // Update comment
 func (r *commentsRepo) Update(ctx context.Context, comment *models.Comment) (*models.Comment, error) {
-
 	comm := &models.Comment{}
 	if err := r.db.QueryRowxContext(ctx, updateComment, comment.Message, comment.CommentID).StructScan(comm); err != nil {
 		return nil, errors.WithMessage(err, "commentsRepo Update QueryRowxContext")
-	}
-
-	if err := r.redisPool.Delete(r.createKey(comment.CommentID.String())); err != nil {
-		logger.Errorf("redisPool.Delete: %s", err.Error())
 	}
 
 	return comm, nil
@@ -65,7 +50,6 @@ func (r *commentsRepo) Update(ctx context.Context, comment *models.Comment) (*mo
 
 // Delete comment
 func (r *commentsRepo) Delete(ctx context.Context, commentID uuid.UUID) error {
-
 	result, err := r.db.ExecContext(ctx, deleteComment, commentID)
 	if err != nil {
 		return errors.WithMessage(err, "commentsRepo Delete ExecContext")
@@ -79,27 +63,14 @@ func (r *commentsRepo) Delete(ctx context.Context, commentID uuid.UUID) error {
 		return errors.WithMessage(sql.ErrNoRows, "commentsRepo Delete no rowsAffected")
 	}
 
-	if err := r.redisPool.Delete(r.createKey(commentID.String())); err != nil {
-		logger.Errorf("redisPool.Delete: %s", err.Error())
-	}
-
 	return nil
 }
 
 // GetByID comment
 func (r *commentsRepo) GetByID(ctx context.Context, commentID uuid.UUID) (*models.CommentBase, error) {
 	comment := &models.CommentBase{}
-
-	if err := r.redisPool.GetJSONContext(ctx, r.createKey(commentID.String()), comment); err == nil {
-		return comment, nil
-	}
-
 	if err := r.db.GetContext(ctx, comment, getCommentByID, commentID); err != nil {
 		return nil, errors.WithMessage(err, "commentsRepo GetByID GetContext")
-	}
-
-	if err := r.redisPool.SetexJSONContext(ctx, r.createKey(commentID.String()), durationSeconds, comment); err != nil {
-		logger.Errorf("SetexJSONContext: %s", err.Error())
 	}
 
 	return comment, nil
@@ -149,8 +120,4 @@ func (r *commentsRepo) GetAllByNewsID(ctx context.Context, newsID uuid.UUID, que
 		HasMore:    utils.GetHasMore(query.GetPage(), totalCount, query.GetSize()),
 		Comments:   commentsList,
 	}, nil
-}
-
-func (r *commentsRepo) createKey(commentID string) string {
-	return fmt.Sprintf("%s: %s", r.basePrefix, commentID)
 }

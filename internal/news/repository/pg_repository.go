@@ -3,38 +3,27 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/news"
-	"github.com/AleksK1NG/api-mc/pkg/db/redis"
-	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 )
 
-const (
-	basePrefix    = "api-news:"
-	cacheDuration = 3600
-)
-
 // News Repository
 type newsRepo struct {
-	db         *sqlx.DB
-	redisPool  redis.RedisPool
-	basePrefix string
+	db *sqlx.DB
 }
 
 // News repository constructor
-func NewNewsRepository(db *sqlx.DB, redisPool redis.RedisPool) news.Repository {
-	return &newsRepo{db: db, redisPool: redisPool, basePrefix: basePrefix}
+func NewNewsRepository(db *sqlx.DB) news.Repository {
+	return &newsRepo{db: db}
 }
 
 // Create news
 func (r newsRepo) Create(ctx context.Context, news *models.News) (*models.News, error) {
 	var n models.News
-
 	if err := r.db.QueryRowxContext(
 		ctx,
 		createNews,
@@ -51,7 +40,6 @@ func (r newsRepo) Create(ctx context.Context, news *models.News) (*models.News, 
 
 // Update news item
 func (r newsRepo) Update(ctx context.Context, news *models.News) (*models.News, error) {
-
 	var n models.News
 	if err := r.db.QueryRowxContext(
 		ctx,
@@ -69,19 +57,9 @@ func (r newsRepo) Update(ctx context.Context, news *models.News) (*models.News, 
 
 // Get single news by id
 func (r newsRepo) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*models.NewsBase, error) {
-
 	n := &models.NewsBase{}
-
-	if err := r.redisPool.GetJSONContext(ctx, r.getKeyWithPrefix(newsID.String()), n); err == nil {
-		return n, nil
-	}
-
 	if err := r.db.GetContext(ctx, n, getNewsByID, newsID); err != nil {
 		return nil, errors.WithMessage(err, "newsRepo GetNewsByID GetContext")
-	}
-
-	if err := r.redisPool.SetexJSONContext(ctx, r.getKeyWithPrefix(newsID.String()), cacheDuration, n); err != nil {
-		logger.Errorf("SetexJSONContext Error: %s", err.Error())
 	}
 
 	return n, nil
@@ -89,7 +67,6 @@ func (r newsRepo) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*models.Ne
 
 // Delete news by id
 func (r newsRepo) Delete(ctx context.Context, newsID uuid.UUID) error {
-
 	result, err := r.db.ExecContext(ctx, deleteNews, newsID)
 	if err != nil {
 		return errors.WithMessage(err, "newsRepo Delete ExecContext")
@@ -108,7 +85,6 @@ func (r newsRepo) Delete(ctx context.Context, newsID uuid.UUID) error {
 
 // Get news
 func (r newsRepo) GetNews(ctx context.Context, pq *utils.PaginationQuery) (*models.NewsList, error) {
-
 	var totalCount int
 	if err := r.db.GetContext(ctx, &totalCount, getTotalCount); err != nil {
 		return nil, errors.WithMessage(err, "newsRepo GetNews GetContext")
@@ -198,8 +174,4 @@ func (r newsRepo) SearchByTitle(ctx context.Context, title string, query *utils.
 		HasMore:    utils.GetHasMore(query.GetPage(), totalCount, query.GetSize()),
 		News:       newsList,
 	}, nil
-}
-
-func (r *newsRepo) getKeyWithPrefix(newsID string) string {
-	return fmt.Sprintf("%s: %s", r.basePrefix, newsID)
 }

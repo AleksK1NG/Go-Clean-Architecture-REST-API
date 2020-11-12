@@ -24,7 +24,7 @@ type RedisPool interface {
 	Delete(key string) error
 	DeleteContext(ctx context.Context, key string) error
 	IncrCtx(ctx context.Context, counterKey string) (int64, error)
-	SetEXJSON(key string, seconds int, value interface{}) error
+	SetexJSON(key string, seconds int, value interface{}) error
 	SetexJSONContext(ctx context.Context, key string, seconds int, value interface{}) error
 	GetJSON(key string, model interface{}) error
 	GetJSONContext(ctx context.Context, key string, model interface{}) error
@@ -124,7 +124,7 @@ func (r *RedisClient) IncrCtx(ctx context.Context, counterKey string) (int64, er
 }
 
 // Set JSON value
-func (r *RedisClient) SetEXJSON(key string, seconds int, value interface{}) error {
+func (r *RedisClient) SetexJSON(key string, seconds int, value interface{}) error {
 	bytes, err := json.Marshal(&value)
 	if err != nil {
 		return err
