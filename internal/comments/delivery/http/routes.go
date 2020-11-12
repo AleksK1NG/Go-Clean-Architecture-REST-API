@@ -6,7 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// Map news routes
+// Map comments routes
 func MapCommentsRoutes(commGroup *echo.Group, h comments.Handlers, mw *middleware.MiddlewareManager) {
 	commGroup.POST("", h.Create(), mw.AuthSessionMiddleware)
 	commGroup.DELETE("/:comment_id", h.Delete(), mw.AuthSessionMiddleware)

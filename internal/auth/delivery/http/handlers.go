@@ -16,7 +16,7 @@ import (
 )
 
 // Auth handlers
-type handlers struct {
+type authHandlers struct {
 	cfg    *config.Config
 	authUC auth.UseCase
 	sessUC session.UCSession
@@ -24,7 +24,7 @@ type handlers struct {
 
 // Auth handlers constructor
 func NewAuthHandlers(cfg *config.Config, authUC auth.UseCase, sessUC session.UCSession) auth.Handlers {
-	return &handlers{cfg, authUC, sessUC}
+	return &authHandlers{cfg, authUC, sessUC}
 }
 
 // Register godoc
@@ -34,7 +34,7 @@ func NewAuthHandlers(cfg *config.Config, authUC auth.UseCase, sessUC session.UCS
 // @Produce json
 // @Success 201 {object} models.User
 // @Router /auth/register [post]
-func (h *handlers) Register() echo.HandlerFunc {
+func (h *authHandlers) Register() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx := utils.GetRequestCtx(c)
 
@@ -69,7 +69,7 @@ func (h *handlers) Register() echo.HandlerFunc {
 // @Produce json
 // @Success 200 {object} models.User
 // @Router /auth/login [post]
-func (h *handlers) Login() echo.HandlerFunc {
+func (h *authHandlers) Login() echo.HandlerFunc {
 	// Login user, validate email and password input
 	type Login struct {
 		Email    string `json:"email" db:"email" validate:"omitempty,lte=60,email"`
@@ -112,7 +112,7 @@ func (h *handlers) Login() echo.HandlerFunc {
 // @Produce  json
 // @Success 200 {string} string	"ok"
 // @Router /auth/logout [post]
-func (h *handlers) Logout() echo.HandlerFunc {
+func (h *authHandlers) Logout() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx := utils.GetRequestCtx(c)
 
@@ -142,7 +142,7 @@ func (h *handlers) Logout() echo.HandlerFunc {
 // @Produce json
 // @Success 200 {object} models.User
 // @Router /auth/{id} [put]
-func (h *handlers) Update() echo.HandlerFunc {
+func (h *authHandlers) Update() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx := utils.GetRequestCtx(c)
 
@@ -176,7 +176,7 @@ func (h *handlers) Update() echo.HandlerFunc {
 // @Success 200 {object} models.User
 // @Failure 500 {object} httpErrors.RestError
 // @Router /auth/{id} [get]
-func (h *handlers) GetUserByID() echo.HandlerFunc {
+func (h *authHandlers) GetUserByID() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx := utils.GetRequestCtx(c)
 
@@ -202,7 +202,7 @@ func (h *handlers) GetUserByID() echo.HandlerFunc {
 // @Success 200 {string} string	"ok"
 // @Failure 500 {object} httpErrors.RestError
 // @Router /auth/{id} [delete]
-func (h *handlers) Delete() echo.HandlerFunc {
+func (h *authHandlers) Delete() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx := utils.GetRequestCtx(c)
 
@@ -228,7 +228,7 @@ func (h *handlers) Delete() echo.HandlerFunc {
 // @Success 200 {object} models.UsersList
 // @Failure 500 {object} httpErrors.RestError
 // @Router /auth/find [get]
-func (h *handlers) FindByName() echo.HandlerFunc {
+func (h *authHandlers) FindByName() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx := utils.GetRequestCtx(c)
 
@@ -261,7 +261,7 @@ func (h *handlers) FindByName() echo.HandlerFunc {
 // @Success 200 {object} models.UsersList
 // @Failure 500 {object} httpErrors.RestError
 // @Router /auth/find [get]
-func (h *handlers) GetUsers() echo.HandlerFunc {
+func (h *authHandlers) GetUsers() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx := utils.GetRequestCtx(c)
 
@@ -287,7 +287,7 @@ func (h *handlers) GetUsers() echo.HandlerFunc {
 // @Success 200 {object} models.User
 // @Failure 500 {object} httpErrors.RestError
 // @Router /auth/me [get]
-func (h *handlers) GetMe() echo.HandlerFunc {
+func (h *authHandlers) GetMe() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		user, ok := c.Get("user").(*models.User)
 		if !ok {
@@ -307,7 +307,7 @@ func (h *handlers) GetMe() echo.HandlerFunc {
 // @Success 200 {string} string	"ok"
 // @Failure 500 {object} httpErrors.RestError
 // @Router /auth/avatar [post]
-func (h *handlers) UploadAvatar() echo.HandlerFunc {
+func (h *authHandlers) UploadAvatar() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx := utils.GetRequestCtx(c)
 

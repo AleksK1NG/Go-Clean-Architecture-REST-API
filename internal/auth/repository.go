@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// User repository interface
+// Auth repository interface
 type Repository interface {
 	Register(ctx context.Context, user *models.User) (*models.User, error)
 	Update(ctx context.Context, user *models.User) (*models.User, error)

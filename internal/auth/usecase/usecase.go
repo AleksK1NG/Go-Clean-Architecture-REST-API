@@ -11,19 +11,19 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Auth useCase
-type useCase struct {
+// Auth UseCase
+type authUC struct {
 	cfg      *config.Config
 	authRepo auth.Repository
 }
 
-// Auth useCase constructor
+// Auth UseCase constructor
 func NewAuthUseCase(cfg *config.Config, authRepo auth.Repository) auth.UseCase {
-	return &useCase{cfg: cfg, authRepo: authRepo}
+	return &authUC{cfg: cfg, authRepo: authRepo}
 }
 
 // Create new user
-func (u *useCase) Register(ctx context.Context, user *models.User) (*models.UserWithToken, error) {
+func (u *authUC) Register(ctx context.Context, user *models.User) (*models.UserWithToken, error) {
 
 	if err := user.PrepareCreate(); err != nil {
 		return nil, httpErrors.NewBadRequestError(errors.WithMessage(err, "authUC Register PrepareCreate"))
@@ -47,7 +47,7 @@ func (u *useCase) Register(ctx context.Context, user *models.User) (*models.User
 }
 
 // Update existing user
-func (u *useCase) Update(ctx context.Context, user *models.User) (*models.User, error) {
+func (u *authUC) Update(ctx context.Context, user *models.User) (*models.User, error) {
 
 	if err := user.PrepareUpdate(); err != nil {
 		return nil, httpErrors.NewBadRequestError(errors.WithMessage(err, "authUC Register PrepareUpdate"))
@@ -63,12 +63,12 @@ func (u *useCase) Update(ctx context.Context, user *models.User) (*models.User, 
 }
 
 // Delete new user
-func (u *useCase) Delete(ctx context.Context, userID uuid.UUID) error {
+func (u *authUC) Delete(ctx context.Context, userID uuid.UUID) error {
 	return u.authRepo.Delete(ctx, userID)
 }
 
 // Get user by id
-func (u *useCase) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, error) {
+func (u *authUC) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, error) {
 
 	user, err := u.authRepo.GetByID(ctx, userID)
 	if err != nil {
@@ -80,17 +80,17 @@ func (u *useCase) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, 
 }
 
 // Find users by name
-func (u *useCase) FindByName(ctx context.Context, name string, query *utils.PaginationQuery) (*models.UsersList, error) {
+func (u *authUC) FindByName(ctx context.Context, name string, query *utils.PaginationQuery) (*models.UsersList, error) {
 	return u.authRepo.FindByName(ctx, name, query)
 }
 
 // Get users with pagination
-func (u *useCase) GetUsers(ctx context.Context, pq *utils.PaginationQuery) (*models.UsersList, error) {
+func (u *authUC) GetUsers(ctx context.Context, pq *utils.PaginationQuery) (*models.UsersList, error) {
 	return u.authRepo.GetUsers(ctx, pq)
 }
 
 // Login user, returns user model with jwt token
-func (u *useCase) Login(ctx context.Context, user *models.User) (*models.UserWithToken, error) {
+func (u *authUC) Login(ctx context.Context, user *models.User) (*models.UserWithToken, error) {
 	foundUser, err := u.authRepo.FindByEmail(ctx, user)
 	if err != nil {
 		return nil, err
@@ -114,6 +114,6 @@ func (u *useCase) Login(ctx context.Context, user *models.User) (*models.UserWit
 }
 
 // Upload user avatar
-func (u *useCase) UploadAvatar(ctx context.Context, fileName string, fileData []byte) error {
+func (u *authUC) UploadAvatar(ctx context.Context, fileName string, fileData []byte) error {
 	return u.authRepo.UploadAvatar(ctx, fileName, fileData)
 }

@@ -24,7 +24,7 @@ const (
 )
 
 // Auth Repository
-type repository struct {
+type authRepo struct {
 	db          *sqlx.DB
 	redisClient redis.RedisPool
 	basePrefix  string
@@ -32,11 +32,11 @@ type repository struct {
 
 // Auth Repository constructor
 func NewAuthRepository(db *sqlx.DB, redisClient redis.RedisPool) auth.Repository {
-	return &repository{db: db, redisClient: redisClient, basePrefix: basePrefix}
+	return &authRepo{db: db, redisClient: redisClient, basePrefix: basePrefix}
 }
 
 // Create new user
-func (r *repository) Register(ctx context.Context, user *models.User) (*models.User, error) {
+func (r *authRepo) Register(ctx context.Context, user *models.User) (*models.User, error) {
 	u := &models.User{}
 	if err := r.db.QueryRowxContext(ctx, createUserQuery, &user.FirstName, &user.LastName, &user.Email,
 		&user.Password, &user.Role, &user.About, &user.Avatar, &user.PhoneNumber, &user.Address, &user.City,
@@ -49,7 +49,7 @@ func (r *repository) Register(ctx context.Context, user *models.User) (*models.U
 }
 
 // Update existing user
-func (r *repository) Update(ctx context.Context, user *models.User) (*models.User, error) {
+func (r *authRepo) Update(ctx context.Context, user *models.User) (*models.User, error) {
 
 	u := &models.User{}
 	if err := r.db.GetContext(ctx, u, updateUserQuery, &user.FirstName, &user.LastName, &user.Email,
@@ -66,7 +66,7 @@ func (r *repository) Update(ctx context.Context, user *models.User) (*models.Use
 }
 
 // Delete existing user
-func (r *repository) Delete(ctx context.Context, userID uuid.UUID) error {
+func (r *authRepo) Delete(ctx context.Context, userID uuid.UUID) error {
 
 	result, err := r.db.ExecContext(ctx, deleteUserQuery, userID)
 	if err != nil {
@@ -88,7 +88,7 @@ func (r *repository) Delete(ctx context.Context, userID uuid.UUID) error {
 }
 
 // Get user by id
-func (r *repository) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, error) {
+func (r *authRepo) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, error) {
 
 	user := &models.User{}
 
@@ -108,7 +108,7 @@ func (r *repository) GetByID(ctx context.Context, userID uuid.UUID) (*models.Use
 }
 
 // Find users by name
-func (r *repository) FindByName(ctx context.Context, name string, query *utils.PaginationQuery) (*models.UsersList, error) {
+func (r *authRepo) FindByName(ctx context.Context, name string, query *utils.PaginationQuery) (*models.UsersList, error) {
 	var totalCount int
 	if err := r.db.GetContext(ctx, &totalCount, getTotalCount, name); err != nil {
 		return nil, errors.WithMessage(err, "authRepo FindByName totalCount GetContext")
@@ -162,7 +162,7 @@ func (r *repository) FindByName(ctx context.Context, name string, query *utils.P
 }
 
 // Get users with pagination
-func (r *repository) GetUsers(ctx context.Context, pq *utils.PaginationQuery) (*models.UsersList, error) {
+func (r *authRepo) GetUsers(ctx context.Context, pq *utils.PaginationQuery) (*models.UsersList, error) {
 
 	var totalCount int
 	if err := r.db.GetContext(ctx, &totalCount, getTotal); err != nil {
@@ -203,7 +203,7 @@ func (r *repository) GetUsers(ctx context.Context, pq *utils.PaginationQuery) (*
 }
 
 // Find user by email
-func (r *repository) FindByEmail(ctx context.Context, user *models.User) (*models.User, error) {
+func (r *authRepo) FindByEmail(ctx context.Context, user *models.User) (*models.User, error) {
 
 	foundUser := &models.User{}
 
@@ -222,12 +222,12 @@ func (r *repository) FindByEmail(ctx context.Context, user *models.User) (*model
 	return foundUser, nil
 }
 
-func (r *repository) generateUserKey(userID string) string {
+func (r *authRepo) generateUserKey(userID string) string {
 	return fmt.Sprintf("%s: %s", r.basePrefix, userID)
 }
 
 // Upload user avatar
-func (r *repository) UploadAvatar(ctx context.Context, fileName string, fileData []byte) error {
+func (r *authRepo) UploadAvatar(ctx context.Context, fileName string, fileData []byte) error {
 	user, err := utils.GetUserFromCtx(ctx)
 	if err != nil {
 		return errors.WithMessage(err, "authRepo UploadAvatar GetUserFromCtx")

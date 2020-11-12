@@ -19,8 +19,8 @@ const (
 	durationSeconds = 3600
 )
 
-// Comments repository
-type repository struct {
+// Comments Repository
+type commentsRepo struct {
 	db         *sqlx.DB
 	redisPool  redis.RedisPool
 	basePrefix string
@@ -28,11 +28,11 @@ type repository struct {
 
 // Comments Repository constructor
 func NewCommentsRepository(db *sqlx.DB, redisPool redis.RedisPool) comments.Repository {
-	return &repository{db: db, redisPool: redisPool, basePrefix: basePrefix}
+	return &commentsRepo{db: db, redisPool: redisPool, basePrefix: basePrefix}
 }
 
 // Create comment
-func (r *repository) Create(ctx context.Context, comment *models.Comment) (*models.Comment, error) {
+func (r *commentsRepo) Create(ctx context.Context, comment *models.Comment) (*models.Comment, error) {
 
 	c := &models.Comment{}
 	if err := r.db.QueryRowxContext(
@@ -49,7 +49,7 @@ func (r *repository) Create(ctx context.Context, comment *models.Comment) (*mode
 }
 
 // Update comment
-func (r *repository) Update(ctx context.Context, comment *models.Comment) (*models.Comment, error) {
+func (r *commentsRepo) Update(ctx context.Context, comment *models.Comment) (*models.Comment, error) {
 
 	comm := &models.Comment{}
 	if err := r.db.QueryRowxContext(ctx, updateComment, comment.Message, comment.CommentID).StructScan(comm); err != nil {
@@ -64,7 +64,7 @@ func (r *repository) Update(ctx context.Context, comment *models.Comment) (*mode
 }
 
 // Delete comment
-func (r *repository) Delete(ctx context.Context, commentID uuid.UUID) error {
+func (r *commentsRepo) Delete(ctx context.Context, commentID uuid.UUID) error {
 
 	result, err := r.db.ExecContext(ctx, deleteComment, commentID)
 	if err != nil {
@@ -87,7 +87,7 @@ func (r *repository) Delete(ctx context.Context, commentID uuid.UUID) error {
 }
 
 // GetByID comment
-func (r *repository) GetByID(ctx context.Context, commentID uuid.UUID) (*models.CommentBase, error) {
+func (r *commentsRepo) GetByID(ctx context.Context, commentID uuid.UUID) (*models.CommentBase, error) {
 	comment := &models.CommentBase{}
 
 	if err := r.redisPool.GetJSONContext(ctx, r.createKey(commentID.String()), comment); err == nil {
@@ -106,7 +106,7 @@ func (r *repository) GetByID(ctx context.Context, commentID uuid.UUID) (*models.
 }
 
 // GetAllByNewsID comments
-func (r *repository) GetAllByNewsID(ctx context.Context, newsID uuid.UUID, query *utils.PaginationQuery) (*models.CommentsList, error) {
+func (r *commentsRepo) GetAllByNewsID(ctx context.Context, newsID uuid.UUID, query *utils.PaginationQuery) (*models.CommentsList, error) {
 	var totalCount int
 	if err := r.db.QueryRowContext(ctx, getTotalCountByNewsID, newsID).Scan(&totalCount); err != nil {
 		return nil, errors.WithMessage(err, "commentsRepo GetAllByNewsID QueryRowContext")
@@ -151,6 +151,6 @@ func (r *repository) GetAllByNewsID(ctx context.Context, newsID uuid.UUID, query
 	}, nil
 }
 
-func (r *repository) createKey(commentID string) string {
+func (r *commentsRepo) createKey(commentID string) string {
 	return fmt.Sprintf("%s: %s", r.basePrefix, commentID)
 }
