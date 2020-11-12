@@ -25,43 +25,41 @@ const (
 // Server struct
 type server struct {
 	echo      *echo.Echo
-	config    *config.Config
+	cfg       *config.Config
 	db        *sqlx.DB
 	redisPool redis.RedisPool
 }
 
 // New server constructor
-func NewServer(config *config.Config, db *sqlx.DB, redisPool redis.RedisPool) *server {
-	e := echo.New()
-
-	return &server{e, config, db, redisPool}
+func NewServer(cfg *config.Config, db *sqlx.DB, redisPool redis.RedisPool) *server {
+	return &server{echo: echo.New(), cfg: cfg, db: db, redisPool: redisPool}
 }
 
 func (s *server) Run() error {
-	if s.config.Server.SSL {
+	if s.cfg.Server.SSL {
 
 		if err := s.MapHandlers(s.echo); err != nil {
 			return err
 		}
 
-		s.echo.Server.ReadTimeout = time.Second * s.config.Server.ReadTimeout
-		s.echo.Server.WriteTimeout = time.Second * s.config.Server.WriteTimeout
+		s.echo.Server.ReadTimeout = time.Second * s.cfg.Server.ReadTimeout
+		s.echo.Server.WriteTimeout = time.Second * s.cfg.Server.WriteTimeout
 
 		go func() {
-			logger.Infof("Server is listening on PORT: %s", s.config.Server.Port)
-			s.echo.Server.ReadTimeout = time.Second * s.config.Server.ReadTimeout
-			s.echo.Server.WriteTimeout = time.Second * s.config.Server.WriteTimeout
+			logger.Infof("Server is listening on PORT: %s", s.cfg.Server.Port)
+			s.echo.Server.ReadTimeout = time.Second * s.cfg.Server.ReadTimeout
+			s.echo.Server.WriteTimeout = time.Second * s.cfg.Server.WriteTimeout
 			s.echo.Server.MaxHeaderBytes = maxHeaderBytes
-			if err := s.echo.StartTLS(s.config.Server.Port, certFile, keyFile); err != nil {
-				logger.Fatalf("Error starting TLS server: ", err.Error())
+			if err := s.echo.StartTLS(s.cfg.Server.Port, certFile, keyFile); err != nil {
+				logger.Fatalf("Error starting TLS server: ", err)
 			}
 
 		}()
 
 		go func() {
-			logger.Infof("Starting Debug server on PORT: %s", s.config.Server.PprofPort)
-			if err := http.ListenAndServe(s.config.Server.PprofPort, http.DefaultServeMux); err != nil {
-				logger.Errorf("Error PPROF ListenAndServe: %s", err.Error())
+			logger.Infof("Starting Debug server on PORT: %s", s.cfg.Server.PprofPort)
+			if err := http.ListenAndServe(s.cfg.Server.PprofPort, http.DefaultServeMux); err != nil {
+				logger.Errorf("Error PPROF ListenAndServe: %s", err)
 			}
 		}()
 
@@ -83,23 +81,23 @@ func (s *server) Run() error {
 	}
 
 	server := &http.Server{
-		Addr:           s.config.Server.Port,
-		ReadTimeout:    time.Second * s.config.Server.ReadTimeout,
-		WriteTimeout:   time.Second * s.config.Server.WriteTimeout,
+		Addr:           s.cfg.Server.Port,
+		ReadTimeout:    time.Second * s.cfg.Server.ReadTimeout,
+		WriteTimeout:   time.Second * s.cfg.Server.WriteTimeout,
 		MaxHeaderBytes: maxHeaderBytes,
 	}
 
 	go func() {
-		logger.Infof("Server is listening on PORT: %s", s.config.Server.Port)
+		logger.Infof("Server is listening on PORT: %s", s.cfg.Server.Port)
 		if err := e.StartServer(server); err != nil {
-			logger.Fatalf("Error starting server: ", err.Error())
+			logger.Fatalf("Error starting server: ", err)
 		}
 	}()
 
 	go func() {
-		logger.Infof("Starting Debug server on PORT: %s", s.config.Server.PprofPort)
-		if err := http.ListenAndServe(s.config.Server.PprofPort, http.DefaultServeMux); err != nil {
-			logger.Errorf("Error PPROF ListenAndServe: %s", err.Error())
+		logger.Infof("Starting Debug server on PORT: %s", s.cfg.Server.PprofPort)
+		if err := http.ListenAndServe(s.cfg.Server.PprofPort, http.DefaultServeMux); err != nil {
+			logger.Errorf("Error PPROF ListenAndServe: %s", err)
 		}
 	}()
 

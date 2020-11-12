@@ -29,41 +29,41 @@ import (
 
 // Map Server Handlers
 func (s *server) MapHandlers(e *echo.Echo) error {
-	metrics, err := metric.CreateMetrics(s.config.Metrics.URL, s.config.Metrics.ServiceName)
+	metrics, err := metric.CreateMetrics(s.cfg.Metrics.URL, s.cfg.Metrics.ServiceName)
 	if err != nil {
-		logger.Errorf("CreateMetrics Error: %s", err.Error())
+		logger.Errorf("CreateMetrics Error: %s", err)
 	}
 	logger.Info(
 		"Metrics available URL: %s, ServiceName: %s",
-		s.config.Metrics.URL,
-		s.config.Metrics.ServiceName,
+		s.cfg.Metrics.URL,
+		s.cfg.Metrics.ServiceName,
 	)
 
 	// Init repositories
 	aRepo := authRepository.NewAuthRepository(s.db)
 	nRepo := newsRepository.NewNewsRepository(s.db)
 	cRepo := commentsRepository.NewCommentsRepository(s.db)
-	sRepo := sessionRepository.NewSessionRepository(s.redisPool, s.config)
+	sRepo := sessionRepository.NewSessionRepository(s.redisPool, s.cfg)
 
 	// Init useCases
-	authUC := authUseCase.NewAuthUseCase(s.config, aRepo, s.redisPool)
-	newsUC := newsUseCase.NewNewsUseCase(s.config, nRepo, s.redisPool)
-	commUC := commentsUseCase.NewCommentsUseCase(s.config, cRepo, s.redisPool)
-	sessUC := usecase.NewSessionUseCase(sRepo, s.config)
+	authUC := authUseCase.NewAuthUseCase(s.cfg, aRepo, s.redisPool)
+	newsUC := newsUseCase.NewNewsUseCase(s.cfg, nRepo, s.redisPool)
+	commUC := commentsUseCase.NewCommentsUseCase(s.cfg, cRepo, s.redisPool)
+	sessUC := usecase.NewSessionUseCase(sRepo, s.cfg)
 
 	// Init handlers
-	authHandlers := authHttp.NewAuthHandlers(s.config, authUC, sessUC)
-	newsHandlers := newsHttp.NewNewsHandlers(s.config, newsUC)
-	commHandlers := commentsHttp.NewCommentsHandlers(s.config, commUC)
+	authHandlers := authHttp.NewAuthHandlers(s.cfg, authUC, sessUC)
+	newsHandlers := newsHttp.NewNewsHandlers(s.cfg, newsUC)
+	commHandlers := commentsHttp.NewCommentsHandlers(s.cfg, commUC)
 
-	mw := apiMiddlewares.NewMiddlewareManager(sessUC, authUC, s.config, []string{"*"})
+	mw := apiMiddlewares.NewMiddlewareManager(sessUC, authUC, s.cfg, []string{"*"})
 
 	e.Use(mw.RequestLoggerMiddleware)
 
 	docs.SwaggerInfo.Title = "Swagger Example API"
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
-	if s.config.Server.SSL {
+	if s.cfg.Server.SSL {
 		e.Pre(middleware.HTTPSRedirect())
 	}
 
@@ -88,7 +88,7 @@ func (s *server) MapHandlers(e *echo.Echo) error {
 	// e.Use(middleware.CSRF())
 	e.Use(middleware.Secure())
 	e.Use(middleware.BodyLimit("2M"))
-	if s.config.Server.Debug {
+	if s.cfg.Server.Debug {
 		e.Use(mw.DebugMiddleware)
 	}
 

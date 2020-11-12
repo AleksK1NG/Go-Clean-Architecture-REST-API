@@ -60,6 +60,11 @@ type RedisConfig struct {
 	RedisPassword  string
 	RedisDB        string
 	RedisDefaultdb string
+	MinIdleConns   int
+	PoolSize       int
+	PoolTimeout    int
+	Password       string
+	DB             int
 }
 
 // MongoDB config
