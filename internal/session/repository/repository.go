@@ -33,7 +33,7 @@ func (s *sessionRepo) CreateSession(ctx context.Context, session *models.Session
 	sessionKey := s.createKey(session.SessionID)
 
 	if err := s.redisPool.SetexJSONContext(ctx, sessionKey, expire, session); err != nil {
-		return "", errors.WithMessage(err, "sessRepo CreateSession SetexJSONContext")
+		return "", errors.WithMessage(err, "sessionRepo CreateSession redis set")
 	}
 
 	return sessionKey, nil
@@ -43,7 +43,7 @@ func (s *sessionRepo) CreateSession(ctx context.Context, session *models.Session
 func (s *sessionRepo) GetSessionByID(ctx context.Context, sessionID string) (*models.Session, error) {
 	sess := &models.Session{}
 	if err := s.redisPool.GetJSONContext(ctx, sessionID, sess); err != nil {
-		return nil, errors.WithMessage(err, "sessRepo GetSessionByID GetJSONContext")
+		return nil, errors.WithMessage(err, "sessionRepo GetSessionByID redis get")
 	}
 	return sess, nil
 }

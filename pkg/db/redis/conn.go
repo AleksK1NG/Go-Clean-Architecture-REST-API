@@ -32,13 +32,13 @@ type RedisPool interface {
 
 // Redis client
 type RedisClient struct {
-	config *config.Config
+	cfg    *config.Config
 	client *redis.Client
 }
 
 // Returns new redis client
-func NewRedisClient(config *config.Config) *RedisClient {
-	redisHost := config.Redis.RedisAddr
+func NewRedisClient(cfg *config.Config) *RedisClient {
+	redisHost := cfg.Redis.RedisAddr
 
 	if redisHost == "" {
 		redisHost = ":6379"
@@ -46,15 +46,15 @@ func NewRedisClient(config *config.Config) *RedisClient {
 
 	client := redis.NewClient(&redis.Options{
 		Addr:         redisHost,
-		MinIdleConns: 200,
-		PoolSize:     12000,
-		PoolTimeout:  240 * time.Second,
-		Password:     "", // no password set
-		DB:           0,  // use default DB
+		MinIdleConns: cfg.Redis.MinIdleConns,
+		PoolSize:     cfg.Redis.PoolSize,
+		PoolTimeout:  time.Duration(cfg.Redis.PoolTimeout) * time.Second,
+		Password:     cfg.Redis.Password, // no password set
+		DB:           cfg.Redis.DB,       // use default DB
 	})
 
 	cleanupHook(client)
-	return &RedisClient{config: config, client: client}
+	return &RedisClient{cfg: cfg, client: client}
 }
 
 func cleanupHook(client *redis.Client) {
@@ -64,7 +64,7 @@ func cleanupHook(client *redis.Client) {
 	go func() {
 		<-c
 		if err := client.Close(); err != nil {
-			logger.Errorf("RedisClient Close: %s", err.Error())
+			logger.Errorf("RedisClient Close: %s", err)
 		}
 		os.Exit(0)
 	}()
