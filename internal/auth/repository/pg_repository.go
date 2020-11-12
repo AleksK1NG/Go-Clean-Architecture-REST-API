@@ -7,8 +7,6 @@ import (
 	"fmt"
 	"github.com/AleksK1NG/api-mc/internal/auth"
 	"github.com/AleksK1NG/api-mc/internal/models"
-	"github.com/AleksK1NG/api-mc/pkg/db/redis"
-	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -18,21 +16,17 @@ import (
 )
 
 const (
-	basePrefix    = "api-auth:"
-	cacheDuration = 3600
-	avatarsDir    = "avatars/"
+	avatarsDir = "avatars/"
 )
 
 // Auth Repository
 type authRepo struct {
-	db          *sqlx.DB
-	redisClient redis.RedisPool
-	basePrefix  string
+	db *sqlx.DB
 }
 
 // Auth Repository constructor
-func NewAuthRepository(db *sqlx.DB, redisClient redis.RedisPool) auth.Repository {
-	return &authRepo{db: db, redisClient: redisClient, basePrefix: basePrefix}
+func NewAuthRepository(db *sqlx.DB) auth.Repository {
+	return &authRepo{db: db}
 }
 
 // Create new user
@@ -50,7 +44,6 @@ func (r *authRepo) Register(ctx context.Context, user *models.User) (*models.Use
 
 // Update existing user
 func (r *authRepo) Update(ctx context.Context, user *models.User) (*models.User, error) {
-
 	u := &models.User{}
 	if err := r.db.GetContext(ctx, u, updateUserQuery, &user.FirstName, &user.LastName, &user.Email,
 		&user.Role, &user.About, &user.Avatar, &user.PhoneNumber, &user.Address, &user.City, &user.Gender,
@@ -59,15 +52,11 @@ func (r *authRepo) Update(ctx context.Context, user *models.User) (*models.User,
 		return nil, errors.WithMessage(err, "authRepo Update GetContext")
 	}
 
-	if err := r.redisClient.DeleteContext(ctx, r.generateUserKey(u.UserID.String())); err != nil {
-		logger.Errorf("DeleteContext: %s", err.Error())
-	}
 	return u, nil
 }
 
 // Delete existing user
 func (r *authRepo) Delete(ctx context.Context, userID uuid.UUID) error {
-
 	result, err := r.db.ExecContext(ctx, deleteUserQuery, userID)
 	if err != nil {
 		return errors.WithMessage(err, "authRepo Delete ExecContext")
@@ -80,28 +69,15 @@ func (r *authRepo) Delete(ctx context.Context, userID uuid.UUID) error {
 		return errors.WithMessage(sql.ErrNoRows, "authRepo Delete rowsAffected == 0")
 	}
 
-	if err := r.redisClient.DeleteContext(ctx, r.generateUserKey(userID.String())); err != nil {
-		logger.Errorf("DeleteContext: %s", err.Error())
-	}
-
 	return nil
 }
 
 // Get user by id
 func (r *authRepo) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, error) {
-
 	user := &models.User{}
-
-	if err := r.redisClient.GetJSONContext(ctx, r.generateUserKey(userID.String()), user); err != nil {
-		logger.Errorf("GetJSONContext: %s", err.Error())
-	}
 
 	if err := r.db.QueryRowxContext(ctx, getUserQuery, userID).StructScan(user); err != nil {
 		return nil, errors.WithMessage(err, "authRepo GetByID QueryRowxContext")
-	}
-
-	if err := r.redisClient.SetexJSONContext(ctx, r.generateUserKey(userID.String()), cacheDuration, user); err != nil {
-		logger.Errorf("GetJSONContext: %s", err.Error())
 	}
 
 	return user, nil
@@ -163,7 +139,6 @@ func (r *authRepo) FindByName(ctx context.Context, name string, query *utils.Pag
 
 // Get users with pagination
 func (r *authRepo) GetUsers(ctx context.Context, pq *utils.PaginationQuery) (*models.UsersList, error) {
-
 	var totalCount int
 	if err := r.db.GetContext(ctx, &totalCount, getTotal); err != nil {
 		return nil, errors.WithMessage(err, "authRepo GetUsers totalCount GetContext")
@@ -204,26 +179,13 @@ func (r *authRepo) GetUsers(ctx context.Context, pq *utils.PaginationQuery) (*mo
 
 // Find user by email
 func (r *authRepo) FindByEmail(ctx context.Context, user *models.User) (*models.User, error) {
-
 	foundUser := &models.User{}
-
-	if err := r.redisClient.GetJSONContext(ctx, r.generateUserKey(user.Email), foundUser); err != nil {
-		logger.Errorf("GetJSONContext: %s", err.Error())
-	}
 
 	if err := r.db.QueryRowxContext(ctx, findUserByEmail, user.Email).StructScan(foundUser); err != nil {
 		return nil, errors.WithMessage(err, "authRepo FindByEmail QueryRowxContext")
 	}
 
-	if err := r.redisClient.SetexJSONContext(ctx, r.generateUserKey(user.Email), cacheDuration, foundUser); err != nil {
-		logger.Errorf("GetJSONContext: %s", err.Error())
-	}
-
 	return foundUser, nil
-}
-
-func (r *authRepo) generateUserKey(userID string) string {
-	return fmt.Sprintf("%s: %s", r.basePrefix, userID)
 }
 
 // Upload user avatar
