@@ -1,8 +1,8 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "This is a example Golang REST API.",
-        "title": "Go Example API",
+        "description": "Example Golang REST API",
+        "title": "Go Example REST API",
         "contact": {
             "name": "Alexander Bryksin",
             "url": "https://github.com/AleksK1NG",

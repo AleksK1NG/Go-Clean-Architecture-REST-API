@@ -937,8 +937,8 @@ var SwaggerInfo = swaggerInfo{
 	Host:        "",
 	BasePath:    "/api/v1",
 	Schemes:     []string{},
-	Title:       "Go Example API",
-	Description: "This is a example Golang REST API.",
+	Title:       "Go Example REST API",
+	Description: "Example Golang REST API",
 }
 
 type s struct{}

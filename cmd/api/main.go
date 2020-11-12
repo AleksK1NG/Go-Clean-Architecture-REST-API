@@ -11,9 +11,9 @@ import (
 	"os"
 )
 
-// @title Go Example API
+// @title Go Example REST API
 // @version 1.0
-// @description This is a example Golang REST API.
+// @description Example Golang REST API
 // @contact.name Alexander Bryksin
 // @contact.url https://github.com/AleksK1NG
 // @contact.email alexander.bryksin@yandex.ru
