@@ -1,12 +1,12 @@
 # Initial stage: download modules
-FROM golang:1.15.2 as modules
+FROM golang:1.15.5 as modules
 
 ADD ./go.mod go.sum /m/
 RUN cd /m && go mod download
 RUN go get github.com/githubnemo/CompileDaemon
 
 # Intermediate stage: Build the binary
-FROM golang:1.15.2 as builder
+FROM golang:1.15.5 as builder
 
 COPY --from=modules /go/pkg /go/pkg
 

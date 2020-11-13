@@ -154,7 +154,7 @@ func (h *authHandlers) Update() echo.HandlerFunc {
 		user := &models.User{}
 		user.UserID = uID
 
-		if err := utils.ReadRequest(c, user); err != nil {
+		if err = utils.ReadRequest(c, user); err != nil {
 			return utils.ErrResponseWithLog(c, err)
 		}
 

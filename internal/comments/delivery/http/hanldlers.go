@@ -40,7 +40,7 @@ func (h *commentsHandlers) Create() echo.HandlerFunc {
 		comment := &models.Comment{}
 		comment.AuthorID = user.UserID
 
-		if err := utils.SanitizeRequest(c, comment); err != nil {
+		if err = utils.SanitizeRequest(c, comment); err != nil {
 			return utils.ErrResponseWithLog(c, err)
 		}
 
@@ -76,7 +76,7 @@ func (h *commentsHandlers) Update() echo.HandlerFunc {
 		}
 
 		comm := &UpdateComment{}
-		if err := utils.SanitizeRequest(c, comm); err != nil {
+		if err = utils.SanitizeRequest(c, comm); err != nil {
 			return utils.ErrResponseWithLog(c, err)
 		}
 

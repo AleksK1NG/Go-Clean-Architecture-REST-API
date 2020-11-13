@@ -102,13 +102,13 @@ func (r *commentsRepo) GetAllByNewsID(ctx context.Context, newsID uuid.UUID, que
 	commentsList := make([]*models.CommentBase, 0, query.GetSize())
 	for rows.Next() {
 		comment := &models.CommentBase{}
-		if err := rows.StructScan(comment); err != nil {
+		if err = rows.StructScan(comment); err != nil {
 			return nil, errors.WithMessage(err, "commentsRepo GetAllByNewsID StructScan")
 		}
 		commentsList = append(commentsList, comment)
 	}
 
-	if err := rows.Err(); err != nil {
+	if err = rows.Err(); err != nil {
 		return nil, errors.WithMessage(err, "commentsRepo GetAllByNewsID rows.Err")
 	}
 
