@@ -110,7 +110,7 @@ func (r newsRepo) GetNews(ctx context.Context, pq *utils.PaginationQuery) (*mode
 
 	for rows.Next() {
 		n := &models.News{}
-		if err := rows.StructScan(n); err != nil {
+		if err = rows.StructScan(n); err != nil {
 			return nil, errors.WithMessage(err, "newsRepo GetNews StructScan")
 		}
 		newsList = append(newsList, n)
@@ -156,13 +156,13 @@ func (r newsRepo) SearchByTitle(ctx context.Context, title string, query *utils.
 
 	for rows.Next() {
 		n := &models.News{}
-		if err := rows.StructScan(n); err != nil {
+		if err = rows.StructScan(n); err != nil {
 			return nil, errors.WithMessage(err, "newsRepo SearchByTitle StructScan")
 		}
 		newsList = append(newsList, n)
 	}
 
-	if err := rows.Err(); err != nil {
+	if err = rows.Err(); err != nil {
 		return nil, errors.WithMessage(err, "newsRepo SearchByTitle rows.Err")
 	}
 

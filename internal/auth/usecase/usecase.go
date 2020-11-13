@@ -100,7 +100,7 @@ func (u *authUC) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, e
 		return nil, err
 	}
 
-	if err := u.redisRepo.SetexJSONContext(ctx, u.generateUserKey(userID.String()), cacheDuration, user); err != nil {
+	if err = u.redisRepo.SetexJSONContext(ctx, u.generateUserKey(userID.String()), cacheDuration, user); err != nil {
 		logger.Errorf("AuthUC GetByID redis set: %s", err)
 	}
 

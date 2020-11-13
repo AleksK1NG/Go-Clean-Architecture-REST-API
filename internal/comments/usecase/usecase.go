@@ -42,11 +42,11 @@ func (u *commentsUC) Update(ctx context.Context, comment *models.Comment) (*mode
 		return nil, err
 	}
 
-	if err := utils.ValidateIsOwner(ctx, comm.AuthorID.String()); err != nil {
+	if err = utils.ValidateIsOwner(ctx, comm.AuthorID.String()); err != nil {
 		return nil, errors.WithMessage(err, "commentsUC Update ValidateIsOwner")
 	}
 
-	if err := u.redisRepo.Delete(u.createKey(comment.CommentID.String())); err != nil {
+	if err = u.redisRepo.Delete(u.createKey(comment.CommentID.String())); err != nil {
 		logger.Errorf("commentsUC Update redis delete: %s", err)
 	}
 

@@ -37,7 +37,6 @@ func NewServer(cfg *config.Config, db *sqlx.DB, redisPool redis.RedisPool) *serv
 
 func (s *server) Run() error {
 	if s.cfg.Server.SSL {
-
 		if err := s.MapHandlers(s.echo); err != nil {
 			return err
 		}

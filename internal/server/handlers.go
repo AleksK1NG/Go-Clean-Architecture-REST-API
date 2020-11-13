@@ -24,7 +24,6 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
 	"net/http"
-	_ "net/http/pprof" //prof
 )
 
 // Map Server Handlers
@@ -60,7 +59,7 @@ func (s *server) MapHandlers(e *echo.Echo) error {
 
 	e.Use(mw.RequestLoggerMiddleware)
 
-	docs.SwaggerInfo.Title = "Swagger Example API"
+	docs.SwaggerInfo.Title = "Go example REST API"
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	if s.cfg.Server.SSL {

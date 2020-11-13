@@ -206,7 +206,7 @@ func (r *authRepo) UploadAvatar(ctx context.Context, fileName string, fileData [
 
 	buffer := bytes.NewBuffer(fileData)
 
-	if _, err := io.Copy(newAvatarFile, buffer); err != nil {
+	if _, err = io.Copy(newAvatarFile, buffer); err != nil {
 		return errors.WithMessage(err, "authRepo UploadAvatar Copy")
 	}
 

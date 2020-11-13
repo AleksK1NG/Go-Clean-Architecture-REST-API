@@ -25,12 +25,12 @@ func main() {
 
 	cfgFile, err := config.LoadConfig(configPath)
 	if err != nil {
-		log.Fatalf("LoadConfig: %s", err.Error())
+		log.Fatalf("LoadConfig: %v", err)
 	}
 
 	cfg, err := config.ParseConfig(cfgFile)
 	if err != nil {
-		log.Fatalf("ParseConfig: %s", err.Error())
+		log.Fatalf("ParseConfig: %v", err)
 	}
 
 	logger.InitLogger(cfg)
@@ -38,7 +38,7 @@ func main() {
 
 	psqlDB, err := postgres.NewPsqlDB(cfg)
 	if err != nil {
-		logger.Fatalf("Postgresql init: %s", err.Error())
+		logger.Fatalf("Postgresql init: %s", err)
 	} else {
 		logger.Infof("Postgres connected, Status: %#v", psqlDB.Stats())
 	}

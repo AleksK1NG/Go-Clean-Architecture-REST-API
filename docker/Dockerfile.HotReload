@@ -1,4 +1,4 @@
-FROM golang:1.15.2
+FROM golang:1.15.5
 
 #ENV TZ=Europe/Moscow
 #RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
