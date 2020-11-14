@@ -198,6 +198,32 @@ var doc = `{
                 }
             }
         },
+        "/auth/token": {
+            "get": {
+                "description": "Get CSRF token, required auth session cookie",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get CSRF token",
+                "responses": {
+                    "200": {
+                        "description": "Ok",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/httpErrors.RestError"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/{id}": {
             "get": {
                 "description": "get string by ID",

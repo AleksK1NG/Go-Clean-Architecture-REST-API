@@ -35,7 +35,7 @@ func (r *authRepo) Register(ctx context.Context, user *models.User) (*models.Use
 	if err := r.db.QueryRowxContext(ctx, createUserQuery, &user.FirstName, &user.LastName, &user.Email,
 		&user.Password, &user.Role, &user.About, &user.Avatar, &user.PhoneNumber, &user.Address, &user.City,
 		&user.Gender, &user.Postcode, &user.Birthday,
-	).StructScan(&u); err != nil {
+	).StructScan(u); err != nil {
 		return nil, errors.WithMessage(err, "authRepo Register StructScan")
 	}
 

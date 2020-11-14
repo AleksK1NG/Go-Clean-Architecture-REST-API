@@ -15,6 +15,7 @@ import (
 	"go.uber.org/zap"
 	"net/http"
 	"strings"
+	"time"
 )
 
 // Auth sessions middleware using redis
@@ -31,6 +32,8 @@ func (mw *MiddlewareManager) AuthSessionMiddleware(next echo.HandlerFunc) echo.H
 			}
 			return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
 		}
+
+		sid := cookie.Value
 
 		sess, err := mw.sessUC.GetSessionByID(c.Request().Context(), cookie.Value)
 		if err != nil {
@@ -51,7 +54,10 @@ func (mw *MiddlewareManager) AuthSessionMiddleware(next echo.HandlerFunc) echo.H
 			return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
 		}
 
+		c.Set("sid", sid)
+		c.Set("uid", sess.SessionID)
 		c.Set("user", user)
+
 		ctx := context.WithValue(c.Request().Context(), utils.UserCtxKey{}, user)
 		c.SetRequest(c.Request().WithContext(ctx))
 
@@ -222,4 +228,38 @@ func (mw *MiddlewareManager) validateJWTToken(tokenString string, authUC auth.Us
 		c.SetRequest(c.Request().WithContext(ctx))
 	}
 	return nil
+}
+
+// Check auth middleware
+func (mw *MiddlewareManager) CheckAuth(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(ctx echo.Context) error {
+		cookie, err := ctx.Cookie("session_id")
+		if err != nil {
+			logger.Errorf("CheckAuth ctx.Cookie: %s, Cookie: %#v, Error: %s",
+				utils.GetRequestID(ctx),
+				cookie,
+				err,
+			)
+			return ctx.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(err))
+		}
+		sid := cookie.Value
+
+		session, err := mw.sessUC.GetSessionByID(ctx.Request().Context(), sid)
+		if err != nil {
+			// Cookie is invalid, delete it from browser
+			newCookie := http.Cookie{Name: "session_id", Value: sid, Expires: time.Now().AddDate(-1, 0, 0)}
+			ctx.SetCookie(&newCookie)
+
+			logger.Errorf("CheckAuth sessUC.GetSessionByID: %s, Cookie: %#v, Error: %s",
+				utils.GetRequestID(ctx),
+				cookie,
+				err,
+			)
+			return ctx.JSON(http.StatusUnauthorized, httpErrors.NoCookie)
+		}
+
+		ctx.Set("uid", session.SessionID)
+		ctx.Set("sid", sid)
+		return next(ctx)
+	}
 }

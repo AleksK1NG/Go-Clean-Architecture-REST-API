@@ -6,6 +6,7 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/auth"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/session"
+	"github.com/AleksK1NG/api-mc/pkg/csrf"
 	"github.com/AleksK1NG/api-mc/pkg/httpErrors"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
@@ -39,7 +40,6 @@ func (h *authHandlers) Register() echo.HandlerFunc {
 		ctx := utils.GetRequestCtx(c)
 
 		user := &models.User{}
-
 		if err := utils.ReadRequest(c, user); err != nil {
 			return utils.ErrResponseWithLog(c, err)
 		}
@@ -79,7 +79,6 @@ func (h *authHandlers) Login() echo.HandlerFunc {
 		ctx := utils.GetRequestCtx(c)
 
 		login := &Login{}
-
 		if err := utils.ReadRequest(c, login); err != nil {
 			return utils.ErrResponseWithLog(c, err)
 		}
@@ -211,7 +210,7 @@ func (h *authHandlers) Delete() echo.HandlerFunc {
 			return utils.ErrResponseWithLog(c, err)
 		}
 
-		if err := h.authUC.Delete(ctx, uID); err != nil {
+		if err = h.authUC.Delete(ctx, uID); err != nil {
 			return utils.ErrResponseWithLog(c, err)
 		}
 
@@ -298,6 +297,29 @@ func (h *authHandlers) GetMe() echo.HandlerFunc {
 	}
 }
 
+// GetCSRFToken godoc
+// @Summary Get CSRF token
+// @Description Get CSRF token, required auth session cookie
+// @Accept json
+// @Produce json
+// @Success 200 {string} string "Ok"
+// @Failure 500 {object} httpErrors.RestError
+// @Router /auth/token [get]
+func (h *authHandlers) GetCSRFToken() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		sid, ok := c.Get("sid").(string)
+		if !ok {
+			return utils.ErrResponseWithLog(c, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
+		}
+		token := csrf.MakeToken(sid)
+		c.Response().Header().Set(csrf.CSRFHeader, token)
+		c.Response().Header().Set("Access-Control-Expose-Headers", csrf.CSRFHeader)
+
+		return c.NoContent(http.StatusOK)
+
+	}
+}
+
 // UploadAvatar godoc
 // @Summary Post avatar
 // @Description Post user avatar image
@@ -324,15 +346,15 @@ func (h *authHandlers) UploadAvatar() echo.HandlerFunc {
 
 		binaryImage := bytes.NewBuffer(nil)
 
-		if _, err := io.Copy(binaryImage, file); err != nil {
+		if _, err = io.Copy(binaryImage, file); err != nil {
 			return httpErrors.NewInternalServerError(err)
 		}
 
-		if _, err := utils.CheckImageFileContentType(binaryImage.Bytes()); err != nil {
+		if _, err = utils.CheckImageFileContentType(binaryImage.Bytes()); err != nil {
 			return httpErrors.NewBadRequestError(err)
 		}
 
-		if err := h.authUC.UploadAvatar(ctx, image.Filename, binaryImage.Bytes()); err != nil {
+		if err = h.authUC.UploadAvatar(ctx, image.Filename, binaryImage.Bytes()); err != nil {
 			return utils.ErrResponseWithLog(c, err)
 		}
 
