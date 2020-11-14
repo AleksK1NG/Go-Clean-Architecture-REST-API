@@ -331,7 +331,7 @@ func (h *authHandlers) GetCSRFToken() echo.HandlerFunc {
 // @Router /auth/avatar [post]
 func (h *authHandlers) UploadAvatar() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx := utils.GetRequestCtx(c)
+		//ctx := utils.GetRequestCtx(c)
 
 		image, err := utils.ReadImage(c, "file")
 		if err != nil {
@@ -354,10 +354,11 @@ func (h *authHandlers) UploadAvatar() echo.HandlerFunc {
 			return httpErrors.NewBadRequestError(err)
 		}
 
-		if err = h.authUC.UploadAvatar(ctx, image.Filename, binaryImage.Bytes()); err != nil {
-			return utils.ErrResponseWithLog(c, err)
-		}
+		//if err = h.authUC.UploadAvatar(ctx, image.Filename, binaryImage.Bytes()); err != nil {
+		//	return utils.ErrResponseWithLog(c, err)
+		//}
 
-		return c.NoContent(http.StatusOK)
+		return c.JSON(200, len(binaryImage.Bytes()))
+		//return c.NoContent(http.StatusOK)
 	}
 }

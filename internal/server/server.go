@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/AleksK1NG/api-mc/config"
 	_ "github.com/AleksK1NG/api-mc/docs"
+	"github.com/AleksK1NG/api-mc/pkg/db/aws_s3"
 	"github.com/AleksK1NG/api-mc/pkg/db/redis"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/jmoiron/sqlx"
@@ -24,15 +25,16 @@ const (
 
 // Server struct
 type server struct {
-	echo      *echo.Echo
-	cfg       *config.Config
-	db        *sqlx.DB
-	redisPool redis.RedisPool
+	echo        *echo.Echo
+	cfg         *config.Config
+	db          *sqlx.DB
+	redisPool   redis.RedisPool
+	awsS3Client aws_s3.AWSClient
 }
 
 // New server constructor
-func NewServer(cfg *config.Config, db *sqlx.DB, redisPool redis.RedisPool) *server {
-	return &server{echo: echo.New(), cfg: cfg, db: db, redisPool: redisPool}
+func NewServer(cfg *config.Config, db *sqlx.DB, redisPool redis.RedisPool, awsS3Client aws_s3.AWSClient) *server {
+	return &server{echo: echo.New(), cfg: cfg, db: db, redisPool: redisPool, awsS3Client: awsS3Client}
 }
 
 func (s *server) Run() error {
