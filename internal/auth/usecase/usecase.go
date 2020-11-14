@@ -6,6 +6,7 @@ import (
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/auth"
 	"github.com/AleksK1NG/api-mc/internal/models"
+	"github.com/AleksK1NG/api-mc/pkg/db/aws"
 	"github.com/AleksK1NG/api-mc/pkg/db/redis"
 	"github.com/AleksK1NG/api-mc/pkg/httpErrors"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
@@ -24,11 +25,12 @@ type authUC struct {
 	cfg       *config.Config
 	authRepo  auth.Repository
 	redisRepo redis.RedisPool
+	awsClient aws.AWSClient
 }
 
 // Auth UseCase constructor
-func NewAuthUseCase(cfg *config.Config, authRepo auth.Repository, redisRepo redis.RedisPool) auth.UseCase {
-	return &authUC{cfg: cfg, authRepo: authRepo, redisRepo: redisRepo}
+func NewAuthUseCase(cfg *config.Config, authRepo auth.Repository, redisRepo redis.RedisPool, awsClient aws.AWSClient) auth.UseCase {
+	return &authUC{cfg: cfg, authRepo: authRepo, redisRepo: redisRepo, awsClient: awsClient}
 }
 
 // Create new user
@@ -144,8 +146,14 @@ func (u *authUC) Login(ctx context.Context, user *models.User) (*models.UserWith
 }
 
 // Upload user avatar
-func (u *authUC) UploadAvatar(ctx context.Context, fileName string, fileData []byte) error {
-	return u.authRepo.UploadAvatar(ctx, fileName, fileData)
+func (u *authUC) UploadAvatar(ctx context.Context, file aws.UploadInput) error {
+	uploadInfo, err := u.awsClient.FileUpload(ctx, file)
+	if err != nil {
+		return err
+	}
+
+	logger.Infof("UploadAvatar: %#v", uploadInfo)
+	return nil
 }
 
 func (u *authUC) generateUserKey(userID string) string {

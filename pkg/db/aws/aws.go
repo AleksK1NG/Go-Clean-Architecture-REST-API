@@ -1,4 +1,4 @@
-package aws_s3
+package aws
 
 import (
 	"context"
@@ -25,27 +25,29 @@ type UploadInput struct {
 }
 
 // Minio AWS S3 Client
-type awsClient struct {
+type AWSS3Client struct {
 	client *minio.Client
 }
 
 // Minio AWS S3 Client constructor
-func NewAWSClient(endpoint string, accessKeyID string, secretAccessKey string, useSSL bool) (AWSClient, error) {
+func NewAWSClient(endpoint string, accessKeyID string, secretAccessKey string, useSSL bool) (*AWSS3Client, error) {
 
 	// Initialize minio client object.
-	minioClient, err := minio.New(endpoint, &minio.Options{
-		Creds:  credentials.NewStaticV4(accessKeyID, secretAccessKey, ""),
-		Secure: useSSL,
+	minioClient, err := minio.New("play.min.io", &minio.Options{
+		Creds:  credentials.NewStaticV4("Q3AM3UQ867SPQQA43P2F", "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG", ""),
+		Secure: true,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	return &awsClient{client: minioClient}, nil
+	logger.Infof("minioClient: %#v", minioClient)
+
+	return &AWSS3Client{client: minioClient}, nil
 }
 
 // AWS file upload
-func (aws *awsClient) FileUpload(ctx context.Context, input UploadInput) (minio.UploadInfo, error) {
+func (aws *AWSS3Client) FileUpload(ctx context.Context, input UploadInput) (minio.UploadInfo, error) {
 	options := minio.PutObjectOptions{
 		ContentType:  input.ContentType,
 		UserMetadata: map[string]string{"x-amz-acl": "public-read"},
@@ -61,7 +63,7 @@ func (aws *awsClient) FileUpload(ctx context.Context, input UploadInput) (minio.
 	return uploadInfo, err
 }
 
-func (aws *awsClient) generateFileName(fileName string) string {
+func (aws *AWSS3Client) generateFileName(fileName string) string {
 	uid := uuid.New().String()
 	return fmt.Sprintf("%s-%s", fileName, uid)
 }

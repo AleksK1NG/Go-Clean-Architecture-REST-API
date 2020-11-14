@@ -57,7 +57,7 @@ mongodb:
   MongoURI: uristring
 
 aws:
-  Endpoint: http://127.0.0.1:9000
+  Endpoint: 127.0.0.1:9000
   MinioAccessKey: AKIAIOSFODNN7EXAMPLE
   MinioSecretKey: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 

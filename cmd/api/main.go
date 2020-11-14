@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/server"
-	"github.com/AleksK1NG/api-mc/pkg/db/aws_s3"
+	"github.com/AleksK1NG/api-mc/pkg/db/aws"
 	"github.com/AleksK1NG/api-mc/pkg/db/postgres"
 	"github.com/AleksK1NG/api-mc/pkg/db/redis"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
@@ -48,7 +48,10 @@ func main() {
 	redisClient := redis.NewRedisClient(cfg)
 	logger.Info("Redis connected")
 
-	awsClient, err := aws_s3.NewAWSClient(cfg.AWS.Endpoint, cfg.AWS.MinioAccessKey, cfg.AWS.MinioSecretKey, cfg.Server.SSL)
+	awsClient, err := aws.NewAWSClient(cfg.AWS.Endpoint, cfg.AWS.MinioAccessKey, cfg.AWS.MinioSecretKey, cfg.Server.SSL)
+	if err != nil {
+		logger.Fatalf("AWS Client init: %s", err)
+	}
 	logger.Info("AWS S3 connected")
 
 	s := server.NewServer(cfg, psqlDB, redisClient, awsClient)

@@ -46,7 +46,7 @@ func (s *server) MapHandlers(e *echo.Echo) error {
 	sRepo := sessionRepository.NewSessionRepository(s.redisPool, s.cfg)
 
 	// Init useCases
-	authUC := authUseCase.NewAuthUseCase(s.cfg, aRepo, s.redisPool)
+	authUC := authUseCase.NewAuthUseCase(s.cfg, aRepo, s.redisPool, s.awsClient)
 	newsUC := newsUseCase.NewNewsUseCase(s.cfg, nRepo, s.redisPool)
 	commUC := commentsUseCase.NewCommentsUseCase(s.cfg, cRepo, s.redisPool)
 	sessUC := usecase.NewSessionUseCase(sRepo, s.cfg)
