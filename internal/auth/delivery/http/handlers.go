@@ -7,6 +7,7 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/session"
 	"github.com/AleksK1NG/api-mc/pkg/csrf"
+	"github.com/AleksK1NG/api-mc/pkg/db/aws"
 	"github.com/AleksK1NG/api-mc/pkg/httpErrors"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
@@ -331,7 +332,7 @@ func (h *authHandlers) GetCSRFToken() echo.HandlerFunc {
 // @Router /auth/avatar [post]
 func (h *authHandlers) UploadAvatar() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		//ctx := utils.GetRequestCtx(c)
+		ctx := utils.GetRequestCtx(c)
 
 		image, err := utils.ReadImage(c, "file")
 		if err != nil {
@@ -350,13 +351,22 @@ func (h *authHandlers) UploadAvatar() echo.HandlerFunc {
 			return httpErrors.NewInternalServerError(err)
 		}
 
-		if _, err = utils.CheckImageFileContentType(binaryImage.Bytes()); err != nil {
+		contentType, err := utils.CheckImageFileContentType(binaryImage.Bytes())
+		if err != nil {
 			return httpErrors.NewBadRequestError(err)
 		}
 
-		//if err = h.authUC.UploadAvatar(ctx, image.Filename, binaryImage.Bytes()); err != nil {
-		//	return utils.ErrResponseWithLog(c, err)
-		//}
+		reader := bytes.NewReader(binaryImage.Bytes())
+
+		if err = h.authUC.UploadAvatar(ctx, aws.UploadInput{
+			File:        reader,
+			Name:        image.Filename,
+			Size:        image.Size,
+			ContentType: contentType,
+			BucketName:  "000",
+		}); err != nil {
+			return utils.ErrResponseWithLog(c, err)
+		}
 
 		return c.JSON(200, len(binaryImage.Bytes()))
 		//return c.NoContent(http.StatusOK)
