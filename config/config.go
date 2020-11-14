@@ -18,6 +18,7 @@ type Config struct {
 	Session  Session
 	Metrics  Metrics
 	Logger   Logger
+	AWS      AWS
 }
 
 // Server config struct
@@ -97,6 +98,13 @@ type Metrics struct {
 // Store config
 type Store struct {
 	ImagesFolder string
+}
+
+// AWS S3
+type AWS struct {
+	Endpoint       string
+	MinioAccessKey string
+	MinioSecretKey string
 }
 
 // Load config file from given path

@@ -1,4 +1,4 @@
-.PHONY: migrate migrate_down migrate_up migrate_version debug hot_reload prod delve check_install, swagger, local
+.PHONY: migrate migrate_down migrate_up migrate_version debug hot_reload prod delve check_install, swagger, local, aws-s3
 
 force:
 	migrate -database postgres://postgres:postgres@localhost:5432/auth_db?sslmode=disable -path migrations force 1
@@ -40,3 +40,9 @@ local:
 
 swaggo:
 	swag init -g **/**/*.go
+
+aws-s3:
+	docker run -p 9000:9000 \
+      -e "MINIO_ACCESS_KEY=AKIAIOSFODNN7EXAMPLE" \
+      -e "MINIO_SECRET_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY" \
+      minio/minio server /data
