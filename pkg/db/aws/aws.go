@@ -3,7 +3,6 @@ package aws
 import (
 	"context"
 	"fmt"
-	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/google/uuid"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
@@ -33,15 +32,13 @@ type AWSS3Client struct {
 func NewAWSClient(endpoint string, accessKeyID string, secretAccessKey string, useSSL bool) (*AWSS3Client, error) {
 
 	// Initialize minio client object.
-	minioClient, err := minio.New("play.min.io", &minio.Options{
-		Creds:  credentials.NewStaticV4("Q3AM3UQ867SPQQA43P2F", "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG", ""),
-		Secure: true,
+	minioClient, err := minio.New(endpoint, &minio.Options{
+		Creds:  credentials.NewStaticV4(accessKeyID, secretAccessKey, ""),
+		Secure: useSSL,
 	})
 	if err != nil {
 		return nil, err
 	}
-
-	logger.Infof("minioClient: %#v", minioClient)
 
 	return &AWSS3Client{client: minioClient}, nil
 }
@@ -53,17 +50,15 @@ func (aws *AWSS3Client) FileUpload(ctx context.Context, input UploadInput) (mini
 		UserMetadata: map[string]string{"x-amz-acl": "public-read"},
 	}
 
-	uploadInfo, err := aws.client.PutObject(ctx, input.BucketName, input.Name, input.File, input.Size, options)
+	uploadInfo, err := aws.client.PutObject(ctx, input.BucketName, aws.generateFileName(input.Name), input.File, input.Size, options)
 	if err != nil {
-		logger.Errorf("FileUpload ", err)
 		return uploadInfo, err
 	}
 
-	logger.Infof("AWS FileUpload: %#v", uploadInfo)
 	return uploadInfo, err
 }
 
 func (aws *AWSS3Client) generateFileName(fileName string) string {
 	uid := uuid.New().String()
-	return fmt.Sprintf("%s-%s", fileName, uid)
+	return fmt.Sprintf("%s-%s", uid, fileName)
 }

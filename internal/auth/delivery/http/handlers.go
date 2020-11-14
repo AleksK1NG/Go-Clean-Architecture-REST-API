@@ -327,12 +327,14 @@ func (h *authHandlers) GetCSRFToken() echo.HandlerFunc {
 // @Accept  json
 // @Produce  json
 // @Param file formData file true "Body with image file"
+// @Param bucket query string true "aws s3 bucket" Format(bucket)
 // @Success 200 {string} string	"ok"
 // @Failure 500 {object} httpErrors.RestError
 // @Router /auth/avatar [post]
 func (h *authHandlers) UploadAvatar() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx := utils.GetRequestCtx(c)
+		bucket := c.QueryParam("bucket")
 
 		image, err := utils.ReadImage(c, "file")
 		if err != nil {
@@ -358,17 +360,17 @@ func (h *authHandlers) UploadAvatar() echo.HandlerFunc {
 
 		reader := bytes.NewReader(binaryImage.Bytes())
 
-		if err = h.authUC.UploadAvatar(ctx, aws.UploadInput{
+		uploadInfo, err := h.authUC.UploadAvatar(ctx, aws.UploadInput{
 			File:        reader,
 			Name:        image.Filename,
 			Size:        image.Size,
 			ContentType: contentType,
-			BucketName:  "000",
-		}); err != nil {
-			return utils.ErrResponseWithLog(c, err)
+			BucketName:  bucket,
+		})
+		if err != nil {
+			return httpErrors.NewBadRequestError(err)
 		}
 
-		return c.JSON(200, len(binaryImage.Bytes()))
-		//return c.NoContent(http.StatusOK)
+		return c.JSON(http.StatusOK, uploadInfo)
 	}
 }

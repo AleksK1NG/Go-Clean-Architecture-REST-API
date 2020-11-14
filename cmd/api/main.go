@@ -50,7 +50,7 @@ func main() {
 
 	awsClient, err := aws.NewAWSClient(cfg.AWS.Endpoint, cfg.AWS.MinioAccessKey, cfg.AWS.MinioSecretKey, cfg.Server.SSL)
 	if err != nil {
-		logger.Fatalf("AWS Client init: %s", err)
+		logger.Errorf("AWS Client init: %s", err)
 	}
 	logger.Info("AWS S3 connected")
 

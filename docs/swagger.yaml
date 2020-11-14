@@ -251,6 +251,12 @@ paths:
         name: file
         required: true
         type: file
+      - description: aws s3 bucket
+        format: bucket
+        in: query
+        name: bucket
+        required: true
+        type: string
       produces:
       - application/json
       responses:

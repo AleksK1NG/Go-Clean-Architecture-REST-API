@@ -12,6 +12,7 @@ import (
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
+	"github.com/minio/minio-go/v7"
 	"github.com/pkg/errors"
 )
 
@@ -146,14 +147,8 @@ func (u *authUC) Login(ctx context.Context, user *models.User) (*models.UserWith
 }
 
 // Upload user avatar
-func (u *authUC) UploadAvatar(ctx context.Context, file aws.UploadInput) error {
-	uploadInfo, err := u.awsClient.FileUpload(ctx, file)
-	if err != nil {
-		return err
-	}
-
-	logger.Infof("UploadAvatar: %#v", uploadInfo)
-	return nil
+func (u *authUC) UploadAvatar(ctx context.Context, file aws.UploadInput) (minio.UploadInfo, error) {
+	return u.awsClient.FileUpload(ctx, file)
 }
 
 func (u *authUC) generateUserKey(userID string) string {
