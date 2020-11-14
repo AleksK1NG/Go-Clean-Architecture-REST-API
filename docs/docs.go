@@ -45,6 +45,14 @@ var doc = `{
                         "name": "file",
                         "in": "formData",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "bucket",
+                        "description": "aws s3 bucket",
+                        "name": "bucket",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
