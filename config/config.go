@@ -31,6 +31,7 @@ type ServerConfig struct {
 	WriteTimeout      time.Duration
 	SSL               bool
 	CtxDefaultTimeout time.Duration
+	CSRF              bool
 	Debug             bool
 }
 

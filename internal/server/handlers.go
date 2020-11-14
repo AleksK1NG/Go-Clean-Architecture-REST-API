@@ -2,6 +2,7 @@ package server
 
 import (
 	"github.com/AleksK1NG/api-mc/docs"
+	"github.com/AleksK1NG/api-mc/pkg/csrf"
 	"strings"
 
 	//_ "github.com/AleksK1NG/api-mc/docs"
@@ -67,8 +68,8 @@ func (s *server) MapHandlers(e *echo.Echo) error {
 	}
 
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"https://labstack.com", "https://labstack.net"},
-		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+		AllowOrigins: []string{"*"},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderXRequestID, csrf.CSRFHeader},
 	}))
 	e.Use(middleware.RecoverWithConfig(middleware.RecoverConfig{
 		StackSize:         1 << 10, // 1 KB
@@ -84,7 +85,6 @@ func (s *server) MapHandlers(e *echo.Echo) error {
 			return strings.Contains(c.Request().URL.Path, "swagger")
 		},
 	}))
-	// e.Use(middleware.CSRF())
 	e.Use(middleware.Secure())
 	e.Use(middleware.BodyLimit("2M"))
 	if s.cfg.Server.Debug {

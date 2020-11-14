@@ -8,9 +8,9 @@ import (
 
 // Map news routes
 func MapNewsRoutes(newsGroup *echo.Group, h news.Handlers, mw *middleware.MiddlewareManager) {
-	newsGroup.POST("/create", h.Create(), mw.AuthSessionMiddleware)
-	newsGroup.PUT("/:news_id", h.Update(), mw.AuthSessionMiddleware)
-	newsGroup.DELETE("/:news_id", h.Delete(), mw.AuthSessionMiddleware)
+	newsGroup.POST("/create", h.Create(), mw.AuthSessionMiddleware, mw.CSRF)
+	newsGroup.PUT("/:news_id", h.Update(), mw.AuthSessionMiddleware, mw.CSRF)
+	newsGroup.DELETE("/:news_id", h.Delete(), mw.AuthSessionMiddleware, mw.CSRF)
 	newsGroup.GET("/:news_id", h.GetByID())
 	newsGroup.GET("/search", h.SearchByTitle())
 	newsGroup.GET("", h.GetNews())

@@ -352,6 +352,23 @@ paths:
           schema:
             $ref: '#/definitions/models.User'
       summary: Register new user
+  /auth/token:
+    get:
+      consumes:
+      - application/json
+      description: Get CSRF token, required auth session cookie
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Ok
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httpErrors.RestError'
+      summary: Get CSRF token
   /comments:
     post:
       consumes:
