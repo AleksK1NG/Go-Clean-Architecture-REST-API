@@ -342,23 +342,23 @@ func (h *authHandlers) UploadAvatar() echo.HandlerFunc {
 
 		image, err := utils.ReadImage(c, "file")
 		if err != nil {
-			return httpErrors.NewInternalServerError(err)
+			return utils.ErrResponseWithLog(c, err)
 		}
 
 		file, err := image.Open()
 		if err != nil {
-			return httpErrors.NewInternalServerError(err)
+			return utils.ErrResponseWithLog(c, err)
 		}
 		defer file.Close()
 
 		binaryImage := bytes.NewBuffer(nil)
 		if _, err = io.Copy(binaryImage, file); err != nil {
-			return httpErrors.NewInternalServerError(err)
+			return utils.ErrResponseWithLog(c, err)
 		}
 
 		contentType, err := utils.CheckImageFileContentType(binaryImage.Bytes())
 		if err != nil {
-			return httpErrors.NewBadRequestError(err)
+			return utils.ErrResponseWithLog(c, err)
 		}
 
 		reader := bytes.NewReader(binaryImage.Bytes())
@@ -371,7 +371,7 @@ func (h *authHandlers) UploadAvatar() echo.HandlerFunc {
 			BucketName:  bucket,
 		})
 		if err != nil {
-			return httpErrors.NewBadRequestError(err)
+			return utils.ErrResponseWithLog(c, err)
 		}
 
 		return c.JSON(http.StatusOK, updatedUser)
