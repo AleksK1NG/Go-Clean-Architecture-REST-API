@@ -38,6 +38,9 @@ run-linter:
 local:
 	 docker-compose -f docker-compose.local.yml up --build
 
+minio-aws--s3:
+	 docker-compose -f docker-compose.aws.yml up --build
+
 swaggo:
 	swag init -g **/**/*.go
 
