@@ -59,8 +59,8 @@ mongodb:
 
 aws:
   Endpoint: 127.0.0.1:9000
-  MinioAccessKey: AKIAIOSFODNN7EXAMPLE
-  MinioSecretKey: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+  MinioAccessKey: minio
+  MinioSecretKey: minio123
   UseSSL: false
 
 #aws:

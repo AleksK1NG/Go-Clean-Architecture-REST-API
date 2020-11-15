@@ -7,6 +7,7 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/google/uuid"
 	"github.com/minio/minio-go/v7"
+	"github.com/pkg/errors"
 )
 
 // Auth AWS S3 repository
@@ -28,10 +29,20 @@ func (aws *authAWSRepository) FileUpload(ctx context.Context, input models.Uploa
 
 	uploadInfo, err := aws.client.PutObject(ctx, input.BucketName, aws.generateFileName(input.Name), input.File, input.Size, options)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "authAWSRepository FileUpload PutObject")
 	}
 
 	return &uploadInfo, err
+}
+
+// Download file from AWS
+func (aws *authAWSRepository) FileDownload(ctx context.Context, bucket string, fileName string) (*minio.Object, error) {
+	object, err := aws.client.GetObject(ctx, bucket, fileName, minio.GetObjectOptions{})
+	if err != nil {
+		return nil, errors.Wrap(err, "authAWSRepository FileDownload GetObject")
+	}
+
+	return object, nil
 }
 
 func (aws *authAWSRepository) generateFileName(fileName string) string {

@@ -9,4 +9,5 @@ import (
 // Minio AWS S3 interface
 type AWSRepository interface {
 	FileUpload(ctx context.Context, input models.UploadInput) (*minio.UploadInfo, error)
+	FileDownload(ctx context.Context, bucket string, fileName string) (*minio.Object, error)
 }
