@@ -48,7 +48,7 @@ func main() {
 	redisClient := redis.NewRedisClient(cfg)
 	logger.Info("Redis connected")
 
-	awsClient, err := aws.NewAWSClient(cfg.AWS.Endpoint, cfg.AWS.MinioAccessKey, cfg.AWS.MinioSecretKey, cfg.Server.SSL)
+	awsClient, err := aws.NewAWSClient(cfg.AWS.Endpoint, cfg.AWS.MinioAccessKey, cfg.AWS.MinioSecretKey, cfg.AWS.UseSSL)
 	if err != nil {
 		logger.Errorf("AWS Client init: %s", err)
 	}

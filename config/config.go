@@ -105,6 +105,7 @@ type AWS struct {
 	Endpoint       string
 	MinioAccessKey string
 	MinioSecretKey string
+	UseSSL         bool
 }
 
 // Load config file from given path
