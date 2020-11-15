@@ -11,7 +11,6 @@ import (
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
-	"github.com/minio/minio-go/v7"
 	"github.com/pkg/errors"
 )
 
@@ -70,9 +69,11 @@ func (u *authUC) Update(ctx context.Context, user *models.User) (*models.User, e
 
 	updatedUser.SanitizePassword()
 
-	if err := u.redisRepo.Delete(u.generateUserKey(user.UserID.String())); err != nil {
+	if err = u.redisRepo.Delete(u.generateUserKey(user.UserID.String())); err != nil {
 		logger.Errorf("AuthUC Update redis delete: %s", err)
 	}
+
+	updatedUser.SanitizePassword()
 
 	return updatedUser, nil
 }
@@ -146,10 +147,29 @@ func (u *authUC) Login(ctx context.Context, user *models.User) (*models.UserWith
 }
 
 // Upload user avatar
-func (u *authUC) UploadAvatar(ctx context.Context, file models.UploadInput) (*minio.UploadInfo, error) {
-	return u.awsRepo.FileUpload(ctx, file)
+func (u *authUC) UploadAvatar(ctx context.Context, userID uuid.UUID, file models.UploadInput) (*models.User, error) {
+	uploadInfo, err := u.awsRepo.PutObject(ctx, file)
+	if err != nil {
+		return nil, errors.Wrap(err, "authUC UploadAvatar PutObject")
+	}
+
+	avatarURL := u.generateAWSMinioURL(file.BucketName, uploadInfo.Key)
+
+	updatedUser, err := u.authRepo.Update(ctx, &models.User{
+		UserID: userID,
+		Avatar: &avatarURL,
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, "authUC UploadAvatar authRepo.Update")
+	}
+
+	return updatedUser, nil
 }
 
 func (u *authUC) generateUserKey(userID string) string {
 	return fmt.Sprintf("%s: %s", basePrefix, userID)
+}
+
+func (u *authUC) generateAWSMinioURL(bucket string, key string) string {
+	return fmt.Sprintf("%s/minio/%s/%s", u.cfg.AWS.MinioEndpoint, bucket, key)
 }

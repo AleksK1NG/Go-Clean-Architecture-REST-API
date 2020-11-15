@@ -240,7 +240,7 @@ paths:
           schema:
             $ref: '#/definitions/models.User'
       summary: Update user
-  /auth/avatar:
+  /auth/{id}/avatar:
     post:
       consumes:
       - application/json
@@ -257,6 +257,11 @@ paths:
         name: bucket
         required: true
         type: string
+      - description: user_id
+        in: path
+        name: id
+        required: true
+        type: integer
       produces:
       - application/json
       responses:

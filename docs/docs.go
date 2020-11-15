@@ -28,49 +28,6 @@ var doc = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/auth/avatar": {
-            "post": {
-                "description": "Post user avatar image",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "Post avatar",
-                "parameters": [
-                    {
-                        "type": "file",
-                        "description": "Body with image file",
-                        "name": "file",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "format": "bucket",
-                        "description": "aws s3 bucket",
-                        "name": "bucket",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "ok",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/httpErrors.RestError"
-                        }
-                    }
-                }
-            }
-        },
         "/auth/find": {
             "get": {
                 "description": "Get the list of all users",
@@ -303,6 +260,56 @@ var doc = `{
                 ],
                 "summary": "Delete",
                 "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "user_id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/httpErrors.RestError"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/{id}/avatar": {
+            "post": {
+                "description": "Post user avatar image",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Post avatar",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "Body with image file",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "bucket",
+                        "description": "aws s3 bucket",
+                        "name": "bucket",
+                        "in": "query",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "user_id",
