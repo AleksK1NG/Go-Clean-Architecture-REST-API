@@ -3,7 +3,6 @@ package auth
 import (
 	"context"
 	"github.com/AleksK1NG/api-mc/internal/models"
-	"github.com/AleksK1NG/api-mc/pkg/db/aws"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
 	"github.com/minio/minio-go/v7"
@@ -18,5 +17,5 @@ type UseCase interface {
 	GetByID(ctx context.Context, userID uuid.UUID) (*models.User, error)
 	FindByName(ctx context.Context, name string, query *utils.PaginationQuery) (*models.UsersList, error)
 	GetUsers(ctx context.Context, pq *utils.PaginationQuery) (*models.UsersList, error)
-	UploadAvatar(ctx context.Context, file aws.UploadInput) (minio.UploadInfo, error)
+	UploadAvatar(ctx context.Context, file models.UploadInput) (*minio.UploadInfo, error)
 }

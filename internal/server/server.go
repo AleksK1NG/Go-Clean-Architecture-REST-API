@@ -4,11 +4,11 @@ import (
 	"context"
 	"github.com/AleksK1NG/api-mc/config"
 	_ "github.com/AleksK1NG/api-mc/docs"
-	"github.com/AleksK1NG/api-mc/pkg/db/aws"
 	"github.com/AleksK1NG/api-mc/pkg/db/redis"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
+	"github.com/minio/minio-go/v7"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
@@ -29,11 +29,11 @@ type server struct {
 	cfg       *config.Config
 	db        *sqlx.DB
 	redisPool redis.RedisPool
-	awsClient aws.AWSClient
+	awsClient *minio.Client
 }
 
 // New server constructor
-func NewServer(cfg *config.Config, db *sqlx.DB, redisPool redis.RedisPool, awsS3Client aws.AWSClient) *server {
+func NewServer(cfg *config.Config, db *sqlx.DB, redisPool redis.RedisPool, awsS3Client *minio.Client) *server {
 	return &server{echo: echo.New(), cfg: cfg, db: db, redisPool: redisPool, awsClient: awsS3Client}
 }
 

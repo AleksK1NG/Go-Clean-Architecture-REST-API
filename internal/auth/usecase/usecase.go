@@ -6,7 +6,6 @@ import (
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/auth"
 	"github.com/AleksK1NG/api-mc/internal/models"
-	"github.com/AleksK1NG/api-mc/pkg/db/aws"
 	"github.com/AleksK1NG/api-mc/pkg/db/redis"
 	"github.com/AleksK1NG/api-mc/pkg/httpErrors"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
@@ -26,12 +25,12 @@ type authUC struct {
 	cfg       *config.Config
 	authRepo  auth.Repository
 	redisRepo redis.RedisPool
-	awsClient aws.AWSClient
+	awsRepo   auth.AWSRepository
 }
 
 // Auth UseCase constructor
-func NewAuthUseCase(cfg *config.Config, authRepo auth.Repository, redisRepo redis.RedisPool, awsClient aws.AWSClient) auth.UseCase {
-	return &authUC{cfg: cfg, authRepo: authRepo, redisRepo: redisRepo, awsClient: awsClient}
+func NewAuthUseCase(cfg *config.Config, authRepo auth.Repository, redisRepo redis.RedisPool, awsRepo auth.AWSRepository) auth.UseCase {
+	return &authUC{cfg: cfg, authRepo: authRepo, redisRepo: redisRepo, awsRepo: awsRepo}
 }
 
 // Create new user
@@ -147,8 +146,8 @@ func (u *authUC) Login(ctx context.Context, user *models.User) (*models.UserWith
 }
 
 // Upload user avatar
-func (u *authUC) UploadAvatar(ctx context.Context, file aws.UploadInput) (minio.UploadInfo, error) {
-	return u.awsClient.FileUpload(ctx, file)
+func (u *authUC) UploadAvatar(ctx context.Context, file models.UploadInput) (*minio.UploadInfo, error) {
+	return u.awsRepo.FileUpload(ctx, file)
 }
 
 func (u *authUC) generateUserKey(userID string) string {
