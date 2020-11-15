@@ -327,13 +327,18 @@ func (h *authHandlers) GetCSRFToken() echo.HandlerFunc {
 // @Produce  json
 // @Param file formData file true "Body with image file"
 // @Param bucket query string true "aws s3 bucket" Format(bucket)
+// @Param id path int true "user_id"
 // @Success 200 {string} string	"ok"
 // @Failure 500 {object} httpErrors.RestError
-// @Router /auth/avatar [post]
+// @Router /auth/{id}/avatar [post]
 func (h *authHandlers) UploadAvatar() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		ctx := utils.GetRequestCtx(c)
 		bucket := c.QueryParam("bucket")
+		uID, err := uuid.Parse(c.Param("user_id"))
+		if err != nil {
+			return utils.ErrResponseWithLog(c, err)
+		}
 
 		image, err := utils.ReadImage(c, "file")
 		if err != nil {
@@ -347,7 +352,6 @@ func (h *authHandlers) UploadAvatar() echo.HandlerFunc {
 		defer file.Close()
 
 		binaryImage := bytes.NewBuffer(nil)
-
 		if _, err = io.Copy(binaryImage, file); err != nil {
 			return httpErrors.NewInternalServerError(err)
 		}
@@ -359,7 +363,7 @@ func (h *authHandlers) UploadAvatar() echo.HandlerFunc {
 
 		reader := bytes.NewReader(binaryImage.Bytes())
 
-		uploadInfo, err := h.authUC.UploadAvatar(ctx, models.UploadInput{
+		updatedUser, err := h.authUC.UploadAvatar(ctx, uID, models.UploadInput{
 			File:        reader,
 			Name:        image.Filename,
 			Size:        image.Size,
@@ -370,6 +374,6 @@ func (h *authHandlers) UploadAvatar() echo.HandlerFunc {
 			return httpErrors.NewBadRequestError(err)
 		}
 
-		return c.JSON(http.StatusOK, uploadInfo)
+		return c.JSON(http.StatusOK, updatedUser)
 	}
 }

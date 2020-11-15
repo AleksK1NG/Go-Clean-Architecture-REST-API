@@ -21,7 +21,7 @@ func NewAuthAWSRepository(awsClient *minio.Client) auth.AWSRepository {
 }
 
 // Upload file to AWS
-func (aws *authAWSRepository) FileUpload(ctx context.Context, input models.UploadInput) (*minio.UploadInfo, error) {
+func (aws *authAWSRepository) PutObject(ctx context.Context, input models.UploadInput) (*minio.UploadInfo, error) {
 	options := minio.PutObjectOptions{
 		ContentType:  input.ContentType,
 		UserMetadata: map[string]string{"x-amz-acl": "public-read"},
@@ -36,13 +36,17 @@ func (aws *authAWSRepository) FileUpload(ctx context.Context, input models.Uploa
 }
 
 // Download file from AWS
-func (aws *authAWSRepository) FileDownload(ctx context.Context, bucket string, fileName string) (*minio.Object, error) {
+func (aws *authAWSRepository) GetObject(ctx context.Context, bucket string, fileName string) (*minio.Object, error) {
 	object, err := aws.client.GetObject(ctx, bucket, fileName, minio.GetObjectOptions{})
 	if err != nil {
 		return nil, errors.Wrap(err, "authAWSRepository FileDownload GetObject")
 	}
-
 	return object, nil
+}
+
+// Delete file from AWS
+func (aws *authAWSRepository) RemoveObject(ctx context.Context, bucket string, fileName string) error {
+	return aws.client.RemoveObject(ctx, bucket, fileName, minio.RemoveObjectOptions{})
 }
 
 func (aws *authAWSRepository) generateFileName(fileName string) string {
