@@ -49,3 +49,6 @@ aws-s3:
       -e "MINIO_ACCESS_KEY=AKIAIOSFODNN7EXAMPLE" \
       -e "MINIO_SECRET_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY" \
       minio/minio server /data
+
+run:
+	go run ./cmd/api/main.go

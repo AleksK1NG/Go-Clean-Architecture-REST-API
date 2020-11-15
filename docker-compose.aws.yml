@@ -66,6 +66,8 @@ services:
       MINIO_ACCESS_KEY: minio
       MINIO_SECRET_KEY: minio123
     command: server /data
+    networks:
+      - web_api
 
   mc:
     image: minio/mc:latest
@@ -79,6 +81,8 @@ services:
       /usr/bin/mc mb --quiet local/somebucketname1/;
       /usr/bin/mc policy set public local/somebucketname1;
       "
+    networks:
+      - web_api
 
 networks:
   web_api:

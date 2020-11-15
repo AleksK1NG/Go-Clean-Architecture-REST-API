@@ -6,7 +6,7 @@ services:
     build:
       context: ./
       dockerfile: docker/Dockerfile.HotReload
-#      dockerfile: docker/Dockerfile
+    #      dockerfile: docker/Dockerfile
     ports:
       - "5000:5000"
       - "5555:5555"
@@ -83,6 +83,34 @@ services:
       - '3000:3000'
     networks:
       - web_api
+
+  minio:
+    image: minio/minio:latest
+    ports:
+      - '9000:9000'
+    container_name: myminio
+    environment:
+      MINIO_ACCESS_KEY: minio
+      MINIO_SECRET_KEY: minio123
+    command: server /data
+    networks:
+      - web_api
+
+  mc:
+    image: minio/mc:latest
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc config host rm local;
+      /usr/bin/mc config host add --quiet --api s3v4 local http://myminio:9000 minio minio123;
+      /usr/bin/mc rb --force local/somebucketname1/;
+      /usr/bin/mc mb --quiet local/somebucketname1/;
+      /usr/bin/mc policy set public local/somebucketname1;
+      "
+    networks:
+      - web_api
+
 
 networks:
   web_api:
