@@ -44,9 +44,10 @@ func (s *server) MapHandlers(e *echo.Echo) error {
 	nRepo := newsRepository.NewNewsRepository(s.db)
 	cRepo := commentsRepository.NewCommentsRepository(s.db)
 	sRepo := sessionRepository.NewSessionRepository(s.redisPool, s.cfg)
+	aAWSRepo := authRepository.NewAuthAWSRepository(s.awsClient)
 
 	// Init useCases
-	authUC := authUseCase.NewAuthUseCase(s.cfg, aRepo, s.redisPool, s.awsClient)
+	authUC := authUseCase.NewAuthUseCase(s.cfg, aRepo, s.redisPool, aAWSRepo)
 	newsUC := newsUseCase.NewNewsUseCase(s.cfg, nRepo, s.redisPool)
 	commUC := commentsUseCase.NewCommentsUseCase(s.cfg, cRepo, s.redisPool)
 	sessUC := usecase.NewSessionUseCase(sRepo, s.cfg)

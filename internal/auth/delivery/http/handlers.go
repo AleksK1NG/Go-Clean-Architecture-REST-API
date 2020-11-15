@@ -7,7 +7,6 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/session"
 	"github.com/AleksK1NG/api-mc/pkg/csrf"
-	"github.com/AleksK1NG/api-mc/pkg/db/aws"
 	"github.com/AleksK1NG/api-mc/pkg/httpErrors"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
@@ -360,7 +359,7 @@ func (h *authHandlers) UploadAvatar() echo.HandlerFunc {
 
 		reader := bytes.NewReader(binaryImage.Bytes())
 
-		uploadInfo, err := h.authUC.UploadAvatar(ctx, aws.UploadInput{
+		uploadInfo, err := h.authUC.UploadAvatar(ctx, models.UploadInput{
 			File:        reader,
 			Name:        image.Filename,
 			Size:        image.Size,
