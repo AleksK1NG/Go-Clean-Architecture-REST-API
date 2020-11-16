@@ -2,7 +2,7 @@ package comments
 
 import "github.com/labstack/echo/v4"
 
-// Comments handlers
+// Comments HTTP Handlers interface
 type Handlers interface {
 	Create() echo.HandlerFunc
 	Update() echo.HandlerFunc
