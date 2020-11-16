@@ -163,6 +163,8 @@ func (u *authUC) UploadAvatar(ctx context.Context, userID uuid.UUID, file models
 		return nil, errors.Wrap(err, "authUC UploadAvatar authRepo.Update")
 	}
 
+	updatedUser.SanitizePassword()
+
 	return updatedUser, nil
 }
 

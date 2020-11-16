@@ -1,4 +1,4 @@
-#Golang api example 🚀
+### Golang api example 🚀
 
 ### Swagger:
 https://localhost:5000/swagger/index.html
@@ -22,3 +22,10 @@ https://localhost:5000/swagger/index.html
 * Dockerfile.prod - Multi-Stage Build
 * Dockerfile.debug - Multi-Stage Build With Delve debugger
 * Dockerfile.hot-reload - hot reload using github.com/githubnemo/CompileDaemon
+
+### Local development usage:
+    make local // run all containers
+    make run // run app
+
+### Docker development usage:
+    make docker_dev
