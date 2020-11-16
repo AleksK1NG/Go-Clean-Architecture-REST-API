@@ -2,7 +2,7 @@ package news
 
 import "github.com/labstack/echo/v4"
 
-// News Http Delivery
+// News HTTP Handlers interface
 type Handlers interface {
 	Create() echo.HandlerFunc
 	Update() echo.HandlerFunc

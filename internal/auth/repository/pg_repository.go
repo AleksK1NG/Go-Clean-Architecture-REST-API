@@ -1,22 +1,14 @@
 package repository
 
 import (
-	"bytes"
 	"context"
 	"database/sql"
-	"fmt"
 	"github.com/AleksK1NG/api-mc/internal/auth"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
-	"io"
-	"os"
-)
-
-const (
-	avatarsDir = "avatars/"
 )
 
 // Auth Repository
@@ -186,29 +178,4 @@ func (r *authRepo) FindByEmail(ctx context.Context, user *models.User) (*models.
 	}
 
 	return foundUser, nil
-}
-
-// Upload user avatar
-func (r *authRepo) UploadAvatar(ctx context.Context, fileName string, fileData []byte) error {
-	user, err := utils.GetUserFromCtx(ctx)
-	if err != nil {
-		return errors.WithMessage(err, "authRepo UploadAvatar GetUserFromCtx")
-	}
-
-	newAvatarFileName := utils.GetUniqFileName(user.UserID.String(), fileName)
-	avatarFilePath := fmt.Sprintf("%s%s", avatarsDir, newAvatarFileName)
-
-	newAvatarFile, err := os.OpenFile(avatarFilePath, os.O_WRONLY|os.O_CREATE, os.FileMode(0777))
-	if err != nil {
-		return errors.WithMessage(err, "authRepo UploadAvatar OpenFile")
-	}
-	defer newAvatarFile.Close()
-
-	buffer := bytes.NewBuffer(fileData)
-
-	if _, err = io.Copy(newAvatarFile, buffer); err != nil {
-		return errors.WithMessage(err, "authRepo UploadAvatar Copy")
-	}
-
-	return nil
 }
