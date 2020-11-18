@@ -6,7 +6,6 @@ import (
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/auth"
 	"github.com/AleksK1NG/api-mc/internal/models"
-	"github.com/AleksK1NG/api-mc/pkg/db/redis"
 	"github.com/AleksK1NG/api-mc/pkg/httpErrors"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
@@ -23,12 +22,12 @@ const (
 type authUC struct {
 	cfg       *config.Config
 	authRepo  auth.Repository
-	redisRepo redis.RedisPool
+	redisRepo auth.RedisRepository
 	awsRepo   auth.AWSRepository
 }
 
 // Auth UseCase constructor
-func NewAuthUseCase(cfg *config.Config, authRepo auth.Repository, redisRepo redis.RedisPool, awsRepo auth.AWSRepository) auth.UseCase {
+func NewAuthUseCase(cfg *config.Config, authRepo auth.Repository, redisRepo auth.RedisRepository, awsRepo auth.AWSRepository) auth.UseCase {
 	return &authUC{cfg: cfg, authRepo: authRepo, redisRepo: redisRepo, awsRepo: awsRepo}
 }
 
@@ -69,7 +68,7 @@ func (u *authUC) Update(ctx context.Context, user *models.User) (*models.User, e
 
 	updatedUser.SanitizePassword()
 
-	if err = u.redisRepo.Delete(u.generateUserKey(user.UserID.String())); err != nil {
+	if err = u.redisRepo.DeleteUserCtx(ctx, u.generateUserKey(user.UserID.String())); err != nil {
 		logger.Errorf("AuthUC Update redis delete: %s", err)
 	}
 
@@ -84,7 +83,7 @@ func (u *authUC) Delete(ctx context.Context, userID uuid.UUID) error {
 		return err
 	}
 
-	if err := u.redisRepo.Delete(u.generateUserKey(userID.String())); err != nil {
+	if err := u.redisRepo.DeleteUserCtx(ctx, u.generateUserKey(userID.String())); err != nil {
 		logger.Errorf("AuthUC Delete redis delete: %s", err)
 	}
 
@@ -93,18 +92,22 @@ func (u *authUC) Delete(ctx context.Context, userID uuid.UUID) error {
 
 // Get user by id
 func (u *authUC) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, error) {
-	user := &models.User{}
-	if err := u.redisRepo.GetJSONContext(ctx, u.generateUserKey(userID.String()), user); err == nil {
-		return user, nil
+	cachedUser, err := u.redisRepo.GetByIDCtx(ctx, u.generateUserKey(userID.String()))
+	if err != nil {
+		logger.Errorf("authUC GetByID redisRepo.GetByIDCtx: %v", err)
+	}
+	if cachedUser != nil {
+		return cachedUser, nil
 	}
 
-	user, err := u.authRepo.GetByID(ctx, userID)
+	user := &models.User{}
+	user, err = u.authRepo.GetByID(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
 
-	if err = u.redisRepo.SetexJSONContext(ctx, u.generateUserKey(userID.String()), cacheDuration, user); err != nil {
-		logger.Errorf("AuthUC GetByID redis set: %s", err)
+	if err = u.redisRepo.SetUserCtx(ctx, u.generateUserKey(userID.String()), cacheDuration, user); err != nil {
+		logger.Errorf("authUC GetByID redisRepo.SetUserCtx: %v", err)
 	}
 
 	user.SanitizePassword()

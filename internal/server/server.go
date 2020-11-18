@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/AleksK1NG/api-mc/config"
 	_ "github.com/AleksK1NG/api-mc/docs"
-	"github.com/AleksK1NG/api-mc/pkg/db/redis"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
+	"github.com/go-redis/redis/v8"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
 	"github.com/minio/minio-go/v7"
@@ -25,16 +25,16 @@ const (
 
 // Server struct
 type server struct {
-	echo      *echo.Echo
-	cfg       *config.Config
-	db        *sqlx.DB
-	redisPool redis.RedisPool
-	awsClient *minio.Client
+	echo        *echo.Echo
+	cfg         *config.Config
+	db          *sqlx.DB
+	redisClient *redis.Client
+	awsClient   *minio.Client
 }
 
 // New server constructor
-func NewServer(cfg *config.Config, db *sqlx.DB, redisPool redis.RedisPool, awsS3Client *minio.Client) *server {
-	return &server{echo: echo.New(), cfg: cfg, db: db, redisPool: redisPool, awsClient: awsS3Client}
+func NewServer(cfg *config.Config, db *sqlx.DB, redisClient *redis.Client, awsS3Client *minio.Client) *server {
+	return &server{echo: echo.New(), cfg: cfg, db: db, redisClient: redisClient, awsClient: awsS3Client}
 }
 
 func (s *server) Run() error {
