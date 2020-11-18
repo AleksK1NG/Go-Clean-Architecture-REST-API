@@ -67,7 +67,6 @@ func (r *authRepo) Delete(ctx context.Context, userID uuid.UUID) error {
 // Get user by id
 func (r *authRepo) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, error) {
 	user := &models.User{}
-
 	if err := r.db.QueryRowxContext(ctx, getUserQuery, userID).StructScan(user); err != nil {
 		return nil, errors.WithMessage(err, "authRepo GetByID QueryRowxContext")
 	}

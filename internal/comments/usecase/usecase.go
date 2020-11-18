@@ -6,9 +6,11 @@ import (
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/comments"
 	"github.com/AleksK1NG/api-mc/internal/models"
+	"github.com/AleksK1NG/api-mc/pkg/httpErrors"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
+	"net/http"
 )
 
 const (
@@ -39,7 +41,7 @@ func (u *commentsUC) Update(ctx context.Context, comment *models.Comment) (*mode
 	}
 
 	if err = utils.ValidateIsOwner(ctx, comm.AuthorID.String()); err != nil {
-		return nil, errors.Wrap(err, "commentsUC Update ValidateIsOwner")
+		return nil, httpErrors.NewRestError(http.StatusForbidden, "Forbidden", errors.WithMessage(err, "commentsUC Update ValidateIsOwner"))
 	}
 
 	updatedComment, err := u.commRepo.Update(ctx, comment)
@@ -58,7 +60,7 @@ func (u *commentsUC) Delete(ctx context.Context, commentID uuid.UUID) error {
 	}
 
 	if err = utils.ValidateIsOwner(ctx, comm.AuthorID.String()); err != nil {
-		return errors.Wrap(err, "commentsUC Delete ValidateIsOwner")
+		return httpErrors.NewRestError(http.StatusForbidden, "Forbidden", errors.WithMessage(err, "commentsUC Delete ValidateIsOwner"))
 	}
 
 	if err = u.commRepo.Delete(ctx, commentID); err != nil {
