@@ -6,7 +6,6 @@ import (
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/news"
-	"github.com/AleksK1NG/api-mc/pkg/db/redis"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
@@ -22,11 +21,11 @@ const (
 type newsUC struct {
 	cfg       *config.Config
 	newsRepo  news.Repository
-	redisRepo redis.RedisPool
+	redisRepo news.RedisRepository
 }
 
 // News UseCase constructor
-func NewNewsUseCase(cfg *config.Config, newsRepo news.Repository, redisRepo redis.RedisPool) news.UseCase {
+func NewNewsUseCase(cfg *config.Config, newsRepo news.Repository, redisRepo news.RedisRepository) news.UseCase {
 	return &newsUC{cfg: cfg, newsRepo: newsRepo, redisRepo: redisRepo}
 }
 
@@ -67,7 +66,7 @@ func (u *newsUC) Update(ctx context.Context, news *models.News) (*models.News, e
 		return nil, err
 	}
 
-	if err := u.redisRepo.Delete(u.getKeyWithPrefix(news.NewsID.String())); err != nil {
+	if err = u.redisRepo.DeleteNewsCtx(ctx, u.getKeyWithPrefix(news.NewsID.String())); err != nil {
 		logger.Errorf("newsUC Update redis delete: %s", err)
 	}
 
@@ -76,9 +75,12 @@ func (u *newsUC) Update(ctx context.Context, news *models.News) (*models.News, e
 
 // Get news by id
 func (u *newsUC) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*models.NewsBase, error) {
-	n := &models.NewsBase{}
-	if err := u.redisRepo.GetJSONContext(ctx, u.getKeyWithPrefix(newsID.String()), n); err == nil {
-		return n, nil
+	newsBase, err := u.redisRepo.GetNewsByIDCtx(ctx, u.getKeyWithPrefix(newsID.String()))
+	if err != nil {
+		logger.Errorf("newsUC GetNewsByID redisRepo.GetNewsByIDCtx: %v", err)
+	}
+	if newsBase != nil {
+		return newsBase, nil
 	}
 
 	n, err := u.newsRepo.GetNewsByID(ctx, newsID)
@@ -86,8 +88,8 @@ func (u *newsUC) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*models.New
 		return nil, err
 	}
 
-	if err := u.redisRepo.SetexJSONContext(ctx, u.getKeyWithPrefix(newsID.String()), cacheDuration, n); err != nil {
-		logger.Errorf("newsUC GetNewsByID redis set: %s", err)
+	if err = u.redisRepo.SetNewsCtx(ctx, u.getKeyWithPrefix(newsID.String()), cacheDuration, n); err != nil {
+		logger.Errorf("newsUC GetNewsByID redisRepo.SetNewsCtx: %s", err)
 	}
 
 	return n, nil
@@ -100,16 +102,16 @@ func (u *newsUC) Delete(ctx context.Context, newsID uuid.UUID) error {
 		return err
 	}
 
-	if err := utils.ValidateIsOwner(ctx, newsByID.AuthorID.String()); err != nil {
+	if err = utils.ValidateIsOwner(ctx, newsByID.AuthorID.String()); err != nil {
 		return errors.WithMessage(err, "newsUC Update ValidateIsOwner")
 	}
 
-	if err := u.newsRepo.Delete(ctx, newsID); err != nil {
+	if err = u.newsRepo.Delete(ctx, newsID); err != nil {
 		return err
 	}
 
-	if err := u.redisRepo.Delete(u.getKeyWithPrefix(newsID.String())); err != nil {
-		logger.Errorf("newsUC Delete redis delete: %s", err)
+	if err = u.redisRepo.DeleteNewsCtx(ctx, u.getKeyWithPrefix(newsID.String())); err != nil {
+		logger.Errorf("newsUC Delete redisRepo.DeleteNewsCtx: %v", err)
 	}
 
 	return nil

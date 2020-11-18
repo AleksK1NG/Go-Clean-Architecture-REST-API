@@ -116,7 +116,7 @@ func (r newsRepo) GetNews(ctx context.Context, pq *utils.PaginationQuery) (*mode
 		newsList = append(newsList, n)
 	}
 
-	if err := rows.Err(); err != nil {
+	if err = rows.Err(); err != nil {
 		return nil, errors.WithMessage(err, "newsRepo GetNews rows.Err")
 	}
 

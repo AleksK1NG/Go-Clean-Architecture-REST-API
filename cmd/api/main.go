@@ -46,6 +46,7 @@ func main() {
 	defer psqlDB.Close()
 
 	redisClient := redis.NewRedisClient(cfg)
+	defer redisClient.Close()
 	logger.Info("Redis connected")
 
 	awsClient, err := aws.NewAWSClient(cfg.AWS.Endpoint, cfg.AWS.MinioAccessKey, cfg.AWS.MinioSecretKey, cfg.AWS.UseSSL)

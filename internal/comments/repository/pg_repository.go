@@ -23,7 +23,6 @@ func NewCommentsRepository(db *sqlx.DB) comments.Repository {
 
 // Create comment
 func (r *commentsRepo) Create(ctx context.Context, comment *models.Comment) (*models.Comment, error) {
-
 	c := &models.Comment{}
 	if err := r.db.QueryRowxContext(
 		ctx,
@@ -72,7 +71,6 @@ func (r *commentsRepo) GetByID(ctx context.Context, commentID uuid.UUID) (*model
 	if err := r.db.GetContext(ctx, comment, getCommentByID, commentID); err != nil {
 		return nil, errors.WithMessage(err, "commentsRepo GetByID GetContext")
 	}
-
 	return comment, nil
 }
 

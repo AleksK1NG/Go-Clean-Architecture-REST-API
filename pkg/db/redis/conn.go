@@ -37,7 +37,7 @@ type RedisClient struct {
 }
 
 // Returns new redis client
-func NewRedisClient(cfg *config.Config) *RedisClient {
+func NewRedisClient(cfg *config.Config) *redis.Client {
 	redisHost := cfg.Redis.RedisAddr
 
 	if redisHost == "" {
@@ -54,8 +54,29 @@ func NewRedisClient(cfg *config.Config) *RedisClient {
 	})
 
 	cleanupHook(client)
-	return &RedisClient{cfg: cfg, client: client}
+	return client
 }
+
+//// Returns new redis client
+//func NewRedisClient(cfg *config.Config) *RedisClient {
+//	redisHost := cfg.Redis.RedisAddr
+//
+//	if redisHost == "" {
+//		redisHost = ":6379"
+//	}
+//
+//	client := redis.NewClient(&redis.Options{
+//		Addr:         redisHost,
+//		MinIdleConns: cfg.Redis.MinIdleConns,
+//		PoolSize:     cfg.Redis.PoolSize,
+//		PoolTimeout:  time.Duration(cfg.Redis.PoolTimeout) * time.Second,
+//		Password:     cfg.Redis.Password, // no password set
+//		DB:           cfg.Redis.DB,       // use default DB
+//	})
+//
+//	cleanupHook(client)
+//	return &RedisClient{cfg: cfg, client: client}
+//}
 
 func cleanupHook(client *redis.Client) {
 	c := make(chan os.Signal, 1)
@@ -151,7 +172,7 @@ func (r *RedisClient) GetJSONContext(ctx context.Context, key string, model inte
 	if err != nil {
 		return err
 	}
-	if err := json.Unmarshal(bytes, &model); err != nil {
+	if err = json.Unmarshal(bytes, &model); err != nil {
 		return err
 	}
 	return nil
@@ -163,7 +184,7 @@ func (r *RedisClient) GetJSON(key string, model interface{}) error {
 	if err != nil {
 		return err
 	}
-	if err := json.Unmarshal(bytes, &model); err != nil {
+	if err = json.Unmarshal(bytes, &model); err != nil {
 		return err
 	}
 	return nil
