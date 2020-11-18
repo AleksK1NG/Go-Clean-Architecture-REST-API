@@ -153,7 +153,7 @@ func (u *authUC) Login(ctx context.Context, user *models.User) (*models.UserWith
 func (u *authUC) UploadAvatar(ctx context.Context, userID uuid.UUID, file models.UploadInput) (*models.User, error) {
 	uploadInfo, err := u.awsRepo.PutObject(ctx, file)
 	if err != nil {
-		return nil, errors.Wrap(err, "authUC UploadAvatar PutObject")
+		return nil, httpErrors.NewInternalServerError(errors.WithMessage(err, "authUC UploadAvatar PutObject"))
 	}
 
 	avatarURL := u.generateAWSMinioURL(file.BucketName, uploadInfo.Key)
@@ -163,7 +163,7 @@ func (u *authUC) UploadAvatar(ctx context.Context, userID uuid.UUID, file models
 		Avatar: &avatarURL,
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "authUC UploadAvatar authRepo.Update")
+		return nil, err
 	}
 
 	updatedUser.SanitizePassword()

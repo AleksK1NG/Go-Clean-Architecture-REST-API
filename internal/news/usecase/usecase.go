@@ -6,10 +6,12 @@ import (
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/news"
+	"github.com/AleksK1NG/api-mc/pkg/httpErrors"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
+	"net/http"
 )
 
 const (
@@ -33,13 +35,13 @@ func NewNewsUseCase(cfg *config.Config, newsRepo news.Repository, redisRepo news
 func (u *newsUC) Create(ctx context.Context, news *models.News) (*models.News, error) {
 	user, err := utils.GetUserFromCtx(ctx)
 	if err != nil {
-		return nil, errors.WithMessage(err, "newsUC Create GetUserFromCtx")
+		return nil, httpErrors.NewUnauthorizedError(errors.WithMessage(err, "newsUC Create GetUserFromCtx"))
 	}
 
 	news.AuthorID = user.UserID
 
 	if err = utils.ValidateStruct(ctx, news); err != nil {
-		return nil, errors.WithMessage(err, "newsUC Create ValidateStruct")
+		return nil, httpErrors.NewBadRequestError(errors.WithMessage(err, "newsUC Create ValidateStruct"))
 	}
 
 	n, err := u.newsRepo.Create(ctx, news)
@@ -58,7 +60,7 @@ func (u *newsUC) Update(ctx context.Context, news *models.News) (*models.News, e
 	}
 
 	if err = utils.ValidateIsOwner(ctx, newsByID.AuthorID.String()); err != nil {
-		return nil, errors.WithMessage(err, "newsUC Update ValidateIsOwner")
+		return nil, httpErrors.NewRestError(http.StatusForbidden, "Forbidden", errors.WithMessage(err, "newsUC Update ValidateIsOwner"))
 	}
 
 	updatedUser, err := u.newsRepo.Update(ctx, news)
@@ -67,7 +69,7 @@ func (u *newsUC) Update(ctx context.Context, news *models.News) (*models.News, e
 	}
 
 	if err = u.redisRepo.DeleteNewsCtx(ctx, u.getKeyWithPrefix(news.NewsID.String())); err != nil {
-		logger.Errorf("newsUC Update redis delete: %s", err)
+		logger.Errorf("newsUC Update redisRepo.DeleteNewsCtx: %v", err)
 	}
 
 	return updatedUser, nil
@@ -103,7 +105,7 @@ func (u *newsUC) Delete(ctx context.Context, newsID uuid.UUID) error {
 	}
 
 	if err = utils.ValidateIsOwner(ctx, newsByID.AuthorID.String()); err != nil {
-		return errors.WithMessage(err, "newsUC Update ValidateIsOwner")
+		return httpErrors.NewRestError(http.StatusForbidden, "Forbidden", errors.WithMessage(err, "newsUC Delete ValidateIsOwner"))
 	}
 
 	if err = u.newsRepo.Delete(ctx, newsID); err != nil {
