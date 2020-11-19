@@ -316,7 +316,6 @@ func (h *authHandlers) GetCSRFToken() echo.HandlerFunc {
 		c.Response().Header().Set("Access-Control-Expose-Headers", csrf.CSRFHeader)
 
 		return c.NoContent(http.StatusOK)
-
 	}
 }
 

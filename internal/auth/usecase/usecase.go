@@ -108,8 +108,7 @@ func (u *authUC) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, e
 		return cachedUser, nil
 	}
 
-	user := &models.User{}
-	user, err = u.authRepo.GetByID(ctx, userID)
+	user, err := u.authRepo.GetByID(ctx, userID)
 	if err != nil {
 		return nil, err
 	}

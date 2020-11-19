@@ -121,7 +121,7 @@ func (h newsHandlers) Delete() echo.HandlerFunc {
 			return utils.ErrResponseWithLog(c, err)
 		}
 
-		if err := h.newsUC.Delete(ctx, newsUUID); err != nil {
+		if err = h.newsUC.Delete(ctx, newsUUID); err != nil {
 			return utils.ErrResponseWithLog(c, err)
 		}
 

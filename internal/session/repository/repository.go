@@ -30,11 +30,11 @@ func NewSessionRepository(redisClient *redis.Client, cfg *config.Config) session
 }
 
 // Create session in redis
-func (s *sessionRepo) CreateSession(ctx context.Context, session *models.Session, expire int) (string, error) {
-	session.SessionID = uuid.New().String()
-	sessionKey := s.createKey(session.SessionID)
+func (s *sessionRepo) CreateSession(ctx context.Context, sess *models.Session, expire int) (string, error) {
+	sess.SessionID = uuid.New().String()
+	sessionKey := s.createKey(sess.SessionID)
 
-	sessBytes, err := json.Marshal(session)
+	sessBytes, err := json.Marshal(sess)
 	if err != nil {
 		return "", errors.WithMessage(err, "sessionRepo CreateSession json.Marshal")
 	}

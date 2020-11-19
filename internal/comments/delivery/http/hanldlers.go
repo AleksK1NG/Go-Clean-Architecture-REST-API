@@ -62,7 +62,6 @@ func (h *commentsHandlers) Create() echo.HandlerFunc {
 // @Failure 500 {object} httpErrors.RestErr
 // @Router /comments/{id} [put]
 func (h *commentsHandlers) Update() echo.HandlerFunc {
-	// Update Comment
 	type UpdateComment struct {
 		Message string `json:"message" db:"message" validate:"required,gte=0"`
 		Likes   int64  `json:"likes" db:"likes" validate:"omitempty"`
@@ -110,7 +109,7 @@ func (h *commentsHandlers) Delete() echo.HandlerFunc {
 			return utils.ErrResponseWithLog(c, err)
 		}
 
-		if err := h.comUC.Delete(ctx, commID); err != nil {
+		if err = h.comUC.Delete(ctx, commID); err != nil {
 			return utils.ErrResponseWithLog(c, err)
 		}
 

@@ -74,7 +74,7 @@ func (mw *MiddlewareManager) AuthSessionMiddleware(next echo.HandlerFunc) echo.H
 }
 
 // JWT way of auth using cookie or Authorization header
-func (mw *MiddlewareManager) AuthJWTMiddleware(authUC auth.UseCase, config *config.Config) echo.MiddlewareFunc {
+func (mw *MiddlewareManager) AuthJWTMiddleware(authUC auth.UseCase, cfg *config.Config) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			bearerHeader := c.Request().Header.Get("Authorization")
@@ -90,7 +90,7 @@ func (mw *MiddlewareManager) AuthJWTMiddleware(authUC auth.UseCase, config *conf
 
 				tokenString := headerParts[1]
 
-				if err := mw.validateJWTToken(tokenString, authUC, c, config); err != nil {
+				if err := mw.validateJWTToken(tokenString, authUC, c, cfg); err != nil {
 					logger.Error("middleware validateJWTToken", zap.String("headerJWT", err.Error()))
 					return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
 				}
@@ -104,7 +104,7 @@ func (mw *MiddlewareManager) AuthJWTMiddleware(authUC auth.UseCase, config *conf
 				return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
 			}
 
-			if err = mw.validateJWTToken(cookie.Value, authUC, c, config); err != nil {
+			if err = mw.validateJWTToken(cookie.Value, authUC, c, cfg); err != nil {
 				logger.Errorf("validateJWTToken", err.Error())
 				return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
 			}
@@ -128,7 +128,6 @@ func (mw *MiddlewareManager) AdminMiddleware(next echo.HandlerFunc) echo.Handler
 func (mw *MiddlewareManager) OwnerOrAdminMiddleware() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-
 			user, ok := c.Get("user").(*models.User)
 			if !ok {
 				logger.Errorf("Error c.Get(user) RequestID: %s, ERROR: %s,", utils.GetRequestID(c), "invalid user ctx")
@@ -157,7 +156,6 @@ func (mw *MiddlewareManager) OwnerOrAdminMiddleware() echo.MiddlewareFunc {
 func (mw *MiddlewareManager) RoleBasedAuthMiddleware(roles []string) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-
 			user, ok := c.Get("user").(*models.User)
 			if !ok {
 				logger.Errorf("Error c.Get(user) RequestID: %s, UserID: %s, ERROR: %s,",
@@ -185,7 +183,7 @@ func (mw *MiddlewareManager) RoleBasedAuthMiddleware(roles []string) echo.Middle
 	}
 }
 
-func (mw *MiddlewareManager) validateJWTToken(tokenString string, authUC auth.UseCase, c echo.Context, config *config.Config) error {
+func (mw *MiddlewareManager) validateJWTToken(tokenString string, authUC auth.UseCase, c echo.Context, cfg *config.Config) error {
 	if tokenString == "" {
 		return httpErrors.InvalidJWTToken
 	}
@@ -194,7 +192,7 @@ func (mw *MiddlewareManager) validateJWTToken(tokenString string, authUC auth.Us
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signin method %v", token.Header["alg"])
 		}
-		secret := []byte(config.Server.JwtSecretKey)
+		secret := []byte(cfg.Server.JwtSecretKey)
 		return secret, nil
 	})
 	if err != nil {
@@ -224,7 +222,7 @@ func (mw *MiddlewareManager) validateJWTToken(tokenString string, authUC auth.Us
 		c.Set("user", u)
 
 		ctx := context.WithValue(c.Request().Context(), utils.UserCtxKey{}, u)
-		c.Request().WithContext(ctx)
+		//req := c.Request().WithContext(ctx)
 		c.SetRequest(c.Request().WithContext(ctx))
 	}
 	return nil

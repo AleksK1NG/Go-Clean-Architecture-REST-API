@@ -56,5 +56,7 @@ func main() {
 	logger.Info("AWS S3 connected")
 
 	s := server.NewServer(cfg, psqlDB, redisClient, awsClient)
-	log.Fatal(s.Run())
+	if err = s.Run(); err != nil {
+		log.Fatal(err)
+	}
 }
