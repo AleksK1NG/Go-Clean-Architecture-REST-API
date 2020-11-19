@@ -10,32 +10,36 @@ import (
 	"strings"
 )
 
+const (
+	ErrBadRequest         = "Bad request"
+	ErrEmailAlreadyExists = "User with given email already exists"
+	ErrNoSuchUser         = "User not found"
+	ErrWrongCredentials   = "Wrong Credentials"
+	ErrNotFound           = "Not Found"
+	ErrUnauthorized       = "Unauthorized"
+	ErrForbidden          = "Forbidden"
+	ErrBadQueryParams     = "Invalid query params"
+)
+
 var (
-	BadRequest              = errors.New("Bad request")
-	NoSuchUser              = errors.New("User not found")
-	WrongCredentials        = errors.New("Wrong Credentials")
-	NotFound                = errors.New("Not Found")
-	SessionStoreError       = errors.New("Store session error")
-	NoSuchSession           = errors.New("Session cookie not found")
-	DeleteSessionError      = errors.New("Error while deleting session")
-	Unauthorized            = errors.New("Unauthorized")
-	Forbidden               = errors.New("Forbidden")
-	SessionTypeAssertionErr = errors.New("Error assert to session type")
-	UserTypeAssertionErr    = errors.New("Error assert to user type")
-	PermissionsError        = errors.New("У вас недостаточно прав")
-	PermissionDenied        = errors.New("Permission Denied")
-	ExpiredCSRFError        = errors.New("Expired CSRF token")
-	WrongCSRFToken          = errors.New("Wrong CSRF token")
-	CSRFNotPresented        = errors.New("CSRF not presented")
-	NotRequiredFields       = errors.New("No such required fields")
-	BadQueryParams          = errors.New("Invalid query params")
-	InternalServerError     = errors.New("Internal Server Error")
-	RequestTimeoutError     = errors.New("Request Timeout")
-	ExistsEmailError        = errors.New("User with given email already exists")
-	InvalidJWTToken         = errors.New("Invalid JWT token")
-	InvalidJWTClaims        = errors.New("Invalid JWT claims")
-	NotAllowedImageHeader   = errors.New("Not allowed image header")
-	NoCookie                = errors.New("not found cookie header")
+	BadRequest            = errors.New("Bad request")
+	WrongCredentials      = errors.New("Wrong Credentials")
+	NotFound              = errors.New("Not Found")
+	Unauthorized          = errors.New("Unauthorized")
+	Forbidden             = errors.New("Forbidden")
+	PermissionDenied      = errors.New("Permission Denied")
+	ExpiredCSRFError      = errors.New("Expired CSRF token")
+	WrongCSRFToken        = errors.New("Wrong CSRF token")
+	CSRFNotPresented      = errors.New("CSRF not presented")
+	NotRequiredFields     = errors.New("No such required fields")
+	BadQueryParams        = errors.New("Invalid query params")
+	InternalServerError   = errors.New("Internal Server Error")
+	RequestTimeoutError   = errors.New("Request Timeout")
+	ExistsEmailError      = errors.New("User with given email already exists")
+	InvalidJWTToken       = errors.New("Invalid JWT token")
+	InvalidJWTClaims      = errors.New("Invalid JWT claims")
+	NotAllowedImageHeader = errors.New("Not allowed image header")
+	NoCookie              = errors.New("not found cookie header")
 )
 
 type RestErr interface {
@@ -63,6 +67,14 @@ func (e RestError) Causes() interface{} {
 }
 
 func NewRestError(status int, err string, causes interface{}) RestErr {
+	return RestError{
+		ErrStatus: status,
+		ErrError:  err,
+		ErrCauses: causes,
+	}
+}
+
+func NewRestErrorWithMessage(status int, err string, causes interface{}) RestErr {
 	return RestError{
 		ErrStatus: status,
 		ErrError:  err,
@@ -116,7 +128,6 @@ func NewInternalServerError(causes interface{}) RestErr {
 		ErrError:  InternalServerError.Error(),
 		ErrCauses: causes,
 	}
-
 	return result
 }
 
