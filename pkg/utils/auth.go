@@ -9,7 +9,6 @@ import (
 // Validate is user from owner of content
 func ValidateIsOwner(ctx context.Context, creatorID string) error {
 	user, err := GetUserFromCtx(ctx)
-
 	if err != nil {
 		return err
 	}

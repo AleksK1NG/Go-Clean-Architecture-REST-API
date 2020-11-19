@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"fmt"
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/comments"
 	"github.com/AleksK1NG/api-mc/internal/models"
@@ -78,8 +77,4 @@ func (u *commentsUC) GetByID(ctx context.Context, commentID uuid.UUID) (*models.
 // GetAllByNewsID comments
 func (u *commentsUC) GetAllByNewsID(ctx context.Context, newsID uuid.UUID, query *utils.PaginationQuery) (*models.CommentsList, error) {
 	return u.commRepo.GetAllByNewsID(ctx, newsID, query)
-}
-
-func (u *commentsUC) createKey(commentID string) string {
-	return fmt.Sprintf("%s: %s", basePrefix, commentID)
 }

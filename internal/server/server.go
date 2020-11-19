@@ -18,13 +18,14 @@ import (
 )
 
 const (
-	certFile       = "ssl/server.crt"
-	keyFile        = "ssl/server.pem"
+	certFile       = "ssl/Server.crt"
+	keyFile        = "ssl/Server.pem"
 	maxHeaderBytes = 1 << 20
+	ctxTimeout     = 5
 )
 
 // Server struct
-type server struct {
+type Server struct {
 	echo        *echo.Echo
 	cfg         *config.Config
 	db          *sqlx.DB
@@ -32,12 +33,12 @@ type server struct {
 	awsClient   *minio.Client
 }
 
-// New server constructor
-func NewServer(cfg *config.Config, db *sqlx.DB, redisClient *redis.Client, awsS3Client *minio.Client) *server {
-	return &server{echo: echo.New(), cfg: cfg, db: db, redisClient: redisClient, awsClient: awsS3Client}
+// New Server constructor
+func NewServer(cfg *config.Config, db *sqlx.DB, redisClient *redis.Client, awsS3Client *minio.Client) *Server {
+	return &Server{echo: echo.New(), cfg: cfg, db: db, redisClient: redisClient, awsClient: awsS3Client}
 }
 
-func (s *server) Run() error {
+func (s *Server) Run() error {
 	if s.cfg.Server.SSL {
 		if err := s.MapHandlers(s.echo); err != nil {
 			return err
@@ -52,13 +53,12 @@ func (s *server) Run() error {
 			s.echo.Server.WriteTimeout = time.Second * s.cfg.Server.WriteTimeout
 			s.echo.Server.MaxHeaderBytes = maxHeaderBytes
 			if err := s.echo.StartTLS(s.cfg.Server.Port, certFile, keyFile); err != nil {
-				logger.Fatalf("Error starting TLS server: ", err)
+				logger.Fatalf("Error starting TLS Server: ", err)
 			}
-
 		}()
 
 		go func() {
-			logger.Infof("Starting Debug server on PORT: %s", s.cfg.Server.PprofPort)
+			logger.Infof("Starting Debug Server on PORT: %s", s.cfg.Server.PprofPort)
 			if err := http.ListenAndServe(s.cfg.Server.PprofPort, http.DefaultServeMux); err != nil {
 				logger.Errorf("Error PPROF ListenAndServe: %s", err)
 			}
@@ -69,7 +69,7 @@ func (s *server) Run() error {
 
 		<-quit
 
-		ctx, shutdown := context.WithTimeout(context.Background(), 5*time.Second)
+		ctx, shutdown := context.WithTimeout(context.Background(), ctxTimeout*time.Second)
 		defer shutdown()
 
 		logger.Info("Server Exited Properly")
@@ -91,12 +91,12 @@ func (s *server) Run() error {
 	go func() {
 		logger.Infof("Server is listening on PORT: %s", s.cfg.Server.Port)
 		if err := e.StartServer(server); err != nil {
-			logger.Fatalf("Error starting server: ", err)
+			logger.Fatalf("Error starting Server: ", err)
 		}
 	}()
 
 	go func() {
-		logger.Infof("Starting Debug server on PORT: %s", s.cfg.Server.PprofPort)
+		logger.Infof("Starting Debug Server on PORT: %s", s.cfg.Server.PprofPort)
 		if err := http.ListenAndServe(s.cfg.Server.PprofPort, http.DefaultServeMux); err != nil {
 			logger.Errorf("Error PPROF ListenAndServe: %s", err)
 		}
@@ -107,7 +107,7 @@ func (s *server) Run() error {
 
 	<-quit
 
-	ctx, shutdown := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, shutdown := context.WithTimeout(context.Background(), ctxTimeout*time.Second)
 	defer shutdown()
 
 	logger.Info("Server Exited Properly")

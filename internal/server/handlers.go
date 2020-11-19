@@ -28,7 +28,7 @@ import (
 )
 
 // Map Server Handlers
-func (s *server) MapHandlers(e *echo.Echo) error {
+func (s *Server) MapHandlers(e *echo.Echo) error {
 	metrics, err := metric.CreateMetrics(s.cfg.Metrics.URL, s.cfg.Metrics.ServiceName)
 	if err != nil {
 		logger.Errorf("CreateMetrics Error: %s", err)
@@ -101,16 +101,14 @@ func (s *server) MapHandlers(e *echo.Echo) error {
 	newsGroup := v1.Group("/news")
 	commGroup := v1.Group("/comments")
 
-	{
-		authHttp.MapAuthRoutes(authGroup, authHandlers, mw)
-		newsHttp.MapNewsRoutes(newsGroup, newsHandlers, mw)
-		commentsHttp.MapCommentsRoutes(commGroup, commHandlers, mw)
+	authHttp.MapAuthRoutes(authGroup, authHandlers, mw)
+	newsHttp.MapNewsRoutes(newsGroup, newsHandlers, mw)
+	commentsHttp.MapCommentsRoutes(commGroup, commHandlers, mw)
 
-		health.GET("", func(c echo.Context) error {
-			logger.Infof("Health check RequestID: %s", utils.GetRequestID(c))
-			return c.JSON(http.StatusOK, map[string]string{"status": "OK"})
-		})
-	}
+	health.GET("", func(c echo.Context) error {
+		logger.Infof("Health check RequestID: %s", utils.GetRequestID(c))
+		return c.JSON(http.StatusOK, map[string]string{"status": "OK"})
+	})
 
 	return nil
 }

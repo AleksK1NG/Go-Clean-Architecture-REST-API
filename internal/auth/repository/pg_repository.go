@@ -115,7 +115,7 @@ func (r *authRepo) FindByName(ctx context.Context, name string, query *utils.Pag
 	}
 
 	if err = rows.Err(); err != nil {
-		return nil, errors.WithMessage(err, "authRepo FindByName rows.Err()")
+		return nil, errors.WithMessage(err, "authRepo FindByName rows.Err")
 	}
 
 	return &models.UsersList{

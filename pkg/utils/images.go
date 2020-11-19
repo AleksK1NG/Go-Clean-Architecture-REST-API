@@ -37,7 +37,7 @@ func CheckImageContentType(image *multipart.FileHeader) error {
 	defer imageFile.Close()
 
 	fileHeader := make([]byte, 512)
-	if _, err := imageFile.Read(fileHeader); err != nil {
+	if _, err = imageFile.Read(fileHeader); err != nil {
 		return httpErrors.BadRequest
 	}
 

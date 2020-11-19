@@ -128,7 +128,7 @@ func ReadImage(ctx echo.Context, field string) (*multipart.FileHeader, error) {
 	}
 
 	// Check content type of image
-	if err := CheckImageContentType(image); err != nil {
+	if err = CheckImageContentType(image); err != nil {
 		return nil, err
 	}
 
@@ -148,7 +148,7 @@ func SanitizeRequest(ctx echo.Context, request interface{}) error {
 		return ctx.NoContent(http.StatusBadRequest)
 	}
 
-	if err := json.Unmarshal(sanBody, request); err != nil {
+	if err = json.Unmarshal(sanBody, request); err != nil {
 		return err
 	}
 
