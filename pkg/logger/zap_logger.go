@@ -9,7 +9,7 @@ import (
 
 var sugarLogger *zap.SugaredLogger
 
-// для соответствия уровня логгирования в конфиге и внутренним уровнем логера
+// For mapping config logger to app logger levels
 var loggerLevelMap = map[string]zapcore.Level{
 	"debug":  zapcore.DebugLevel,
 	"info":   zapcore.InfoLevel,
@@ -35,22 +35,10 @@ func InitLogger(cfg *config.Config) {
 		return
 	}
 
-	//logFile := viper.GetString("logger.logfile")
 	logLevel := getLoggerLevel(cfg)
 
 	var logWriter zapcore.WriteSyncer
-
-	//if logFile != "stdout" {
-	//	logWriter = zapcore.AddSync(&lumberjack.Logger{
-	//		Filename: logFile,
-	//		//TODO: подумать как достать из конфига
-	//		MaxSize:   1 << 30, //1G
-	//		LocalTime: true,
-	//		Compress:  true,
-	//	})
-	//} else {
 	logWriter = zapcore.AddSync(os.Stdout)
-	//}
 
 	var encoderCfg zapcore.EncoderConfig
 	if cfg.Server.Mode == "Development" {
