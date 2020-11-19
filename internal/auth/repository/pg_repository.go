@@ -171,10 +171,8 @@ func (r *authRepo) GetUsers(ctx context.Context, pq *utils.PaginationQuery) (*mo
 // Find user by email
 func (r *authRepo) FindByEmail(ctx context.Context, user *models.User) (*models.User, error) {
 	foundUser := &models.User{}
-
 	if err := r.db.QueryRowxContext(ctx, findUserByEmail, user.Email).StructScan(foundUser); err != nil {
 		return nil, errors.WithMessage(err, "authRepo FindByEmail QueryRowxContext")
 	}
-
 	return foundUser, nil
 }

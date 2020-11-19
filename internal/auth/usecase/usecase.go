@@ -11,6 +11,7 @@ import (
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
+	"net/http"
 )
 
 const (
@@ -33,8 +34,15 @@ func NewAuthUseCase(cfg *config.Config, authRepo auth.Repository, redisRepo auth
 
 // Create new user
 func (u *authUC) Register(ctx context.Context, user *models.User) (*models.UserWithToken, error) {
+	existsUser, err := u.authRepo.FindByEmail(ctx, user)
+	if err != nil {
+		logger.Infof("authUC Register FindByEmail: %v", err)
+	}
+	if existsUser != nil {
+		return nil, httpErrors.NewRestErrorWithMessage(http.StatusBadRequest, httpErrors.ErrEmailAlreadyExists, nil)
+	}
 
-	if err := user.PrepareCreate(); err != nil {
+	if err = user.PrepareCreate(); err != nil {
 		return nil, httpErrors.NewBadRequestError(errors.WithMessage(err, "authUC Register PrepareCreate"))
 	}
 

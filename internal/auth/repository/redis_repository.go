@@ -47,7 +47,7 @@ func (a *authRedisRepo) SetUserCtx(ctx context.Context, key string, seconds int,
 // Delete user by key
 func (a *authRedisRepo) DeleteUserCtx(ctx context.Context, key string) error {
 	if err := a.redisClient.Del(ctx, key).Err(); err != nil {
-		return errors.WithMessage(err, "authRedisRepo DeleteUserCtxredisClient.Del")
+		return errors.WithMessage(err, "authRedisRepo DeleteUserCtx redisClient.Del")
 	}
 	return nil
 }
