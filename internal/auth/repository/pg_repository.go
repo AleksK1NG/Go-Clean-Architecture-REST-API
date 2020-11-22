@@ -70,7 +70,6 @@ func (r *authRepo) GetByID(ctx context.Context, userID uuid.UUID) (*models.User,
 	if err := r.db.QueryRowxContext(ctx, getUserQuery, userID).StructScan(user); err != nil {
 		return nil, errors.WithMessage(err, "authRepo GetByID QueryRowxContext")
 	}
-
 	return user, nil
 }
 
