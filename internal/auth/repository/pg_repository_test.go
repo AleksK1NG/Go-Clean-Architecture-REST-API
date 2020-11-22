@@ -2,14 +2,34 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
+	"github.com/AleksK1NG/api-mc/internal/auth"
 	"github.com/AleksK1NG/api-mc/internal/models"
+	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
+	"log"
 	"testing"
 )
+
+func prepareDB() (auth.Repository, sqlmock.Sqlmock) {
+	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	sqlxDB := sqlx.NewDb(db, "sqlmock")
+	defer sqlxDB.Close()
+
+	authRepo := NewAuthRepository(sqlxDB)
+
+	return authRepo, mock
+}
 
 func TestAuthRepo_Register(t *testing.T) {
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
@@ -50,6 +70,17 @@ func TestAuthRepo_Register(t *testing.T) {
 		require.NotNil(t, createdUser)
 		require.Equal(t, createdUser, user)
 	})
+}
+
+func TestAuthRepo_GetByID(t *testing.T) {
+	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+	require.NoError(t, err)
+	defer db.Close()
+
+	sqlxDB := sqlx.NewDb(db, "sqlmock")
+	defer sqlxDB.Close()
+
+	authRepo := NewAuthRepository(sqlxDB)
 
 	t.Run("GetByID", func(t *testing.T) {
 		uid := uuid.New()
@@ -74,6 +105,54 @@ func TestAuthRepo_Register(t *testing.T) {
 		fmt.Printf("test user: %s \n", testUser.FirstName)
 		fmt.Printf("user: %s \n", user.FirstName)
 	})
+}
+
+func TestAuthRepo_Delete(t *testing.T) {
+	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+	require.NoError(t, err)
+	defer db.Close()
+
+	sqlxDB := sqlx.NewDb(db, "sqlmock")
+	defer sqlxDB.Close()
+
+	authRepo := NewAuthRepository(sqlxDB)
+
+	t.Run("Delete", func(t *testing.T) {
+
+		uid := uuid.New()
+
+		mock.ExpectExec(deleteUserQuery).WithArgs(uid).WillReturnResult(sqlmock.NewResult(1, 1))
+
+		err := authRepo.Delete(context.Background(), uid)
+		if err != nil {
+			fmt.Printf("test user: %s \n", err.Error())
+		}
+		require.Nil(t, err)
+	})
+
+	t.Run("Delete No rows", func(t *testing.T) {
+
+		uid := uuid.New()
+
+		mock.ExpectExec(deleteUserQuery).WithArgs(uid).WillReturnResult(sqlmock.NewResult(1, 0))
+
+		err := authRepo.Delete(context.Background(), uid)
+
+		require.NotNil(t, err)
+		require.Equal(t, errors.Unwrap(err), sql.ErrNoRows)
+		fmt.Printf("ERROR DELETE: %s \n", err.Error())
+	})
+}
+
+func TestAuthRepo_Update(t *testing.T) {
+	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+	require.NoError(t, err)
+	defer db.Close()
+
+	sqlxDB := sqlx.NewDb(db, "sqlmock")
+	defer sqlxDB.Close()
+
+	authRepo := NewAuthRepository(sqlxDB)
 
 	t.Run("Update", func(t *testing.T) {
 		gender := "male"
@@ -103,17 +182,107 @@ func TestAuthRepo_Register(t *testing.T) {
 		fmt.Printf("test user: %s \n", updatedUser.FirstName)
 		fmt.Printf("user: %s \n", user.FirstName)
 	})
+}
 
-	t.Run("Delete", func(t *testing.T) {
+func TestAuthRepo_FindByEmail(t *testing.T) {
+	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+	require.NoError(t, err)
+	defer db.Close()
+
+	sqlxDB := sqlx.NewDb(db, "sqlmock")
+	defer sqlxDB.Close()
+
+	authRepo := NewAuthRepository(sqlxDB)
+
+	t.Run("FindByEmail", func(t *testing.T) {
 		uid := uuid.New()
 
-		mock.ExpectExec(deleteUserQuery).WithArgs(uid).WillReturnResult(sqlmock.NewResult(1, 1))
+		rows := sqlmock.NewRows([]string{"user_id", "first_name", "last_name", "email"}).AddRow(
+			uid, "Alex", "Bryksin", "alex@mail.ru")
 
-		err := authRepo.Delete(context.Background(), uid)
-		if err != nil {
-			fmt.Printf("test user: %s \n", err.Error())
+		testUser := &models.User{
+			UserID:    uid,
+			FirstName: "Alex",
+			LastName:  "Bryksin",
+			Email:     "alex@mail.ru",
 		}
-		require.Nil(t, err)
+
+		mock.ExpectQuery(findUserByEmail).WithArgs(testUser.Email).WillReturnRows(rows)
+
+		foundUser, err := authRepo.FindByEmail(context.Background(), testUser)
+		require.NoError(t, err)
+		require.NotNil(t, foundUser)
+		require.Equal(t, foundUser.FirstName, testUser.FirstName)
+	})
+}
+
+func TestAuthRepo_GetUsers(t *testing.T) {
+	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+	require.NoError(t, err)
+	defer db.Close()
+
+	sqlxDB := sqlx.NewDb(db, "sqlmock")
+	defer sqlxDB.Close()
+
+	authRepo := NewAuthRepository(sqlxDB)
+
+	t.Run("FindByEmail", func(t *testing.T) {
+		uid := uuid.New()
+
+		totalCountRows := sqlmock.NewRows([]string{"count"}).AddRow(0)
+
+		rows := sqlmock.NewRows([]string{"user_id", "first_name", "last_name", "email"}).AddRow(
+			uid, "Alex", "Bryksin", "alex@mail.ru")
+
+		mock.ExpectQuery(getTotal).WillReturnRows(totalCountRows)
+		mock.ExpectQuery(getUsers).WithArgs("", 0, 10).WillReturnRows(rows)
+
+		users, err := authRepo.GetUsers(context.Background(), &utils.PaginationQuery{
+			Size:    10,
+			Page:    1,
+			OrderBy: "",
+		})
+		require.NoError(t, err)
+		require.NotNil(t, users)
+
+		fmt.Printf("users: %#v \n", users)
+		fmt.Printf("len users: %#v \n", len(users.Users))
 	})
 
+}
+
+func TestAuthRepo_FindByName(t *testing.T) {
+	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+	require.NoError(t, err)
+	defer db.Close()
+
+	sqlxDB := sqlx.NewDb(db, "sqlmock")
+	defer sqlxDB.Close()
+
+	authRepo := NewAuthRepository(sqlxDB)
+
+	t.Run("FindByName", func(t *testing.T) {
+		uid := uuid.New()
+		userName := "Alex"
+
+		totalCountRows := sqlmock.NewRows([]string{"count"}).AddRow(0)
+
+		rows := sqlmock.NewRows([]string{"user_id", "first_name", "last_name", "email"}).AddRow(
+			uid, "Alex", "Bryksin", "alex@mail.ru")
+
+		mock.ExpectQuery(getTotalCount).WillReturnRows(totalCountRows)
+		mock.ExpectQuery(findUsers).WithArgs("", 0, 10).WillReturnRows(rows)
+
+		usersList, err := authRepo.FindByName(context.Background(), userName, &utils.PaginationQuery{
+			Size:    10,
+			Page:    1,
+			OrderBy: "",
+		})
+
+		require.NoError(t, err)
+		require.NotNil(t, usersList)
+
+		fmt.Printf("users: %#v \n", usersList)
+		fmt.Printf("len users: %#v \n", len(usersList.Users))
+	})
 }
