@@ -48,6 +48,7 @@ func (r newsRepo) Update(ctx context.Context, news *models.News) (*models.News, 
 		&news.Content,
 		&news.ImageURL,
 		&news.Category,
+		&news.NewsID,
 	).StructScan(&n); err != nil {
 		return nil, errors.WithMessage(err, "newsRepo Update QueryRowxContext")
 	}

@@ -11,6 +11,7 @@ const (
 					    image_url = COALESCE(NULLIF($3, ''), image_url), 
 					    category = COALESCE(NULLIF($4, ''), category), 
 					    updated_at = now() 
+					WHERE news_id = $5
 					RETURNING *`
 
 	getNewsByID = `SELECT n.news_id,
