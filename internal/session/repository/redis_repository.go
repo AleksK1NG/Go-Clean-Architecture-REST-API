@@ -34,7 +34,7 @@ func (s *sessionRepo) CreateSession(ctx context.Context, sess *models.Session, e
 	sess.SessionID = uuid.New().String()
 	sessionKey := s.createKey(sess.SessionID)
 
-	sessBytes, err := json.Marshal(sess)
+	sessBytes, err := json.Marshal(&sess)
 	if err != nil {
 		return "", errors.WithMessage(err, "sessionRepo CreateSession json.Marshal")
 	}
@@ -52,7 +52,7 @@ func (s *sessionRepo) GetSessionByID(ctx context.Context, sessionID string) (*mo
 	}
 
 	sess := &models.Session{}
-	if err = json.Unmarshal(sessBytes, sess); err != nil {
+	if err = json.Unmarshal(sessBytes, &sess); err != nil {
 		return nil, errors.WithMessage(err, "sessionRepo GetSessionByID json.Unmarshal")
 	}
 	return sess, nil

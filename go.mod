@@ -5,6 +5,8 @@ go 1.15
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
+	github.com/alicebob/gopher-json v0.0.0-20200520072559-a9ecdc9d1d3a // indirect
+	github.com/alicebob/miniredis v2.5.0+incompatible
 	github.com/cockroachdb/apd v1.1.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
@@ -40,6 +42,7 @@ require (
 	github.com/swaggo/echo-swagger v1.0.0
 	github.com/swaggo/swag v1.6.9
 	github.com/urfave/cli/v2 v2.3.0 // indirect
+	github.com/yuin/gopher-lua v0.0.0-20200816102855-ee81675732da // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.16.0
 	golang.org/x/crypto v0.0.0-20201112155050-0c6587e931a9
