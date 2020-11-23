@@ -38,6 +38,7 @@ func TestCommentsRepo_Create(t *testing.T) {
 		mock.ExpectQuery(createComment).WithArgs(comment.AuthorID, &comment.NewsID, comment.Message).WillReturnRows(rows)
 
 		createdComment, err := commRepo.Create(context.Background(), comment)
+
 		require.NoError(t, err)
 		require.NotNil(t, createdComment)
 		require.Equal(t, createdComment, comment)
@@ -56,6 +57,7 @@ func TestCommentsRepo_Create(t *testing.T) {
 		mock.ExpectQuery(createComment).WithArgs(comment.AuthorID, &comment.NewsID, comment.Message).WillReturnError(createErr)
 
 		createdComment, err := commRepo.Create(context.Background(), comment)
+
 		require.Nil(t, createdComment)
 		require.NotNil(t, err)
 		require.Equal(t, errors.Unwrap(err), createErr)
@@ -87,6 +89,7 @@ func TestCommentsRepo_Update(t *testing.T) {
 		mock.ExpectQuery(updateComment).WithArgs(comment.Message, comment.CommentID).WillReturnRows(rows)
 
 		createdComment, err := commRepo.Update(context.Background(), comment)
+
 		require.NoError(t, err)
 		require.NotNil(t, createdComment)
 		require.Equal(t, createdComment.Message, comment.Message)
@@ -105,6 +108,7 @@ func TestCommentsRepo_Update(t *testing.T) {
 		mock.ExpectQuery(updateComment).WithArgs(comment.Message, comment.CommentID).WillReturnError(updateErr)
 
 		createdComment, err := commRepo.Update(context.Background(), comment)
+
 		require.NotNil(t, err)
 		require.Nil(t, createdComment)
 		require.Equal(t, errors.Unwrap(err), updateErr)
@@ -123,10 +127,9 @@ func TestCommentsRepo_Delete(t *testing.T) {
 
 	t.Run("Delete", func(t *testing.T) {
 		commUID := uuid.New()
-
 		mock.ExpectExec(deleteComment).WithArgs(commUID).WillReturnResult(sqlmock.NewResult(1, 1))
-
 		err := commRepo.Delete(context.Background(), commUID)
+
 		require.NoError(t, err)
 	})
 
