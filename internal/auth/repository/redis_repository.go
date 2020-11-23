@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"encoding/json"
+	"github.com/AleksK1NG/api-mc/internal/auth"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/go-redis/redis/v8"
 	"github.com/pkg/errors"
@@ -15,7 +16,7 @@ type authRedisRepo struct {
 }
 
 // Auth redis repository constructor
-func NewAuthRedisRepo(redisClient *redis.Client) *authRedisRepo {
+func NewAuthRedisRepo(redisClient *redis.Client) auth.RedisRepository {
 	return &authRedisRepo{redisClient: redisClient}
 }
 
