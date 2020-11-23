@@ -46,7 +46,7 @@ func TestNewsRedisRepo_SetNewsCtx(t *testing.T) {
 func TestNewsRedisRepo_GetNewsByIDCtx(t *testing.T) {
 	newsRedisRepo := SetupRedis()
 
-	t.Run("SetNewsCtx", func(t *testing.T) {
+	t.Run("GetNewsByIDCtx", func(t *testing.T) {
 		newsUID := uuid.New()
 		key := "key"
 		n := &models.NewsBase{
@@ -55,11 +55,15 @@ func TestNewsRedisRepo_GetNewsByIDCtx(t *testing.T) {
 			Content: "Content",
 		}
 
-		err := newsRedisRepo.SetNewsCtx(context.Background(), key, 10, n)
+		newsBase, err := newsRedisRepo.GetNewsByIDCtx(context.Background(), key)
+		require.Nil(t, newsBase)
+		require.NotNil(t, err)
+
+		err = newsRedisRepo.SetNewsCtx(context.Background(), key, 10, n)
 		require.NoError(t, err)
 		require.Nil(t, err)
 
-		newsBase, err := newsRedisRepo.GetNewsByIDCtx(context.Background(), key)
+		newsBase, err = newsRedisRepo.GetNewsByIDCtx(context.Background(), key)
 		require.NoError(t, err)
 		require.Nil(t, err)
 		require.NotNil(t, newsBase)
