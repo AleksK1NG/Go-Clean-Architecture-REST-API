@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/AleksK1NG/api-mc/internal/auth"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/DATA-DOG/go-sqlmock"
@@ -12,24 +11,8 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
-	"log"
 	"testing"
 )
-
-func prepareDB() (auth.Repository, sqlmock.Sqlmock) {
-	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
-
-	sqlxDB := sqlx.NewDb(db, "sqlmock")
-	defer sqlxDB.Close()
-
-	authRepo := NewAuthRepository(sqlxDB)
-
-	return authRepo, mock
-}
 
 func TestAuthRepo_Register(t *testing.T) {
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
@@ -42,7 +25,6 @@ func TestAuthRepo_Register(t *testing.T) {
 	authRepo := NewAuthRepository(sqlxDB)
 
 	t.Run("Register", func(t *testing.T) {
-		//uid := uuid.New()
 		gender := "male"
 		role := "admin"
 
@@ -63,9 +45,7 @@ func TestAuthRepo_Register(t *testing.T) {
 			&user.Gender, &user.Postcode, &user.Birthday).WillReturnRows(rows)
 
 		createdUser, err := authRepo.Register(context.Background(), user)
-		if err != nil {
-			fmt.Printf("ERROR: %s \n", err.Error())
-		}
+
 		require.NoError(t, err)
 		require.NotNil(t, createdUser)
 		require.Equal(t, createdUser, user)
@@ -124,9 +104,6 @@ func TestAuthRepo_Delete(t *testing.T) {
 		mock.ExpectExec(deleteUserQuery).WithArgs(uid).WillReturnResult(sqlmock.NewResult(1, 1))
 
 		err := authRepo.Delete(context.Background(), uid)
-		if err != nil {
-			fmt.Printf("test user: %s \n", err.Error())
-		}
 		require.Nil(t, err)
 	})
 
@@ -140,7 +117,6 @@ func TestAuthRepo_Delete(t *testing.T) {
 
 		require.NotNil(t, err)
 		require.Equal(t, errors.Unwrap(err), sql.ErrNoRows)
-		fmt.Printf("ERROR DELETE: %s \n", err.Error())
 	})
 }
 
@@ -175,12 +151,10 @@ func TestAuthRepo_Update(t *testing.T) {
 			&user.Postcode, &user.Birthday, &user.UserID).WillReturnRows(rows)
 
 		updatedUser, err := authRepo.Update(context.Background(), user)
+
 		require.NoError(t, err)
 		require.NotNil(t, updatedUser)
 		require.Equal(t, user, updatedUser)
-
-		fmt.Printf("test user: %s \n", updatedUser.FirstName)
-		fmt.Printf("user: %s \n", user.FirstName)
 	})
 }
 
@@ -210,6 +184,7 @@ func TestAuthRepo_FindByEmail(t *testing.T) {
 		mock.ExpectQuery(findUserByEmail).WithArgs(testUser.Email).WillReturnRows(rows)
 
 		foundUser, err := authRepo.FindByEmail(context.Background(), testUser)
+
 		require.NoError(t, err)
 		require.NotNil(t, foundUser)
 		require.Equal(t, foundUser.FirstName, testUser.FirstName)
@@ -244,9 +219,6 @@ func TestAuthRepo_GetUsers(t *testing.T) {
 		})
 		require.NoError(t, err)
 		require.NotNil(t, users)
-
-		fmt.Printf("users: %#v \n", users)
-		fmt.Printf("len users: %#v \n", len(users.Users))
 	})
 
 }
@@ -281,8 +253,5 @@ func TestAuthRepo_FindByName(t *testing.T) {
 
 		require.NoError(t, err)
 		require.NotNil(t, usersList)
-
-		fmt.Printf("users: %#v \n", usersList)
-		fmt.Printf("len users: %#v \n", len(usersList.Users))
 	})
 }

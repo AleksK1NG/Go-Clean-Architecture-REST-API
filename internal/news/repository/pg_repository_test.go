@@ -36,6 +36,7 @@ func TestNewsRepo_Create(t *testing.T) {
 		mock.ExpectQuery(createNews).WithArgs(news.AuthorID, news.Title, news.Content, news.Category).WillReturnRows(rows)
 
 		createdNews, err := newsRepo.Create(context.Background(), news)
+
 		require.NoError(t, err)
 		require.NotNil(t, createdNews)
 		require.Equal(t, news.Title, createdNews.Title)
@@ -73,6 +74,7 @@ func TestNewsRepo_Update(t *testing.T) {
 		).WillReturnRows(rows)
 
 		updatedNews, err := newsRepo.Update(context.Background(), news)
+
 		require.NoError(t, err)
 		require.NotNil(t, updateNews)
 		require.Equal(t, updatedNews, news)
@@ -94,6 +96,7 @@ func TestNewsRepo_Delete(t *testing.T) {
 		mock.ExpectExec(deleteNews).WithArgs(newsUID).WillReturnResult(sqlmock.NewResult(1, 1))
 
 		err := newsRepo.Delete(context.Background(), newsUID)
+
 		require.NoError(t, err)
 	})
 }
