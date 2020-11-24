@@ -9,6 +9,8 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/golang/mock/gomock"
+	"github.com/google/uuid"
+	"github.com/minio/minio-go/v7"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/bcrypt"
 	"testing"
@@ -232,4 +234,39 @@ func TestAuthUC_Login(t *testing.T) {
 	require.NoError(t, err)
 	require.Nil(t, err)
 	require.NotNil(t, userWithToken)
+}
+
+func TestAuthUC_UploadAvatar(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	cfg := &config.Config{
+		Server: config.ServerConfig{
+			JwtSecretKey: "secret",
+		},
+	}
+
+	mockAuthRepo := mock.NewMockRepository(ctrl)
+	mockRedisRepo := mock.NewMockRedisRepository(ctrl)
+	mockAWSRepo := mock.NewMockAWSRepository(ctrl)
+	authUC := NewAuthUseCase(cfg, mockAuthRepo, mockRedisRepo, mockAWSRepo)
+
+	ctx := context.Background()
+	file := models.UploadInput{}
+	uploadInfo := &minio.UploadInfo{}
+	userUID := uuid.New()
+
+	user := &models.User{
+		UserID:   userUID,
+		Password: "123456",
+		Email:    "email@gmail.com",
+	}
+
+	mockAWSRepo.EXPECT().PutObject(ctx, gomock.Eq(file)).Return(uploadInfo, nil)
+	mockAuthRepo.EXPECT().Update(ctx, gomock.Any()).Return(user, nil)
+
+	updatedUser, err := authUC.UploadAvatar(ctx, userUID, file)
+	require.NoError(t, err)
+	require.Nil(t, err)
+	require.NotNil(t, updatedUser)
 }
