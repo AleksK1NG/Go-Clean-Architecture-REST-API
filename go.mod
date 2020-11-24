@@ -15,6 +15,7 @@ require (
 	github.com/go-playground/validator/v10 v10.4.1
 	github.com/go-redis/redis/v8 v8.3.2
 	github.com/gofrs/uuid v3.3.0+incompatible // indirect
+	github.com/golang/mock v1.4.4
 	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/google/uuid v1.1.2
 	github.com/jackc/fake v0.0.0-20150926172116-812a484cc733 // indirect
@@ -49,7 +50,7 @@ require (
 	golang.org/x/net v0.0.0-20201110031124-69a78807bb2b
 	golang.org/x/sys v0.0.0-20201113233024-12cec1faf1ba // indirect
 	golang.org/x/text v0.3.4 // indirect
-	golang.org/x/tools v0.0.0-20201103235415-b653051172e4 // indirect
+	golang.org/x/tools v0.0.0-20201124005743-911501bfb504 // indirect
 	google.golang.org/protobuf v1.25.0 // indirect
 	gopkg.in/ini.v1 v1.62.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776 // indirect
