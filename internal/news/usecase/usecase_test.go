@@ -107,3 +107,85 @@ func TestNewsUC_GetNewsByID(t *testing.T) {
 	require.Nil(t, err)
 	require.NotNil(t, newsByID)
 }
+
+func TestNewsUC_Delete(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockNewsRepo := mock.NewMockRepository(ctrl)
+	mockRedisRepo := mock.NewMockRedisRepository(ctrl)
+	newsUC := NewNewsUseCase(nil, mockNewsRepo, mockRedisRepo)
+
+	newsUID := uuid.New()
+	userUID := uuid.New()
+	newsBase := &models.NewsBase{
+		NewsID:   newsUID,
+		AuthorID: userUID,
+	}
+	cacheKey := fmt.Sprintf("%s: %s", basePrefix, newsUID)
+
+	user := &models.User{
+		UserID: userUID,
+	}
+
+	ctx := context.WithValue(context.Background(), utils.UserCtxKey{}, user)
+
+	mockNewsRepo.EXPECT().GetNewsByID(ctx, gomock.Eq(newsBase.NewsID)).Return(newsBase, nil)
+	mockNewsRepo.EXPECT().Delete(ctx, gomock.Eq(newsUID)).Return(nil)
+	mockRedisRepo.EXPECT().DeleteNewsCtx(ctx, gomock.Eq(cacheKey)).Return(nil)
+
+	err := newsUC.Delete(ctx, newsBase.NewsID)
+	require.NoError(t, err)
+	require.Nil(t, err)
+}
+
+func TestNewsUC_GetNews(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockNewsRepo := mock.NewMockRepository(ctrl)
+	mockRedisRepo := mock.NewMockRedisRepository(ctrl)
+	newsUC := NewNewsUseCase(nil, mockNewsRepo, mockRedisRepo)
+
+	ctx := context.Background()
+	query := &utils.PaginationQuery{
+		Size:    10,
+		Page:    1,
+		OrderBy: "",
+	}
+
+	newsList := &models.NewsList{}
+
+	mockNewsRepo.EXPECT().GetNews(ctx, query).Return(newsList, nil)
+
+	news, err := newsUC.GetNews(ctx, query)
+	require.NoError(t, err)
+	require.Nil(t, err)
+	require.NotNil(t, news)
+}
+
+func TestNewsUC_SearchByTitle(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockNewsRepo := mock.NewMockRepository(ctrl)
+	mockRedisRepo := mock.NewMockRedisRepository(ctrl)
+	newsUC := NewNewsUseCase(nil, mockNewsRepo, mockRedisRepo)
+
+	ctx := context.Background()
+	query := &utils.PaginationQuery{
+		Size:    10,
+		Page:    1,
+		OrderBy: "",
+	}
+
+	newsList := &models.NewsList{}
+	title := "title"
+
+	mockNewsRepo.EXPECT().SearchByTitle(ctx, title, query).Return(newsList, nil)
+
+	news, err := newsUC.SearchByTitle(ctx, title, query)
+	require.NoError(t, err)
+	require.Nil(t, err)
+	require.NotNil(t, news)
+}
