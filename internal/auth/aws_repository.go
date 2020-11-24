@@ -1,3 +1,4 @@
+//go:generate mockgen -source aws_repository.go -destination mock/aws_repository_mock.go -package mock
 package auth
 
 import (
