@@ -35,10 +35,10 @@ func NewAuthUseCase(cfg *config.Config, authRepo auth.Repository, redisRepo auth
 // Create new user
 func (u *authUC) Register(ctx context.Context, user *models.User) (*models.UserWithToken, error) {
 	existsUser, err := u.authRepo.FindByEmail(ctx, user)
-	if err != nil {
-		logger.Infof("authUC Register FindByEmail: %v", err)
-	}
-	if existsUser != nil {
+	//if err != nil {
+	//	logger.Infof("authUC Register FindByEmail: %v", err)
+	//}
+	if existsUser != nil || err == nil {
 		return nil, httpErrors.NewRestErrorWithMessage(http.StatusBadRequest, httpErrors.ErrEmailAlreadyExists, nil)
 	}
 
@@ -76,7 +76,7 @@ func (u *authUC) Update(ctx context.Context, user *models.User) (*models.User, e
 
 	updatedUser.SanitizePassword()
 
-	if err = u.redisRepo.DeleteUserCtx(ctx, u.generateUserKey(user.UserID.String())); err != nil {
+	if err = u.redisRepo.DeleteUserCtx(ctx, u.GenerateUserKey(user.UserID.String())); err != nil {
 		logger.Errorf("AuthUC Update redis delete: %s", err)
 	}
 
@@ -91,7 +91,7 @@ func (u *authUC) Delete(ctx context.Context, userID uuid.UUID) error {
 		return err
 	}
 
-	if err := u.redisRepo.DeleteUserCtx(ctx, u.generateUserKey(userID.String())); err != nil {
+	if err := u.redisRepo.DeleteUserCtx(ctx, u.GenerateUserKey(userID.String())); err != nil {
 		logger.Errorf("AuthUC Delete redis delete: %s", err)
 	}
 
@@ -100,7 +100,7 @@ func (u *authUC) Delete(ctx context.Context, userID uuid.UUID) error {
 
 // Get user by id
 func (u *authUC) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, error) {
-	cachedUser, err := u.redisRepo.GetByIDCtx(ctx, u.generateUserKey(userID.String()))
+	cachedUser, err := u.redisRepo.GetByIDCtx(ctx, u.GenerateUserKey(userID.String()))
 	if err != nil {
 		logger.Errorf("authUC GetByID redisRepo.GetByIDCtx: %v", err)
 	}
@@ -113,7 +113,7 @@ func (u *authUC) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, e
 		return nil, err
 	}
 
-	if err = u.redisRepo.SetUserCtx(ctx, u.generateUserKey(userID.String()), cacheDuration, user); err != nil {
+	if err = u.redisRepo.SetUserCtx(ctx, u.GenerateUserKey(userID.String()), cacheDuration, user); err != nil {
 		logger.Errorf("authUC GetByID redisRepo.SetUserCtx: %v", err)
 	}
 
@@ -178,7 +178,7 @@ func (u *authUC) UploadAvatar(ctx context.Context, userID uuid.UUID, file models
 	return updatedUser, nil
 }
 
-func (u *authUC) generateUserKey(userID string) string {
+func (u *authUC) GenerateUserKey(userID string) string {
 	return fmt.Sprintf("%s: %s", basePrefix, userID)
 }
 
