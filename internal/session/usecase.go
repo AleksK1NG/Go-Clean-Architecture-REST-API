@@ -1,3 +1,4 @@
+//go:generate mockgen -source usecase.go -destination mock/usecase_mock.go -package mock
 package session
 
 import (
