@@ -42,6 +42,7 @@ func (h *commentsHandlers) Create() echo.HandlerFunc {
 
 		if err = utils.SanitizeRequest(c, comment); err != nil {
 			return utils.ErrResponseWithLog(c, err)
+			//return err
 		}
 
 		createdComment, err := h.comUC.Create(ctx, comment)
