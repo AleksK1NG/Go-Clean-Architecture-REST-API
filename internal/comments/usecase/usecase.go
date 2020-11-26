@@ -12,10 +12,6 @@ import (
 	"net/http"
 )
 
-const (
-	basePrefix = "api-comments:"
-)
-
 // Comments UseCase
 type commentsUC struct {
 	cfg      *config.Config
