@@ -1,7 +1,6 @@
 package http
 
 import (
-	"fmt"
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/auth/mock"
 	"github.com/AleksK1NG/api-mc/internal/models"
@@ -47,7 +46,7 @@ func TestAuthHandlers_Register(t *testing.T) {
 	require.Nil(t, err)
 
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/api/v1/register", strings.NewReader(buf.String()))
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/register", strings.NewReader(buf.String()))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
 
@@ -111,7 +110,7 @@ func TestAuthHandlers_Login(t *testing.T) {
 	require.Nil(t, err)
 
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/api/v1/login", strings.NewReader(buf.String()))
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/login", strings.NewReader(buf.String()))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
 
@@ -156,13 +155,11 @@ func TestAuthHandlers_Logout(t *testing.T) {
 	cookieValue := "cookieValue"
 
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/api/v1/logout", nil)
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/logout", nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	req.AddCookie(&http.Cookie{Name: sessionKey, Value: cookieValue})
 
 	rec := httptest.NewRecorder()
-	// Drop a cookie on the recorder.
-	//http.SetCookie(rec, &http.Cookie{Name: "session-id", Value: "expected"})
 
 	c := e.NewContext(req, rec)
 	ctx := utils.GetRequestCtx(c)
@@ -170,13 +167,11 @@ func TestAuthHandlers_Logout(t *testing.T) {
 	authHandlers := NewAuthHandlers(cfg, mockAuthUC, mockSessUC)
 	logout := authHandlers.Logout()
 
-	// Extract the dropped cookie from the request.
 	cookie, err := req.Cookie(sessionKey)
 	require.NoError(t, err)
 	require.NotNil(t, cookie)
 	require.NotEqual(t, cookie.Value, "")
 	require.Equal(t, cookie.Value, cookieValue)
-	fmt.Printf("COOKIE: %#v", cookie)
 
 	mockSessUC.EXPECT().DeleteByID(ctx, gomock.Eq(cookie.Value)).Return(nil)
 
