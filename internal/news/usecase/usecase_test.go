@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/news/mock"
+	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
@@ -18,8 +19,9 @@ func TestNewsUC_Create(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	apiLogger := logger.NewApiLogger(nil)
 	mockNewsRepo := mock.NewMockRepository(ctrl)
-	newsUC := NewNewsUseCase(nil, mockNewsRepo, nil)
+	newsUC := NewNewsUseCase(nil, mockNewsRepo, nil, apiLogger)
 
 	userUID := uuid.New()
 
@@ -49,9 +51,10 @@ func TestNewsUC_Update(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	apiLogger := logger.NewApiLogger(nil)
 	mockNewsRepo := mock.NewMockRepository(ctrl)
 	mockRedisRepo := mock.NewMockRedisRepository(ctrl)
-	newsUC := NewNewsUseCase(nil, mockNewsRepo, mockRedisRepo)
+	newsUC := NewNewsUseCase(nil, mockNewsRepo, mockRedisRepo, apiLogger)
 
 	userUID := uuid.New()
 	newsUID := uuid.New()
@@ -93,9 +96,10 @@ func TestNewsUC_GetNewsByID(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	apiLogger := logger.NewApiLogger(nil)
 	mockNewsRepo := mock.NewMockRepository(ctrl)
 	mockRedisRepo := mock.NewMockRedisRepository(ctrl)
-	newsUC := NewNewsUseCase(nil, mockNewsRepo, mockRedisRepo)
+	newsUC := NewNewsUseCase(nil, mockNewsRepo, mockRedisRepo, apiLogger)
 
 	newsUID := uuid.New()
 	newsBase := &models.NewsBase{
@@ -120,9 +124,10 @@ func TestNewsUC_Delete(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	apiLogger := logger.NewApiLogger(nil)
 	mockNewsRepo := mock.NewMockRepository(ctrl)
 	mockRedisRepo := mock.NewMockRedisRepository(ctrl)
-	newsUC := NewNewsUseCase(nil, mockNewsRepo, mockRedisRepo)
+	newsUC := NewNewsUseCase(nil, mockNewsRepo, mockRedisRepo, apiLogger)
 
 	newsUID := uuid.New()
 	userUID := uuid.New()
@@ -153,9 +158,10 @@ func TestNewsUC_GetNews(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	apiLogger := logger.NewApiLogger(nil)
 	mockNewsRepo := mock.NewMockRepository(ctrl)
 	mockRedisRepo := mock.NewMockRedisRepository(ctrl)
-	newsUC := NewNewsUseCase(nil, mockNewsRepo, mockRedisRepo)
+	newsUC := NewNewsUseCase(nil, mockNewsRepo, mockRedisRepo, apiLogger)
 
 	ctx := context.Background()
 	query := &utils.PaginationQuery{
@@ -180,9 +186,10 @@ func TestNewsUC_SearchByTitle(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	apiLogger := logger.NewApiLogger(nil)
 	mockNewsRepo := mock.NewMockRepository(ctrl)
 	mockRedisRepo := mock.NewMockRedisRepository(ctrl)
-	newsUC := NewNewsUseCase(nil, mockNewsRepo, mockRedisRepo)
+	newsUC := NewNewsUseCase(nil, mockNewsRepo, mockRedisRepo, apiLogger)
 
 	ctx := context.Background()
 	query := &utils.PaginationQuery{

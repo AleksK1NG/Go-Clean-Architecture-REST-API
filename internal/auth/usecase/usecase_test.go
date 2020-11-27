@@ -7,6 +7,7 @@ import (
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/auth/mock"
 	"github.com/AleksK1NG/api-mc/internal/models"
+	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
@@ -26,10 +27,17 @@ func TestAuthUC_Register(t *testing.T) {
 		Server: config.ServerConfig{
 			JwtSecretKey: "secret",
 		},
+		Logger: config.Logger{
+			Development:       true,
+			DisableCaller:     false,
+			DisableStacktrace: false,
+			Encoding:          "json",
+		},
 	}
 
+	apiLogger := logger.NewApiLogger(cfg)
 	mockAuthRepo := mock.NewMockRepository(ctrl)
-	authUC := NewAuthUseCase(cfg, mockAuthRepo, nil, nil)
+	authUC := NewAuthUseCase(cfg, mockAuthRepo, nil, nil, apiLogger)
 
 	user := &models.User{
 		Password: "123456",
@@ -57,11 +65,19 @@ func TestAuthUC_Update(t *testing.T) {
 		Server: config.ServerConfig{
 			JwtSecretKey: "secret",
 		},
+		Logger: config.Logger{
+			Development:       true,
+			DisableCaller:     false,
+			DisableStacktrace: false,
+			Encoding:          "json",
+		},
 	}
+
+	apiLogger := logger.NewApiLogger(cfg)
 
 	mockAuthRepo := mock.NewMockRepository(ctrl)
 	mockRedisRepo := mock.NewMockRedisRepository(ctrl)
-	authUC := NewAuthUseCase(cfg, mockAuthRepo, mockRedisRepo, nil)
+	authUC := NewAuthUseCase(cfg, mockAuthRepo, mockRedisRepo, nil, apiLogger)
 
 	user := &models.User{
 		Password: "123456",
@@ -90,11 +106,19 @@ func TestAuthUC_Delete(t *testing.T) {
 		Server: config.ServerConfig{
 			JwtSecretKey: "secret",
 		},
+		Logger: config.Logger{
+			Development:       true,
+			DisableCaller:     false,
+			DisableStacktrace: false,
+			Encoding:          "json",
+		},
 	}
+
+	apiLogger := logger.NewApiLogger(cfg)
 
 	mockAuthRepo := mock.NewMockRepository(ctrl)
 	mockRedisRepo := mock.NewMockRedisRepository(ctrl)
-	authUC := NewAuthUseCase(cfg, mockAuthRepo, mockRedisRepo, nil)
+	authUC := NewAuthUseCase(cfg, mockAuthRepo, mockRedisRepo, nil, apiLogger)
 
 	user := &models.User{
 		Password: "123456",
@@ -122,11 +146,18 @@ func TestAuthUC_GetByID(t *testing.T) {
 		Server: config.ServerConfig{
 			JwtSecretKey: "secret",
 		},
+		Logger: config.Logger{
+			Development:       true,
+			DisableCaller:     false,
+			DisableStacktrace: false,
+			Encoding:          "json",
+		},
 	}
 
+	apiLogger := logger.NewApiLogger(cfg)
 	mockAuthRepo := mock.NewMockRepository(ctrl)
 	mockRedisRepo := mock.NewMockRedisRepository(ctrl)
-	authUC := NewAuthUseCase(cfg, mockAuthRepo, mockRedisRepo, nil)
+	authUC := NewAuthUseCase(cfg, mockAuthRepo, mockRedisRepo, nil, apiLogger)
 
 	user := &models.User{
 		Password: "123456",
@@ -156,11 +187,18 @@ func TestAuthUC_FindByName(t *testing.T) {
 		Server: config.ServerConfig{
 			JwtSecretKey: "secret",
 		},
+		Logger: config.Logger{
+			Development:       true,
+			DisableCaller:     false,
+			DisableStacktrace: false,
+			Encoding:          "json",
+		},
 	}
 
+	apiLogger := logger.NewApiLogger(cfg)
 	mockAuthRepo := mock.NewMockRepository(ctrl)
 	mockRedisRepo := mock.NewMockRedisRepository(ctrl)
-	authUC := NewAuthUseCase(cfg, mockAuthRepo, mockRedisRepo, nil)
+	authUC := NewAuthUseCase(cfg, mockAuthRepo, mockRedisRepo, nil, apiLogger)
 
 	userName := "name"
 	query := &utils.PaginationQuery{
@@ -190,11 +228,18 @@ func TestAuthUC_GetUsers(t *testing.T) {
 		Server: config.ServerConfig{
 			JwtSecretKey: "secret",
 		},
+		Logger: config.Logger{
+			Development:       true,
+			DisableCaller:     false,
+			DisableStacktrace: false,
+			Encoding:          "json",
+		},
 	}
 
+	apiLogger := logger.NewApiLogger(cfg)
 	mockAuthRepo := mock.NewMockRepository(ctrl)
 	mockRedisRepo := mock.NewMockRedisRepository(ctrl)
-	authUC := NewAuthUseCase(cfg, mockAuthRepo, mockRedisRepo, nil)
+	authUC := NewAuthUseCase(cfg, mockAuthRepo, mockRedisRepo, nil, apiLogger)
 
 	query := &utils.PaginationQuery{
 		Size:    10,
@@ -222,11 +267,18 @@ func TestAuthUC_Login(t *testing.T) {
 		Server: config.ServerConfig{
 			JwtSecretKey: "secret",
 		},
+		Logger: config.Logger{
+			Development:       true,
+			DisableCaller:     false,
+			DisableStacktrace: false,
+			Encoding:          "json",
+		},
 	}
 
+	apiLogger := logger.NewApiLogger(cfg)
 	mockAuthRepo := mock.NewMockRepository(ctrl)
 	mockRedisRepo := mock.NewMockRedisRepository(ctrl)
-	authUC := NewAuthUseCase(cfg, mockAuthRepo, mockRedisRepo, nil)
+	authUC := NewAuthUseCase(cfg, mockAuthRepo, mockRedisRepo, nil, apiLogger)
 
 	ctx := context.Background()
 	user := &models.User{
@@ -260,12 +312,19 @@ func TestAuthUC_UploadAvatar(t *testing.T) {
 		Server: config.ServerConfig{
 			JwtSecretKey: "secret",
 		},
+		Logger: config.Logger{
+			Development:       true,
+			DisableCaller:     false,
+			DisableStacktrace: false,
+			Encoding:          "json",
+		},
 	}
 
+	apiLogger := logger.NewApiLogger(cfg)
 	mockAuthRepo := mock.NewMockRepository(ctrl)
 	mockRedisRepo := mock.NewMockRedisRepository(ctrl)
 	mockAWSRepo := mock.NewMockAWSRepository(ctrl)
-	authUC := NewAuthUseCase(cfg, mockAuthRepo, mockRedisRepo, mockAWSRepo)
+	authUC := NewAuthUseCase(cfg, mockAuthRepo, mockRedisRepo, mockAWSRepo, apiLogger)
 
 	ctx := context.Background()
 	file := models.UploadInput{}

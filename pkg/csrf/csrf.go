@@ -14,7 +14,7 @@ const (
 )
 
 // Create CSRF token
-func MakeToken(sid string) string {
+func MakeToken(sid string, logger logger.Logger) string {
 	hash := sha256.New()
 	_, err := io.WriteString(hash, csrfSalt+sid)
 	if err != nil {
@@ -25,7 +25,7 @@ func MakeToken(sid string) string {
 }
 
 // Validate CSRF token
-func ValidateToken(token string, sid string) bool {
-	trueToken := MakeToken(sid)
+func ValidateToken(token string, sid string, logger logger.Logger) bool {
+	trueToken := MakeToken(sid, logger)
 	return token == trueToken
 }

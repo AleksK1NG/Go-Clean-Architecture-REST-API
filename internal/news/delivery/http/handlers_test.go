@@ -5,6 +5,7 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/news/mock"
 	"github.com/AleksK1NG/api-mc/pkg/converter"
+	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
@@ -22,8 +23,9 @@ func TestNewsHandlers_Create(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	apiLogger := logger.NewApiLogger(nil)
 	mockNewsUC := mock.NewMockUseCase(ctrl)
-	newsHandlers := NewNewsHandlers(nil, mockNewsUC)
+	newsHandlers := NewNewsHandlers(nil, mockNewsUC, apiLogger)
 
 	handlerFunc := newsHandlers.Create()
 
@@ -70,8 +72,9 @@ func TestNewsHandlers_Update(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	apiLogger := logger.NewApiLogger(nil)
 	mockNewsUC := mock.NewMockUseCase(ctrl)
-	newsHandlers := NewNewsHandlers(nil, mockNewsUC)
+	newsHandlers := NewNewsHandlers(nil, mockNewsUC, apiLogger)
 
 	handlerFunc := newsHandlers.Update()
 
@@ -120,8 +123,9 @@ func TestNewsHandlers_GetByID(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	apiLogger := logger.NewApiLogger(nil)
 	mockNewsUC := mock.NewMockUseCase(ctrl)
-	newsHandlers := NewNewsHandlers(nil, mockNewsUC)
+	newsHandlers := NewNewsHandlers(nil, mockNewsUC, apiLogger)
 
 	handlerFunc := newsHandlers.GetByID()
 

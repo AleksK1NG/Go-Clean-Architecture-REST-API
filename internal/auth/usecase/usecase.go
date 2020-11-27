@@ -25,11 +25,12 @@ type authUC struct {
 	authRepo  auth.Repository
 	redisRepo auth.RedisRepository
 	awsRepo   auth.AWSRepository
+	logger    logger.Logger
 }
 
 // Auth UseCase constructor
-func NewAuthUseCase(cfg *config.Config, authRepo auth.Repository, redisRepo auth.RedisRepository, awsRepo auth.AWSRepository) auth.UseCase {
-	return &authUC{cfg: cfg, authRepo: authRepo, redisRepo: redisRepo, awsRepo: awsRepo}
+func NewAuthUseCase(cfg *config.Config, authRepo auth.Repository, redisRepo auth.RedisRepository, awsRepo auth.AWSRepository, log logger.Logger) auth.UseCase {
+	return &authUC{cfg: cfg, authRepo: authRepo, redisRepo: redisRepo, awsRepo: awsRepo, logger: log}
 }
 
 // Create new user
@@ -74,7 +75,7 @@ func (u *authUC) Update(ctx context.Context, user *models.User) (*models.User, e
 	updatedUser.SanitizePassword()
 
 	if err = u.redisRepo.DeleteUserCtx(ctx, u.GenerateUserKey(user.UserID.String())); err != nil {
-		logger.Errorf("AuthUC Update redis delete: %s", err)
+		u.logger.Errorf("AuthUC Update redis delete: %s", err)
 	}
 
 	updatedUser.SanitizePassword()
@@ -89,7 +90,7 @@ func (u *authUC) Delete(ctx context.Context, userID uuid.UUID) error {
 	}
 
 	if err := u.redisRepo.DeleteUserCtx(ctx, u.GenerateUserKey(userID.String())); err != nil {
-		logger.Errorf("AuthUC Delete redis delete: %s", err)
+		u.logger.Errorf("AuthUC Delete redis delete: %s", err)
 	}
 
 	return nil
@@ -99,7 +100,7 @@ func (u *authUC) Delete(ctx context.Context, userID uuid.UUID) error {
 func (u *authUC) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, error) {
 	cachedUser, err := u.redisRepo.GetByIDCtx(ctx, u.GenerateUserKey(userID.String()))
 	if err != nil {
-		logger.Errorf("authUC GetByID redisRepo.GetByIDCtx: %v", err)
+		u.logger.Errorf("authUC GetByID redisRepo.GetByIDCtx: %v", err)
 	}
 	if cachedUser != nil {
 		return cachedUser, nil
@@ -111,7 +112,7 @@ func (u *authUC) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, e
 	}
 
 	if err = u.redisRepo.SetUserCtx(ctx, u.GenerateUserKey(userID.String()), cacheDuration, user); err != nil {
-		logger.Errorf("authUC GetByID redisRepo.SetUserCtx: %v", err)
+		u.logger.Errorf("authUC GetByID redisRepo.SetUserCtx: %v", err)
 	}
 
 	user.SanitizePassword()

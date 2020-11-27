@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/AleksK1NG/api-mc/internal/comments/mock"
 	"github.com/AleksK1NG/api-mc/internal/models"
+	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
@@ -17,8 +18,9 @@ func TestCommentsUC_Create(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	apiLogger := logger.NewApiLogger(nil)
 	mockCommRepo := mock.NewMockRepository(ctrl)
-	commUC := NewCommentsUseCase(nil, mockCommRepo)
+	commUC := NewCommentsUseCase(nil, mockCommRepo, apiLogger)
 
 	comm := &models.Comment{}
 
@@ -35,8 +37,9 @@ func TestCommentsUC_Update(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	apiLogger := logger.NewApiLogger(nil)
 	mockCommRepo := mock.NewMockRepository(ctrl)
-	commUC := NewCommentsUseCase(nil, mockCommRepo)
+	commUC := NewCommentsUseCase(nil, mockCommRepo, apiLogger)
 
 	authorUID := uuid.New()
 
@@ -69,8 +72,9 @@ func TestCommentsUC_Delete(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	apiLogger := logger.NewApiLogger(nil)
 	mockCommRepo := mock.NewMockRepository(ctrl)
-	commUC := NewCommentsUseCase(nil, mockCommRepo)
+	commUC := NewCommentsUseCase(nil, mockCommRepo, apiLogger)
 
 	authorUID := uuid.New()
 
@@ -103,8 +107,9 @@ func TestCommentsUC_GetByID(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	apiLogger := logger.NewApiLogger(nil)
 	mockCommRepo := mock.NewMockRepository(ctrl)
-	commUC := NewCommentsUseCase(nil, mockCommRepo)
+	commUC := NewCommentsUseCase(nil, mockCommRepo, apiLogger)
 
 	comm := &models.Comment{
 		CommentID: uuid.New(),
@@ -128,8 +133,9 @@ func TestCommentsUC_GetAllByNewsID(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	apiLogger := logger.NewApiLogger(nil)
 	mockCommRepo := mock.NewMockRepository(ctrl)
-	commUC := NewCommentsUseCase(nil, mockCommRepo)
+	commUC := NewCommentsUseCase(nil, mockCommRepo, apiLogger)
 
 	newsUID := uuid.New()
 

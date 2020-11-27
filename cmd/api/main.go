@@ -34,28 +34,30 @@ func main() {
 		log.Fatalf("ParseConfig: %v", err)
 	}
 
-	logger.InitLogger(cfg)
-	logger.Infof("LogLevel: %s, Mode: %s, SSL: %v", cfg.Logger.Level, cfg.Server.Mode, cfg.Server.SSL)
+	appLogger := logger.NewApiLogger(cfg)
+
+	appLogger.InitLogger()
+	appLogger.Infof("LogLevel: %s, Mode: %s, SSL: %v", cfg.Logger.Level, cfg.Server.Mode, cfg.Server.SSL)
 
 	psqlDB, err := postgres.NewPsqlDB(cfg)
 	if err != nil {
-		logger.Fatalf("Postgresql init: %s", err)
+		appLogger.Fatalf("Postgresql init: %s", err)
 	} else {
-		logger.Infof("Postgres connected, Status: %#v", psqlDB.Stats())
+		appLogger.Infof("Postgres connected, Status: %#v", psqlDB.Stats())
 	}
 	defer psqlDB.Close()
 
 	redisClient := redis.NewRedisClient(cfg)
 	defer redisClient.Close()
-	logger.Info("Redis connected")
+	appLogger.Info("Redis connected")
 
 	awsClient, err := aws.NewAWSClient(cfg.AWS.Endpoint, cfg.AWS.MinioAccessKey, cfg.AWS.MinioSecretKey, cfg.AWS.UseSSL)
 	if err != nil {
-		logger.Errorf("AWS Client init: %s", err)
+		appLogger.Errorf("AWS Client init: %s", err)
 	}
-	logger.Info("AWS S3 connected")
+	appLogger.Info("AWS S3 connected")
 
-	s := server.NewServer(cfg, psqlDB, redisClient, awsClient)
+	s := server.NewServer(cfg, psqlDB, redisClient, awsClient, appLogger)
 	if err = s.Run(); err != nil {
 		log.Fatal(err)
 	}

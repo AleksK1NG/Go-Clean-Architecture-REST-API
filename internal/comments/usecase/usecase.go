@@ -6,6 +6,7 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/comments"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/pkg/httpErrors"
+	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
@@ -16,11 +17,12 @@ import (
 type commentsUC struct {
 	cfg      *config.Config
 	commRepo comments.Repository
+	logger   logger.Logger
 }
 
 // Comments UseCase constructor
-func NewCommentsUseCase(cfg *config.Config, commRepo comments.Repository) comments.UseCase {
-	return &commentsUC{cfg: cfg, commRepo: commRepo}
+func NewCommentsUseCase(cfg *config.Config, commRepo comments.Repository, logger logger.Logger) comments.UseCase {
+	return &commentsUC{cfg: cfg, commRepo: commRepo, logger: logger}
 }
 
 // Create comment
@@ -35,7 +37,7 @@ func (u *commentsUC) Update(ctx context.Context, comment *models.Comment) (*mode
 		return nil, err
 	}
 
-	if err = utils.ValidateIsOwner(ctx, comm.AuthorID.String()); err != nil {
+	if err = utils.ValidateIsOwner(ctx, comm.AuthorID.String(), u.logger); err != nil {
 		return nil, httpErrors.NewRestError(http.StatusForbidden, "Forbidden", errors.WithMessage(err, "commentsUC Update ValidateIsOwner"))
 	}
 
@@ -54,7 +56,7 @@ func (u *commentsUC) Delete(ctx context.Context, commentID uuid.UUID) error {
 		return err
 	}
 
-	if err = utils.ValidateIsOwner(ctx, comm.AuthorID.String()); err != nil {
+	if err = utils.ValidateIsOwner(ctx, comm.AuthorID.String(), u.logger); err != nil {
 		return httpErrors.NewRestError(http.StatusForbidden, "Forbidden", errors.WithMessage(err, "commentsUC Delete ValidateIsOwner"))
 	}
 
