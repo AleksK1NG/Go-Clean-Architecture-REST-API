@@ -12,6 +12,8 @@ import (
 )
 
 func TestCommentsUC_Create(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -28,6 +30,8 @@ func TestCommentsUC_Create(t *testing.T) {
 }
 
 func TestCommentsUC_Update(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -60,6 +64,8 @@ func TestCommentsUC_Update(t *testing.T) {
 }
 
 func TestCommentsUC_Delete(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -92,6 +98,8 @@ func TestCommentsUC_Delete(t *testing.T) {
 }
 
 func TestCommentsUC_GetByID(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -115,6 +123,8 @@ func TestCommentsUC_GetByID(t *testing.T) {
 }
 
 func TestCommentsUC_GetAllByNewsID(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 

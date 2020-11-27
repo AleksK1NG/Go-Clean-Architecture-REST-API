@@ -11,6 +11,8 @@ import (
 )
 
 func TestNewsRepo_Create(t *testing.T) {
+	t.Parallel()
+
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 	require.NoError(t, err)
 	defer db.Close()
@@ -44,6 +46,8 @@ func TestNewsRepo_Create(t *testing.T) {
 }
 
 func TestNewsRepo_Update(t *testing.T) {
+	t.Parallel()
+
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 	require.NoError(t, err)
 	defer db.Close()
@@ -82,6 +86,8 @@ func TestNewsRepo_Update(t *testing.T) {
 }
 
 func TestNewsRepo_Delete(t *testing.T) {
+	t.Parallel()
+
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 	require.NoError(t, err)
 	defer db.Close()

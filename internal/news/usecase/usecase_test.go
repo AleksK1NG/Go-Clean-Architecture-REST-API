@@ -13,6 +13,8 @@ import (
 )
 
 func TestNewsUC_Create(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -42,6 +44,8 @@ func TestNewsUC_Create(t *testing.T) {
 }
 
 func TestNewsUC_Update(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -84,6 +88,8 @@ func TestNewsUC_Update(t *testing.T) {
 }
 
 func TestNewsUC_GetNewsByID(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -109,6 +115,8 @@ func TestNewsUC_GetNewsByID(t *testing.T) {
 }
 
 func TestNewsUC_Delete(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -140,6 +148,8 @@ func TestNewsUC_Delete(t *testing.T) {
 }
 
 func TestNewsUC_GetNews(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -165,6 +175,8 @@ func TestNewsUC_GetNews(t *testing.T) {
 }
 
 func TestNewsUC_SearchByTitle(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 

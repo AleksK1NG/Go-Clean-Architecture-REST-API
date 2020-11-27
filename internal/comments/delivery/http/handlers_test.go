@@ -19,6 +19,8 @@ import (
 )
 
 func TestCommentsHandlers_Create(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -70,6 +72,8 @@ func TestCommentsHandlers_Create(t *testing.T) {
 }
 
 func TestCommentsHandlers_GetByID(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -96,6 +100,8 @@ func TestCommentsHandlers_GetByID(t *testing.T) {
 }
 
 func TestCommentsHandlers_Delete(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 

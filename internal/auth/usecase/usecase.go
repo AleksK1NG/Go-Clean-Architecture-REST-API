@@ -35,9 +35,6 @@ func NewAuthUseCase(cfg *config.Config, authRepo auth.Repository, redisRepo auth
 // Create new user
 func (u *authUC) Register(ctx context.Context, user *models.User) (*models.UserWithToken, error) {
 	existsUser, err := u.authRepo.FindByEmail(ctx, user)
-	//if err != nil {
-	//	logger.Infof("authUC Register FindByEmail: %v", err)
-	//}
 	if existsUser != nil || err == nil {
 		return nil, httpErrors.NewRestErrorWithMessage(http.StatusBadRequest, httpErrors.ErrEmailAlreadyExists, nil)
 	}

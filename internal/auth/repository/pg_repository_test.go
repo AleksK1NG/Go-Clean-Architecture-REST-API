@@ -15,6 +15,8 @@ import (
 )
 
 func TestAuthRepo_Register(t *testing.T) {
+	t.Parallel()
+
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 	require.NoError(t, err)
 	defer db.Close()
@@ -53,6 +55,8 @@ func TestAuthRepo_Register(t *testing.T) {
 }
 
 func TestAuthRepo_GetByID(t *testing.T) {
+	t.Parallel()
+
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 	require.NoError(t, err)
 	defer db.Close()
@@ -88,6 +92,8 @@ func TestAuthRepo_GetByID(t *testing.T) {
 }
 
 func TestAuthRepo_Delete(t *testing.T) {
+	t.Parallel()
+
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 	require.NoError(t, err)
 	defer db.Close()
@@ -121,6 +127,8 @@ func TestAuthRepo_Delete(t *testing.T) {
 }
 
 func TestAuthRepo_Update(t *testing.T) {
+	t.Parallel()
+
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 	require.NoError(t, err)
 	defer db.Close()
@@ -159,6 +167,8 @@ func TestAuthRepo_Update(t *testing.T) {
 }
 
 func TestAuthRepo_FindByEmail(t *testing.T) {
+	t.Parallel()
+
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 	require.NoError(t, err)
 	defer db.Close()
@@ -192,6 +202,8 @@ func TestAuthRepo_FindByEmail(t *testing.T) {
 }
 
 func TestAuthRepo_GetUsers(t *testing.T) {
+	t.Parallel()
+
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 	require.NoError(t, err)
 	defer db.Close()
@@ -224,6 +236,8 @@ func TestAuthRepo_GetUsers(t *testing.T) {
 }
 
 func TestAuthRepo_FindByName(t *testing.T) {
+	t.Parallel()
+
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 	require.NoError(t, err)
 	defer db.Close()

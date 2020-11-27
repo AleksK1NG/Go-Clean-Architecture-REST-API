@@ -26,6 +26,8 @@ func SetupRedis() news.RedisRepository {
 }
 
 func TestNewsRedisRepo_SetNewsCtx(t *testing.T) {
+	t.Parallel()
+
 	newsRedisRepo := SetupRedis()
 
 	t.Run("SetNewsCtx", func(t *testing.T) {
@@ -44,6 +46,8 @@ func TestNewsRedisRepo_SetNewsCtx(t *testing.T) {
 }
 
 func TestNewsRedisRepo_GetNewsByIDCtx(t *testing.T) {
+	t.Parallel()
+
 	newsRedisRepo := SetupRedis()
 
 	t.Run("GetNewsByIDCtx", func(t *testing.T) {
@@ -71,6 +75,8 @@ func TestNewsRedisRepo_GetNewsByIDCtx(t *testing.T) {
 }
 
 func TestNewsRedisRepo_DeleteNewsCtx(t *testing.T) {
+	t.Parallel()
+
 	newsRedisRepo := SetupRedis()
 
 	t.Run("SetNewsCtx", func(t *testing.T) {
