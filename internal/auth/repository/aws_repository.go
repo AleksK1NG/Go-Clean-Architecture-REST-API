@@ -29,7 +29,7 @@ func (aws *authAWSRepository) PutObject(ctx context.Context, input models.Upload
 
 	uploadInfo, err := aws.client.PutObject(ctx, input.BucketName, aws.generateFileName(input.Name), input.File, input.Size, options)
 	if err != nil {
-		return nil, errors.WithMessage(err, "authAWSRepository FileUpload PutObject")
+		return nil, errors.Wrap(err, "authAWSRepository FileUpload PutObject")
 	}
 
 	return &uploadInfo, err
@@ -39,7 +39,7 @@ func (aws *authAWSRepository) PutObject(ctx context.Context, input models.Upload
 func (aws *authAWSRepository) GetObject(ctx context.Context, bucket string, fileName string) (*minio.Object, error) {
 	object, err := aws.client.GetObject(ctx, bucket, fileName, minio.GetObjectOptions{})
 	if err != nil {
-		return nil, errors.WithMessage(err, "authAWSRepository FileDownload GetObject")
+		return nil, errors.Wrap(err, "authAWSRepository FileDownload GetObject")
 	}
 	return object, nil
 }
@@ -47,7 +47,7 @@ func (aws *authAWSRepository) GetObject(ctx context.Context, bucket string, file
 // Delete file from AWS
 func (aws *authAWSRepository) RemoveObject(ctx context.Context, bucket string, fileName string) error {
 	if err := aws.client.RemoveObject(ctx, bucket, fileName, minio.RemoveObjectOptions{}); err != nil {
-		return errors.WithMessage(err, "authAWSRepository RemoveObject")
+		return errors.Wrap(err, "authAWSRepository RemoveObject")
 	}
 	return nil
 }

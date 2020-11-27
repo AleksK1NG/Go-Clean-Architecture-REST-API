@@ -61,7 +61,7 @@ func (u *newsUC) Update(ctx context.Context, news *models.News) (*models.News, e
 	}
 
 	if err = utils.ValidateIsOwner(ctx, newsByID.AuthorID.String(), u.logger); err != nil {
-		return nil, httpErrors.NewRestError(http.StatusForbidden, "Forbidden", errors.WithMessage(err, "newsUC Update ValidateIsOwner"))
+		return nil, httpErrors.NewRestError(http.StatusForbidden, "Forbidden", errors.Wrap(err, "newsUC Update ValidateIsOwner"))
 	}
 
 	updatedUser, err := u.newsRepo.Update(ctx, news)
@@ -106,7 +106,7 @@ func (u *newsUC) Delete(ctx context.Context, newsID uuid.UUID) error {
 	}
 
 	if err = utils.ValidateIsOwner(ctx, newsByID.AuthorID.String(), u.logger); err != nil {
-		return httpErrors.NewRestError(http.StatusForbidden, "Forbidden", errors.WithMessage(err, "newsUC Delete ValidateIsOwner"))
+		return httpErrors.NewRestError(http.StatusForbidden, "Forbidden", errors.Wrap(err, "newsUC Delete ValidateIsOwner"))
 	}
 
 	if err = u.newsRepo.Delete(ctx, newsID); err != nil {
