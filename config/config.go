@@ -23,6 +23,7 @@ type Config struct {
 
 // Server config struct
 type ServerConfig struct {
+	AppVersion        string
 	Port              string
 	PprofPort         string
 	Mode              string
