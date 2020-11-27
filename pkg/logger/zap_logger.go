@@ -30,6 +30,7 @@ type apiLogger struct {
 	sugarLogger *zap.SugaredLogger
 }
 
+// App Logger constructor
 func NewApiLogger(cfg *config.Config) *apiLogger {
 	return &apiLogger{cfg: cfg}
 }

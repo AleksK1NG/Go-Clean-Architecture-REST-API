@@ -8,17 +8,20 @@ import (
 	"strconv"
 )
 
+// App Metrics interface
 type Metrics interface {
 	IncHits(status int, method, path string)
 	ObserveResponseTime(status int, method, path string, observeTime float64)
 }
 
+// Prometheus Metrics struct
 type PrometheusMetrics struct {
 	HitsTotal prometheus.Counter
 	Hits      *prometheus.CounterVec
 	Times     *prometheus.HistogramVec
 }
 
+// Create metrics with address and name
 func CreateMetrics(address string, name string) (Metrics, error) {
 	var metr PrometheusMetrics
 	metr.HitsTotal = prometheus.NewCounter(prometheus.CounterOpts{
@@ -67,11 +70,13 @@ func CreateMetrics(address string, name string) (Metrics, error) {
 	return &metr, nil
 }
 
+// IncHits
 func (metr *PrometheusMetrics) IncHits(status int, method, path string) {
 	metr.HitsTotal.Inc()
 	metr.Hits.WithLabelValues(strconv.Itoa(status), method, path).Inc()
 }
 
+// Observer response time
 func (metr *PrometheusMetrics) ObserveResponseTime(status int, method, path string, observeTime float64) {
 	metr.Times.WithLabelValues(strconv.Itoa(status), method, path).Observe(observeTime)
 }
