@@ -41,7 +41,7 @@ func (u *authUC) Register(ctx context.Context, user *models.User) (*models.UserW
 	}
 
 	if err = user.PrepareCreate(); err != nil {
-		return nil, httpErrors.NewBadRequestError(errors.WithMessage(err, "authUC Register PrepareCreate"))
+		return nil, httpErrors.NewBadRequestError(errors.Wrap(err, "authUC Register PrepareCreate"))
 	}
 
 	createdUser, err := u.authRepo.Register(ctx, user)
@@ -52,7 +52,7 @@ func (u *authUC) Register(ctx context.Context, user *models.User) (*models.UserW
 
 	token, err := utils.GenerateJWTToken(createdUser, u.cfg)
 	if err != nil {
-		return nil, httpErrors.NewInternalServerError(errors.WithMessage(err, "authUC Register GenerateJWTToken"))
+		return nil, httpErrors.NewInternalServerError(errors.Wrap(err, "authUC Register GenerateJWTToken"))
 	}
 
 	return &models.UserWithToken{
@@ -64,7 +64,7 @@ func (u *authUC) Register(ctx context.Context, user *models.User) (*models.UserW
 // Update existing user
 func (u *authUC) Update(ctx context.Context, user *models.User) (*models.User, error) {
 	if err := user.PrepareUpdate(); err != nil {
-		return nil, httpErrors.NewBadRequestError(errors.WithMessage(err, "authUC Register PrepareUpdate"))
+		return nil, httpErrors.NewBadRequestError(errors.Wrap(err, "authUC Register PrepareUpdate"))
 	}
 
 	updatedUser, err := u.authRepo.Update(ctx, user)
@@ -138,14 +138,14 @@ func (u *authUC) Login(ctx context.Context, user *models.User) (*models.UserWith
 	}
 
 	if err = foundUser.ComparePasswords(user.Password); err != nil {
-		return nil, httpErrors.NewUnauthorizedError(errors.WithMessage(err, "authUC GetUsers ComparePasswords"))
+		return nil, httpErrors.NewUnauthorizedError(errors.Wrap(err, "authUC GetUsers ComparePasswords"))
 	}
 
 	foundUser.SanitizePassword()
 
 	token, err := utils.GenerateJWTToken(foundUser, u.cfg)
 	if err != nil {
-		return nil, httpErrors.NewInternalServerError(errors.WithMessage(err, "authUC GetUsers GenerateJWTToken"))
+		return nil, httpErrors.NewInternalServerError(errors.Wrap(err, "authUC GetUsers GenerateJWTToken"))
 	}
 
 	return &models.UserWithToken{
@@ -158,7 +158,7 @@ func (u *authUC) Login(ctx context.Context, user *models.User) (*models.UserWith
 func (u *authUC) UploadAvatar(ctx context.Context, userID uuid.UUID, file models.UploadInput) (*models.User, error) {
 	uploadInfo, err := u.awsRepo.PutObject(ctx, file)
 	if err != nil {
-		return nil, httpErrors.NewInternalServerError(errors.WithMessage(err, "authUC UploadAvatar PutObject"))
+		return nil, httpErrors.NewInternalServerError(errors.Wrap(err, "authUC UploadAvatar PutObject"))
 	}
 
 	avatarURL := u.generateAWSMinioURL(file.BucketName, uploadInfo.Key)

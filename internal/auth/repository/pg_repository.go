@@ -28,7 +28,7 @@ func (r *authRepo) Register(ctx context.Context, user *models.User) (*models.Use
 		&user.Password, &user.Role, &user.About, &user.Avatar, &user.PhoneNumber, &user.Address, &user.City,
 		&user.Gender, &user.Postcode, &user.Birthday,
 	).StructScan(u); err != nil {
-		return nil, errors.WithMessage(err, "authRepo Register StructScan")
+		return nil, errors.Wrap(err, "authRepo Register StructScan")
 	}
 
 	return u, nil
@@ -41,7 +41,7 @@ func (r *authRepo) Update(ctx context.Context, user *models.User) (*models.User,
 		&user.Role, &user.About, &user.Avatar, &user.PhoneNumber, &user.Address, &user.City, &user.Gender,
 		&user.Postcode, &user.Birthday, &user.UserID,
 	); err != nil {
-		return nil, errors.WithMessage(err, "authRepo Update GetContext")
+		return nil, errors.Wrap(err, "authRepo Update GetContext")
 	}
 
 	return u, nil
@@ -55,10 +55,10 @@ func (r *authRepo) Delete(ctx context.Context, userID uuid.UUID) error {
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return errors.WithMessage(err, "authRepo Delete RowsAffected")
+		return errors.Wrap(err, "authRepo Delete RowsAffected")
 	}
 	if rowsAffected == 0 {
-		return errors.WithMessage(sql.ErrNoRows, "authRepo Delete rowsAffected == 0")
+		return errors.Wrap(sql.ErrNoRows, "authRepo Delete rowsAffected == 0")
 	}
 
 	return nil
@@ -68,7 +68,7 @@ func (r *authRepo) Delete(ctx context.Context, userID uuid.UUID) error {
 func (r *authRepo) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, error) {
 	user := &models.User{}
 	if err := r.db.QueryRowxContext(ctx, getUserQuery, userID).StructScan(user); err != nil {
-		return nil, errors.WithMessage(err, "authRepo GetByID QueryRowxContext")
+		return nil, errors.Wrap(err, "authRepo GetByID QueryRowxContext")
 	}
 	return user, nil
 }
@@ -77,7 +77,7 @@ func (r *authRepo) GetByID(ctx context.Context, userID uuid.UUID) (*models.User,
 func (r *authRepo) FindByName(ctx context.Context, name string, query *utils.PaginationQuery) (*models.UsersList, error) {
 	var totalCount int
 	if err := r.db.GetContext(ctx, &totalCount, getTotalCount, name); err != nil {
-		return nil, errors.WithMessage(err, "authRepo FindByName totalCount GetContext")
+		return nil, errors.Wrap(err, "authRepo FindByName totalCount GetContext")
 	}
 
 	if totalCount == 0 {
@@ -93,13 +93,13 @@ func (r *authRepo) FindByName(ctx context.Context, name string, query *utils.Pag
 
 	rows, err := r.db.QueryxContext(ctx, findUsers, name, query.GetOffset(), query.GetLimit())
 	if err != nil {
-		return nil, errors.WithMessage(err, "authRepo FindByName QueryxContext")
+		return nil, errors.Wrap(err, "authRepo FindByName QueryxContext")
 	}
 
 	defer func() {
 		if closeErr := rows.Close(); closeErr != nil {
 			if err == nil {
-				err = errors.WithMessage(closeErr, "authRepo FindByName rows.Close()")
+				err = errors.Wrap(closeErr, "authRepo FindByName rows.Close()")
 			}
 		}
 	}()
@@ -108,13 +108,13 @@ func (r *authRepo) FindByName(ctx context.Context, name string, query *utils.Pag
 	for rows.Next() {
 		var user models.User
 		if err = rows.StructScan(&user); err != nil {
-			return nil, errors.WithMessage(err, "authRepo FindByName StructScan")
+			return nil, errors.Wrap(err, "authRepo FindByName StructScan")
 		}
 		users = append(users, &user)
 	}
 
 	if err = rows.Err(); err != nil {
-		return nil, errors.WithMessage(err, "authRepo FindByName rows.Err")
+		return nil, errors.Wrap(err, "authRepo FindByName rows.Err")
 	}
 
 	return &models.UsersList{
@@ -131,7 +131,7 @@ func (r *authRepo) FindByName(ctx context.Context, name string, query *utils.Pag
 func (r *authRepo) GetUsers(ctx context.Context, pq *utils.PaginationQuery) (*models.UsersList, error) {
 	var totalCount int
 	if err := r.db.GetContext(ctx, &totalCount, getTotal); err != nil {
-		return nil, errors.WithMessage(err, "authRepo GetUsers totalCount GetContext")
+		return nil, errors.Wrap(err, "authRepo GetUsers totalCount GetContext")
 	}
 
 	if totalCount == 0 {
@@ -154,7 +154,7 @@ func (r *authRepo) GetUsers(ctx context.Context, pq *utils.PaginationQuery) (*mo
 		pq.GetOffset(),
 		pq.GetLimit(),
 	); err != nil {
-		return nil, errors.WithMessage(err, "authRepo GetUsers SelectContext")
+		return nil, errors.Wrap(err, "authRepo GetUsers SelectContext")
 	}
 
 	return &models.UsersList{
@@ -171,7 +171,7 @@ func (r *authRepo) GetUsers(ctx context.Context, pq *utils.PaginationQuery) (*mo
 func (r *authRepo) FindByEmail(ctx context.Context, user *models.User) (*models.User, error) {
 	foundUser := &models.User{}
 	if err := r.db.QueryRowxContext(ctx, findUserByEmail, user.Email).StructScan(foundUser); err != nil {
-		return nil, errors.WithMessage(err, "authRepo FindByEmail QueryRowxContext")
+		return nil, errors.Wrap(err, "authRepo FindByEmail QueryRowxContext")
 	}
 	return foundUser, nil
 }

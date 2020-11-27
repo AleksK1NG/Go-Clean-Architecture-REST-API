@@ -38,7 +38,7 @@ func (u *commentsUC) Update(ctx context.Context, comment *models.Comment) (*mode
 	}
 
 	if err = utils.ValidateIsOwner(ctx, comm.AuthorID.String(), u.logger); err != nil {
-		return nil, httpErrors.NewRestError(http.StatusForbidden, "Forbidden", errors.WithMessage(err, "commentsUC Update ValidateIsOwner"))
+		return nil, httpErrors.NewRestError(http.StatusForbidden, "Forbidden", errors.Wrap(err, "commentsUC Update ValidateIsOwner"))
 	}
 
 	updatedComment, err := u.commRepo.Update(ctx, comment)
@@ -57,7 +57,7 @@ func (u *commentsUC) Delete(ctx context.Context, commentID uuid.UUID) error {
 	}
 
 	if err = utils.ValidateIsOwner(ctx, comm.AuthorID.String(), u.logger); err != nil {
-		return httpErrors.NewRestError(http.StatusForbidden, "Forbidden", errors.WithMessage(err, "commentsUC Delete ValidateIsOwner"))
+		return httpErrors.NewRestError(http.StatusForbidden, "Forbidden", errors.Wrap(err, "commentsUC Delete ValidateIsOwner"))
 	}
 
 	if err = u.commRepo.Delete(ctx, commentID); err != nil {
