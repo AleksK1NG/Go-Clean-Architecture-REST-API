@@ -17,6 +17,8 @@ import (
 )
 
 func TestNewsHandlers_Create(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -63,6 +65,8 @@ func TestNewsHandlers_Create(t *testing.T) {
 }
 
 func TestNewsHandlers_Update(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -111,6 +115,8 @@ func TestNewsHandlers_Update(t *testing.T) {
 }
 
 func TestNewsHandlers_GetByID(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 

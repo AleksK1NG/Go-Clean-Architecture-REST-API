@@ -26,6 +26,8 @@ func SetupRedis() auth.RedisRepository {
 }
 
 func TestAuthRedisRepo_GetByIDCtx(t *testing.T) {
+	t.Parallel()
+
 	authRedisRepo := SetupRedis()
 
 	t.Run("GetByIDCtx", func(t *testing.T) {
@@ -48,6 +50,8 @@ func TestAuthRedisRepo_GetByIDCtx(t *testing.T) {
 }
 
 func TestAuthRedisRepo_SetUserCtx(t *testing.T) {
+	t.Parallel()
+
 	authRedisRepo := SetupRedis()
 
 	t.Run("SetUserCtx", func(t *testing.T) {
@@ -66,6 +70,8 @@ func TestAuthRedisRepo_SetUserCtx(t *testing.T) {
 }
 
 func TestAuthRedisRepo_DeleteUserCtx(t *testing.T) {
+	t.Parallel()
+
 	authRedisRepo := SetupRedis()
 
 	t.Run("DeleteUserCtx", func(t *testing.T) {

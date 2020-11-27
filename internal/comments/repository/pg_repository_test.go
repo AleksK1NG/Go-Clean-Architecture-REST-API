@@ -13,6 +13,8 @@ import (
 )
 
 func TestCommentsRepo_Create(t *testing.T) {
+	t.Parallel()
+
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 	require.NoError(t, err)
 	defer db.Close()
@@ -65,6 +67,8 @@ func TestCommentsRepo_Create(t *testing.T) {
 }
 
 func TestCommentsRepo_Update(t *testing.T) {
+	t.Parallel()
+
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 	require.NoError(t, err)
 	defer db.Close()
@@ -116,6 +120,8 @@ func TestCommentsRepo_Update(t *testing.T) {
 }
 
 func TestCommentsRepo_Delete(t *testing.T) {
+	t.Parallel()
+
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 	require.NoError(t, err)
 	defer db.Close()

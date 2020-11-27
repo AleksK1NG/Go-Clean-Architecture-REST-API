@@ -26,6 +26,8 @@ func SetupRedis() session.SessRepository {
 }
 
 func TestSessionRepo_CreateSession(t *testing.T) {
+	t.Parallel()
+
 	sessRepository := SetupRedis()
 
 	t.Run("CreateSession", func(t *testing.T) {
@@ -41,6 +43,8 @@ func TestSessionRepo_CreateSession(t *testing.T) {
 }
 
 func TestSessionRepo_GetSessionByID(t *testing.T) {
+	t.Parallel()
+
 	sessRepository := SetupRedis()
 
 	t.Run("GetSessionByID", func(t *testing.T) {
@@ -60,6 +64,8 @@ func TestSessionRepo_GetSessionByID(t *testing.T) {
 }
 
 func TestSessionRepo_DeleteByID(t *testing.T) {
+	t.Parallel()
+
 	sessRepository := SetupRedis()
 
 	t.Run("DeleteByID", func(t *testing.T) {

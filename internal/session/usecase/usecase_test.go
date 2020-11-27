@@ -10,6 +10,8 @@ import (
 )
 
 func TestSessionUC_CreateSession(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -29,6 +31,8 @@ func TestSessionUC_CreateSession(t *testing.T) {
 }
 
 func TestSessionUC_GetSessionByID(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -48,6 +52,8 @@ func TestSessionUC_GetSessionByID(t *testing.T) {
 }
 
 func TestSessionUC_DeleteByID(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 

@@ -17,6 +17,8 @@ import (
 )
 
 func TestAuthUC_Register(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -46,6 +48,8 @@ func TestAuthUC_Register(t *testing.T) {
 }
 
 func TestAuthUC_Update(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -77,6 +81,8 @@ func TestAuthUC_Update(t *testing.T) {
 }
 
 func TestAuthUC_Delete(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -107,6 +113,8 @@ func TestAuthUC_Delete(t *testing.T) {
 }
 
 func TestAuthUC_GetByID(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -139,6 +147,8 @@ func TestAuthUC_GetByID(t *testing.T) {
 }
 
 func TestAuthUC_FindByName(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -171,6 +181,8 @@ func TestAuthUC_FindByName(t *testing.T) {
 }
 
 func TestAuthUC_GetUsers(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -201,6 +213,8 @@ func TestAuthUC_GetUsers(t *testing.T) {
 }
 
 func TestAuthUC_Login(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -237,6 +251,8 @@ func TestAuthUC_Login(t *testing.T) {
 }
 
 func TestAuthUC_UploadAvatar(t *testing.T) {
+	t.Parallel()
+
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
