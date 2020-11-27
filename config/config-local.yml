@@ -1,4 +1,5 @@
 server:
+  AppVersion: 1.0.0
   Port: :5000
   PprofPort: :5555
   Mode: Development
