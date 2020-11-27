@@ -7,6 +7,7 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/comments/usecase"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/pkg/converter"
+	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
@@ -24,10 +25,11 @@ func TestCommentsHandlers_Create(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	apiLogger := logger.NewApiLogger(nil)
 	mockCommUC := mock.NewMockUseCase(ctrl)
-	commUC := usecase.NewCommentsUseCase(nil, mockCommUC)
+	commUC := usecase.NewCommentsUseCase(nil, mockCommUC, apiLogger)
 
-	commHandlers := NewCommentsHandlers(nil, commUC)
+	commHandlers := NewCommentsHandlers(nil, commUC, apiLogger)
 	handlerFunc := commHandlers.Create()
 
 	userID := uuid.New()
@@ -77,10 +79,11 @@ func TestCommentsHandlers_GetByID(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	apiLogger := logger.NewApiLogger(nil)
 	mockCommUC := mock.NewMockUseCase(ctrl)
-	commUC := usecase.NewCommentsUseCase(nil, mockCommUC)
+	commUC := usecase.NewCommentsUseCase(nil, mockCommUC, apiLogger)
 
-	commHandlers := NewCommentsHandlers(nil, commUC)
+	commHandlers := NewCommentsHandlers(nil, commUC, apiLogger)
 	handlerFunc := commHandlers.GetByID()
 
 	r := httptest.NewRequest(http.MethodGet, "/api/v1/comments/5c9a9d67-ad38-499c-9858-086bfdeaf7d2", nil)
@@ -105,10 +108,11 @@ func TestCommentsHandlers_Delete(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	apiLogger := logger.NewApiLogger(nil)
 	mockCommUC := mock.NewMockUseCase(ctrl)
-	commUC := usecase.NewCommentsUseCase(nil, mockCommUC)
+	commUC := usecase.NewCommentsUseCase(nil, mockCommUC, apiLogger)
 
-	commHandlers := NewCommentsHandlers(nil, commUC)
+	commHandlers := NewCommentsHandlers(nil, commUC, apiLogger)
 	handlerFunc := commHandlers.Delete()
 
 	userID := uuid.New()

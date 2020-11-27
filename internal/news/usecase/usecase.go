@@ -24,11 +24,12 @@ type newsUC struct {
 	cfg       *config.Config
 	newsRepo  news.Repository
 	redisRepo news.RedisRepository
+	logger    logger.Logger
 }
 
 // News UseCase constructor
-func NewNewsUseCase(cfg *config.Config, newsRepo news.Repository, redisRepo news.RedisRepository) news.UseCase {
-	return &newsUC{cfg: cfg, newsRepo: newsRepo, redisRepo: redisRepo}
+func NewNewsUseCase(cfg *config.Config, newsRepo news.Repository, redisRepo news.RedisRepository, logger logger.Logger) news.UseCase {
+	return &newsUC{cfg: cfg, newsRepo: newsRepo, redisRepo: redisRepo, logger: logger}
 }
 
 // Create news
@@ -59,7 +60,7 @@ func (u *newsUC) Update(ctx context.Context, news *models.News) (*models.News, e
 		return nil, err
 	}
 
-	if err = utils.ValidateIsOwner(ctx, newsByID.AuthorID.String()); err != nil {
+	if err = utils.ValidateIsOwner(ctx, newsByID.AuthorID.String(), u.logger); err != nil {
 		return nil, httpErrors.NewRestError(http.StatusForbidden, "Forbidden", errors.WithMessage(err, "newsUC Update ValidateIsOwner"))
 	}
 
@@ -69,7 +70,7 @@ func (u *newsUC) Update(ctx context.Context, news *models.News) (*models.News, e
 	}
 
 	if err = u.redisRepo.DeleteNewsCtx(ctx, u.getKeyWithPrefix(news.NewsID.String())); err != nil {
-		logger.Errorf("newsUC Update redisRepo.DeleteNewsCtx: %v", err)
+		u.logger.Errorf("newsUC Update redisRepo.DeleteNewsCtx: %v", err)
 	}
 
 	return updatedUser, nil
@@ -79,7 +80,7 @@ func (u *newsUC) Update(ctx context.Context, news *models.News) (*models.News, e
 func (u *newsUC) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*models.NewsBase, error) {
 	newsBase, err := u.redisRepo.GetNewsByIDCtx(ctx, u.getKeyWithPrefix(newsID.String()))
 	if err != nil {
-		logger.Errorf("newsUC GetNewsByID redisRepo.GetNewsByIDCtx: %v", err)
+		u.logger.Errorf("newsUC GetNewsByID redisRepo.GetNewsByIDCtx: %v", err)
 	}
 	if newsBase != nil {
 		return newsBase, nil
@@ -91,7 +92,7 @@ func (u *newsUC) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*models.New
 	}
 
 	if err = u.redisRepo.SetNewsCtx(ctx, u.getKeyWithPrefix(newsID.String()), cacheDuration, n); err != nil {
-		logger.Errorf("newsUC GetNewsByID redisRepo.SetNewsCtx: %s", err)
+		u.logger.Errorf("newsUC GetNewsByID redisRepo.SetNewsCtx: %s", err)
 	}
 
 	return n, nil
@@ -104,7 +105,7 @@ func (u *newsUC) Delete(ctx context.Context, newsID uuid.UUID) error {
 		return err
 	}
 
-	if err = utils.ValidateIsOwner(ctx, newsByID.AuthorID.String()); err != nil {
+	if err = utils.ValidateIsOwner(ctx, newsByID.AuthorID.String(), u.logger); err != nil {
 		return httpErrors.NewRestError(http.StatusForbidden, "Forbidden", errors.WithMessage(err, "newsUC Delete ValidateIsOwner"))
 	}
 
@@ -113,7 +114,7 @@ func (u *newsUC) Delete(ctx context.Context, newsID uuid.UUID) error {
 	}
 
 	if err = u.redisRepo.DeleteNewsCtx(ctx, u.getKeyWithPrefix(newsID.String())); err != nil {
-		logger.Errorf("newsUC Delete redisRepo.DeleteNewsCtx: %v", err)
+		u.logger.Errorf("newsUC Delete redisRepo.DeleteNewsCtx: %v", err)
 	}
 
 	return nil

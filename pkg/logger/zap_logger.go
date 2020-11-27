@@ -7,7 +7,32 @@ import (
 	"os"
 )
 
-var sugarLogger *zap.SugaredLogger
+// Logger methods interface
+type Logger interface {
+	InitLogger()
+	Debug(args ...interface{})
+	Debugf(template string, args ...interface{})
+	Info(args ...interface{})
+	Infof(template string, args ...interface{})
+	Warn(args ...interface{})
+	Warnf(template string, args ...interface{})
+	Error(args ...interface{})
+	Errorf(template string, args ...interface{})
+	DPanic(args ...interface{})
+	DPanicf(template string, args ...interface{})
+	Fatal(args ...interface{})
+	Fatalf(template string, args ...interface{})
+}
+
+// Logger
+type apiLogger struct {
+	cfg         *config.Config
+	sugarLogger *zap.SugaredLogger
+}
+
+func NewApiLogger(cfg *config.Config) *apiLogger {
+	return &apiLogger{cfg: cfg}
+}
 
 // For mapping config logger to app logger levels
 var loggerLevelMap = map[string]zapcore.Level{
@@ -20,7 +45,7 @@ var loggerLevelMap = map[string]zapcore.Level{
 	"fatal":  zapcore.FatalLevel,
 }
 
-func getLoggerLevel(cfg *config.Config) zapcore.Level {
+func (l *apiLogger) getLoggerLevel(cfg *config.Config) zapcore.Level {
 	level, exist := loggerLevelMap[cfg.Logger.Level]
 	if !exist {
 		return zapcore.DebugLevel
@@ -30,18 +55,14 @@ func getLoggerLevel(cfg *config.Config) zapcore.Level {
 }
 
 // Init logger
-func InitLogger(cfg *config.Config) {
-	if sugarLogger != nil {
-		return
-	}
-
-	logLevel := getLoggerLevel(cfg)
+func (l *apiLogger) InitLogger() {
+	logLevel := l.getLoggerLevel(l.cfg)
 
 	var logWriter zapcore.WriteSyncer
-	logWriter = zapcore.AddSync(os.Stdout)
+	logWriter = zapcore.AddSync(os.Stderr)
 
 	var encoderCfg zapcore.EncoderConfig
-	if cfg.Server.Mode == "Development" {
+	if l.cfg.Server.Mode == "Development" {
 		encoderCfg = zap.NewDevelopmentEncoderConfig()
 	} else {
 		encoderCfg = zap.NewProductionEncoderConfig()
@@ -54,7 +75,7 @@ func InitLogger(cfg *config.Config) {
 	encoderCfg.NameKey = "NAME"
 	encoderCfg.MessageKey = "MESSAGE"
 
-	if cfg.Logger.Encoding == "console" {
+	if l.cfg.Logger.Encoding == "console" {
 		encoder = zapcore.NewConsoleEncoder(encoderCfg)
 	} else {
 		encoder = zapcore.NewJSONEncoder(encoderCfg)
@@ -64,63 +85,66 @@ func InitLogger(cfg *config.Config) {
 	core := zapcore.NewCore(encoder, logWriter, zap.NewAtomicLevelAt(logLevel))
 	logger := zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
 
-	sugarLogger = logger.Sugar()
+	l.sugarLogger = logger.Sugar()
+	if err := l.sugarLogger.Sync(); err != nil {
+		l.sugarLogger.Error(err)
+	}
 }
 
 // Logger methods
 
-func Debug(args ...interface{}) {
-	sugarLogger.Debug(args...)
+func (l *apiLogger) Debug(args ...interface{}) {
+	l.sugarLogger.Debug(args...)
 }
 
-func Debugf(template string, args ...interface{}) {
-	sugarLogger.Debugf(template, args...)
+func (l *apiLogger) Debugf(template string, args ...interface{}) {
+	l.sugarLogger.Debugf(template, args...)
 }
 
-func Info(args ...interface{}) {
-	sugarLogger.Info(args...)
+func (l *apiLogger) Info(args ...interface{}) {
+	l.sugarLogger.Info(args...)
 }
 
-func Infof(template string, args ...interface{}) {
-	sugarLogger.Infof(template, args...)
+func (l *apiLogger) Infof(template string, args ...interface{}) {
+	l.sugarLogger.Infof(template, args...)
 }
 
-func Warn(args ...interface{}) {
-	sugarLogger.Warn(args...)
+func (l *apiLogger) Warn(args ...interface{}) {
+	l.sugarLogger.Warn(args...)
 }
 
-func Warnf(template string, args ...interface{}) {
-	sugarLogger.Warnf(template, args...)
+func (l *apiLogger) Warnf(template string, args ...interface{}) {
+	l.sugarLogger.Warnf(template, args...)
 }
 
-func Error(args ...interface{}) {
-	sugarLogger.Error(args...)
+func (l *apiLogger) Error(args ...interface{}) {
+	l.sugarLogger.Error(args...)
 }
 
-func Errorf(template string, args ...interface{}) {
-	sugarLogger.Errorf(template, args...)
+func (l *apiLogger) Errorf(template string, args ...interface{}) {
+	l.sugarLogger.Errorf(template, args...)
 }
 
-func DPanic(args ...interface{}) {
-	sugarLogger.DPanic(args...)
+func (l *apiLogger) DPanic(args ...interface{}) {
+	l.sugarLogger.DPanic(args...)
 }
 
-func DPanicf(template string, args ...interface{}) {
-	sugarLogger.DPanicf(template, args...)
+func (l *apiLogger) DPanicf(template string, args ...interface{}) {
+	l.sugarLogger.DPanicf(template, args...)
 }
 
-func Panic(args ...interface{}) {
-	sugarLogger.Panic(args...)
+func (l *apiLogger) Panic(args ...interface{}) {
+	l.sugarLogger.Panic(args...)
 }
 
-func Panicf(template string, args ...interface{}) {
-	sugarLogger.Panicf(template, args...)
+func (l *apiLogger) Panicf(template string, args ...interface{}) {
+	l.sugarLogger.Panicf(template, args...)
 }
 
-func Fatal(args ...interface{}) {
-	sugarLogger.Fatal(args...)
+func (l *apiLogger) Fatal(args ...interface{}) {
+	l.sugarLogger.Fatal(args...)
 }
 
-func Fatalf(template string, args ...interface{}) {
-	sugarLogger.Fatalf(template, args...)
+func (l *apiLogger) Fatalf(template string, args ...interface{}) {
+	l.sugarLogger.Fatalf(template, args...)
 }

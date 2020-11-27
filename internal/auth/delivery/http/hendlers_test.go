@@ -6,6 +6,7 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/models"
 	mockSess "github.com/AleksK1NG/api-mc/internal/session/mock"
 	"github.com/AleksK1NG/api-mc/pkg/converter"
+	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
@@ -30,8 +31,13 @@ func TestAuthHandlers_Register(t *testing.T) {
 		Session: config.Session{
 			Expire: 10,
 		},
+		Logger: config.Logger{
+			Development: true,
+		},
 	}
-	authHandlers := NewAuthHandlers(cfg, mockAuthUC, mockSessUC)
+
+	apiLogger := logger.NewApiLogger(cfg)
+	authHandlers := NewAuthHandlers(cfg, mockAuthUC, mockSessUC, apiLogger)
 
 	gender := "male"
 	user := &models.User{
@@ -89,9 +95,13 @@ func TestAuthHandlers_Login(t *testing.T) {
 		Session: config.Session{
 			Expire: 10,
 		},
+		Logger: config.Logger{
+			Development: true,
+		},
 	}
 
-	authHandlers := NewAuthHandlers(cfg, mockAuthUC, mockSessUC)
+	apiLogger := logger.NewApiLogger(cfg)
+	authHandlers := NewAuthHandlers(cfg, mockAuthUC, mockSessUC, apiLogger)
 
 	type Login struct {
 		Email    string `json:"email" db:"email" validate:"omitempty,lte=60,email"`
@@ -154,9 +164,14 @@ func TestAuthHandlers_Logout(t *testing.T) {
 	cfg := &config.Config{
 		Session: config.Session{
 			Expire: 10,
-			Name:   "session-id",
+		},
+		Logger: config.Logger{
+			Development: true,
 		},
 	}
+
+	apiLogger := logger.NewApiLogger(cfg)
+	authHandlers := NewAuthHandlers(cfg, mockAuthUC, mockSessUC, apiLogger)
 	sessionKey := "session-id"
 	cookieValue := "cookieValue"
 
@@ -170,7 +185,6 @@ func TestAuthHandlers_Logout(t *testing.T) {
 	c := e.NewContext(req, rec)
 	ctx := utils.GetRequestCtx(c)
 
-	authHandlers := NewAuthHandlers(cfg, mockAuthUC, mockSessUC)
 	logout := authHandlers.Logout()
 
 	cookie, err := req.Cookie(sessionKey)

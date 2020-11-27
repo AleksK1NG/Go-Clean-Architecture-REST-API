@@ -18,7 +18,6 @@ import (
 	newsUseCase "github.com/AleksK1NG/api-mc/internal/news/usecase"
 	sessionRepository "github.com/AleksK1NG/api-mc/internal/session/repository"
 	"github.com/AleksK1NG/api-mc/internal/session/usecase"
-	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/AleksK1NG/api-mc/pkg/metric"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/labstack/echo/v4"
@@ -31,9 +30,9 @@ import (
 func (s *Server) MapHandlers(e *echo.Echo) error {
 	metrics, err := metric.CreateMetrics(s.cfg.Metrics.URL, s.cfg.Metrics.ServiceName)
 	if err != nil {
-		logger.Errorf("CreateMetrics Error: %s", err)
+		s.logger.Errorf("CreateMetrics Error: %s", err)
 	}
-	logger.Info(
+	s.logger.Info(
 		"Metrics available URL: %s, ServiceName: %s",
 		s.cfg.Metrics.URL,
 		s.cfg.Metrics.ServiceName,
@@ -49,17 +48,17 @@ func (s *Server) MapHandlers(e *echo.Echo) error {
 	newsRedisRepo := newsRepository.NewNewsRedisRepo(s.redisClient)
 
 	// Init useCases
-	authUC := authUseCase.NewAuthUseCase(s.cfg, aRepo, authRedisRepo, aAWSRepo)
-	newsUC := newsUseCase.NewNewsUseCase(s.cfg, nRepo, newsRedisRepo)
-	commUC := commentsUseCase.NewCommentsUseCase(s.cfg, cRepo)
+	authUC := authUseCase.NewAuthUseCase(s.cfg, aRepo, authRedisRepo, aAWSRepo, s.logger)
+	newsUC := newsUseCase.NewNewsUseCase(s.cfg, nRepo, newsRedisRepo, s.logger)
+	commUC := commentsUseCase.NewCommentsUseCase(s.cfg, cRepo, s.logger)
 	sessUC := usecase.NewSessionUseCase(sRepo, s.cfg)
 
 	// Init handlers
-	authHandlers := authHttp.NewAuthHandlers(s.cfg, authUC, sessUC)
-	newsHandlers := newsHttp.NewNewsHandlers(s.cfg, newsUC)
-	commHandlers := commentsHttp.NewCommentsHandlers(s.cfg, commUC)
+	authHandlers := authHttp.NewAuthHandlers(s.cfg, authUC, sessUC, s.logger)
+	newsHandlers := newsHttp.NewNewsHandlers(s.cfg, newsUC, s.logger)
+	commHandlers := commentsHttp.NewCommentsHandlers(s.cfg, commUC, s.logger)
 
-	mw := apiMiddlewares.NewMiddlewareManager(sessUC, authUC, s.cfg, []string{"*"})
+	mw := apiMiddlewares.NewMiddlewareManager(sessUC, authUC, s.cfg, []string{"*"}, s.logger)
 
 	e.Use(mw.RequestLoggerMiddleware)
 
@@ -106,7 +105,7 @@ func (s *Server) MapHandlers(e *echo.Echo) error {
 	commentsHttp.MapCommentsRoutes(commGroup, commHandlers, mw)
 
 	health.GET("", func(c echo.Context) error {
-		logger.Infof("Health check RequestID: %s", utils.GetRequestID(c))
+		s.logger.Infof("Health check RequestID: %s", utils.GetRequestID(c))
 		return c.JSON(http.StatusOK, map[string]string{"status": "OK"})
 	})
 

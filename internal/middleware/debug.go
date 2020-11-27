@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"fmt"
-	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"net/http/httputil"
@@ -16,7 +15,7 @@ func (mw *MiddlewareManager) DebugMiddleware(next echo.HandlerFunc) echo.Handler
 			if err != nil {
 				return c.NoContent(http.StatusInternalServerError)
 			}
-			logger.Info(fmt.Sprintf("\nRequest dump begin :--------------\n\n%s\n\nRequest dump end :--------------", dump))
+			mw.logger.Info(fmt.Sprintf("\nRequest dump begin :--------------\n\n%s\n\nRequest dump end :--------------", dump))
 		}
 		return next(c)
 	}

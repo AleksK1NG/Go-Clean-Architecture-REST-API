@@ -7,7 +7,7 @@ import (
 )
 
 // Validate is user from owner of content
-func ValidateIsOwner(ctx context.Context, creatorID string) error {
+func ValidateIsOwner(ctx context.Context, creatorID string, logger logger.Logger) error {
 	user, err := GetUserFromCtx(ctx)
 	if err != nil {
 		return err

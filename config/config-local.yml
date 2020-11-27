@@ -4,8 +4,8 @@ server:
   Mode: Development
   JwtSecretKey: secretkey
   CookieName: jwt-token
-  ReadTimeout: 10
-  WriteTimeout: 10
+  ReadTimeout: 5
+  WriteTimeout: 5
   SSL: true
   CtxDefaultTimeout: 12
   CSRF: true

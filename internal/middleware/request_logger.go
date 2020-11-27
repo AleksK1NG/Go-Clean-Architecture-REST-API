@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/labstack/echo/v4"
 	"time"
@@ -20,7 +19,7 @@ func (mw *MiddlewareManager) RequestLoggerMiddleware(next echo.HandlerFunc) echo
 		s := time.Since(start).String()
 		requestID := utils.GetRequestID(ctx)
 
-		logger.Infof("RequestID: %s, Method: %s, URI: %s, Status: %v, Size: %v, Time: %s",
+		mw.logger.Infof("RequestID: %s, Method: %s, URI: %s, Status: %v, Size: %v, Time: %s",
 			requestID, req.Method, req.URL, status, size, s,
 		)
 		return err
