@@ -20,7 +20,7 @@ migrate_down:
 # Docker compose commands
 
 docker:
-	 docker-compose -f docker-compose.dockerdev up --build
+	 docker-compose -f docker-compose.dev.yml up --build
 
 docker_delve:
 	 docker-compose -f docker-compose.delve.yml up --build
