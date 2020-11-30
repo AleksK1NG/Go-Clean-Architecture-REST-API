@@ -24,11 +24,11 @@ func NewNewsRedisRepo(redisClient *redis.Client) news.RedisRepository {
 func (n *newsRedisRepo) GetNewsByIDCtx(ctx context.Context, key string) (*models.NewsBase, error) {
 	newsBytes, err := n.redisClient.Get(ctx, key).Bytes()
 	if err != nil {
-		return nil, errors.Wrap(err, "newsRedisRepo GetNewsByIDCtx redisClient.Get")
+		return nil, errors.Wrap(err, "newsRedisRepo.GetNewsByIDCtx.redisClient.Get")
 	}
 	newsBase := &models.NewsBase{}
 	if err = json.Unmarshal(newsBytes, newsBase); err != nil {
-		return nil, errors.Wrap(err, "newsRedisRepo GetNewsByIDCtx json.Unmarshal")
+		return nil, errors.Wrap(err, "newsRedisRepo.GetNewsByIDCtx.json.Unmarshal")
 	}
 
 	return newsBase, nil
@@ -38,10 +38,10 @@ func (n *newsRedisRepo) GetNewsByIDCtx(ctx context.Context, key string) (*models
 func (n *newsRedisRepo) SetNewsCtx(ctx context.Context, key string, seconds int, news *models.NewsBase) error {
 	newsBytes, err := json.Marshal(news)
 	if err != nil {
-		return errors.Wrap(err, "newsRedisRepo SetNewsCtx json.Marshal")
+		return errors.Wrap(err, "newsRedisRepo.SetNewsCtx.json.Marshal")
 	}
 	if err = n.redisClient.Set(ctx, key, newsBytes, time.Second*time.Duration(seconds)).Err(); err != nil {
-		return errors.Wrap(err, "newsRedisRepo SetNewsCtx redisClient.Set")
+		return errors.Wrap(err, "newsRedisRepo.SetNewsCtx.redisClient.Set")
 	}
 	return nil
 }
@@ -49,7 +49,7 @@ func (n *newsRedisRepo) SetNewsCtx(ctx context.Context, key string, seconds int,
 // Delete new item from cache
 func (n *newsRedisRepo) DeleteNewsCtx(ctx context.Context, key string) error {
 	if err := n.redisClient.Del(ctx, key).Err(); err != nil {
-		return errors.Wrap(err, "newsRedisRepo DeleteNewsCtx redisClient.Del")
+		return errors.Wrap(err, "newsRedisRepo.DeleteNewsCtx.redisClient.Del")
 	}
 	return nil
 }

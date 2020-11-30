@@ -232,7 +232,7 @@ func (mw *MiddlewareManager) CheckAuth(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		cookie, err := ctx.Cookie("session_id")
 		if err != nil {
-			mw.logger.Errorf("CheckAuth ctx.Cookie: %s, Cookie: %#v, Error: %s",
+			mw.logger.Errorf("CheckAuth.ctx.Cookie: %s, Cookie: %#v, Error: %s",
 				utils.GetRequestID(ctx),
 				cookie,
 				err,
@@ -247,7 +247,7 @@ func (mw *MiddlewareManager) CheckAuth(next echo.HandlerFunc) echo.HandlerFunc {
 			newCookie := http.Cookie{Name: "session_id", Value: sid, Expires: time.Now().AddDate(-1, 0, 0)}
 			ctx.SetCookie(&newCookie)
 
-			mw.logger.Errorf("CheckAuth sessUC.GetSessionByID: %s, Cookie: %#v, Error: %s",
+			mw.logger.Errorf("CheckAuth.sessUC.GetSessionByID: %s, Cookie: %#v, Error: %s",
 				utils.GetRequestID(ctx),
 				cookie,
 				err,

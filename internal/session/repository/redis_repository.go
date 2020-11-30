@@ -36,10 +36,10 @@ func (s *sessionRepo) CreateSession(ctx context.Context, sess *models.Session, e
 
 	sessBytes, err := json.Marshal(&sess)
 	if err != nil {
-		return "", errors.WithMessage(err, "sessionRepo CreateSession json.Marshal")
+		return "", errors.WithMessage(err, "sessionRepo.CreateSession.json.Marshal")
 	}
 	if err = s.redisClient.Set(ctx, sessionKey, sessBytes, time.Second*time.Duration(expire)).Err(); err != nil {
-		return "", errors.Wrap(err, "sessionRepo CreateSession redisClient.Set")
+		return "", errors.Wrap(err, "sessionRepo.CreateSession.redisClient.Set")
 	}
 	return sessionKey, nil
 }
@@ -48,12 +48,12 @@ func (s *sessionRepo) CreateSession(ctx context.Context, sess *models.Session, e
 func (s *sessionRepo) GetSessionByID(ctx context.Context, sessionID string) (*models.Session, error) {
 	sessBytes, err := s.redisClient.Get(ctx, sessionID).Bytes()
 	if err != nil {
-		return nil, errors.Wrap(err, "sessionRepo GetSessionByID redisClient.Get")
+		return nil, errors.Wrap(err, "sessionRep.GetSessionByID.redisClient.Get")
 	}
 
 	sess := &models.Session{}
 	if err = json.Unmarshal(sessBytes, &sess); err != nil {
-		return nil, errors.Wrap(err, "sessionRepo GetSessionByID json.Unmarshal")
+		return nil, errors.Wrap(err, "sessionRepo.GetSessionByID.json.Unmarshal")
 	}
 	return sess, nil
 }
@@ -61,7 +61,7 @@ func (s *sessionRepo) GetSessionByID(ctx context.Context, sessionID string) (*mo
 // Delete session by id
 func (s *sessionRepo) DeleteByID(ctx context.Context, sessionID string) error {
 	if err := s.redisClient.Del(ctx, sessionID).Err(); err != nil {
-		return errors.Wrap(err, "sessionRepo DeleteByID")
+		return errors.Wrap(err, "sessionRepo.DeleteByID")
 	}
 	return nil
 }

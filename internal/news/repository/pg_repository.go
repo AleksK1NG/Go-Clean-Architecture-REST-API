@@ -32,7 +32,7 @@ func (r newsRepo) Create(ctx context.Context, news *models.News) (*models.News, 
 		&news.Content,
 		&news.Category,
 	).StructScan(&n); err != nil {
-		return nil, errors.Wrap(err, "newsRepo Create QueryRowxContext")
+		return nil, errors.Wrap(err, "newsRepo.Create.QueryRowxContext")
 	}
 
 	return &n, nil
@@ -50,7 +50,7 @@ func (r newsRepo) Update(ctx context.Context, news *models.News) (*models.News, 
 		&news.Category,
 		&news.NewsID,
 	).StructScan(&n); err != nil {
-		return nil, errors.Wrap(err, "newsRepo Update QueryRowxContext")
+		return nil, errors.Wrap(err, "newsRepo.Update.QueryRowxContext")
 	}
 
 	return &n, nil
@@ -60,7 +60,7 @@ func (r newsRepo) Update(ctx context.Context, news *models.News) (*models.News, 
 func (r newsRepo) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*models.NewsBase, error) {
 	n := &models.NewsBase{}
 	if err := r.db.GetContext(ctx, n, getNewsByID, newsID); err != nil {
-		return nil, errors.Wrap(err, "newsRepo GetNewsByID GetContext")
+		return nil, errors.Wrap(err, "newsRepo.GetNewsByID.GetContext")
 	}
 
 	return n, nil
@@ -70,15 +70,15 @@ func (r newsRepo) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*models.Ne
 func (r newsRepo) Delete(ctx context.Context, newsID uuid.UUID) error {
 	result, err := r.db.ExecContext(ctx, deleteNews, newsID)
 	if err != nil {
-		return errors.Wrap(err, "newsRepo Delete ExecContext")
+		return errors.Wrap(err, "newsRepo.Delete.ExecContext")
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return errors.Wrap(err, "newsRepo Delete RowsAffected")
+		return errors.Wrap(err, "newsRepo.Delete.RowsAffected")
 	}
 	if rowsAffected == 0 {
-		return errors.Wrap(sql.ErrNoRows, "newsRepo Deleteno no rowsAffected")
+		return errors.Wrap(sql.ErrNoRows, "newsRepo.Delete.rowsAffected")
 	}
 
 	return nil
@@ -88,7 +88,7 @@ func (r newsRepo) Delete(ctx context.Context, newsID uuid.UUID) error {
 func (r newsRepo) GetNews(ctx context.Context, pq *utils.PaginationQuery) (*models.NewsList, error) {
 	var totalCount int
 	if err := r.db.GetContext(ctx, &totalCount, getTotalCount); err != nil {
-		return nil, errors.Wrap(err, "newsRepo GetNews GetContext")
+		return nil, errors.Wrap(err, "newsRepo.GetNews.GetContext.totalCount")
 	}
 
 	if totalCount == 0 {
@@ -105,20 +105,20 @@ func (r newsRepo) GetNews(ctx context.Context, pq *utils.PaginationQuery) (*mode
 	var newsList = make([]*models.News, 0, pq.GetSize())
 	rows, err := r.db.QueryxContext(ctx, getNews, pq.GetOffset(), pq.GetLimit())
 	if err != nil {
-		return nil, errors.Wrap(err, "newsRepo GetNews QueryxContext")
+		return nil, errors.Wrap(err, "newsRepo.GetNews.QueryxContext")
 	}
 	defer rows.Close()
 
 	for rows.Next() {
 		n := &models.News{}
 		if err = rows.StructScan(n); err != nil {
-			return nil, errors.Wrap(err, "newsRepo GetNews StructScan")
+			return nil, errors.Wrap(err, "newsRepo.GetNews.StructScan")
 		}
 		newsList = append(newsList, n)
 	}
 
 	if err = rows.Err(); err != nil {
-		return nil, errors.Wrap(err, "newsRepo GetNews rows.Err")
+		return nil, errors.Wrap(err, "newsRepo.GetNews.rows.Err")
 	}
 
 	return &models.NewsList{
@@ -135,7 +135,7 @@ func (r newsRepo) GetNews(ctx context.Context, pq *utils.PaginationQuery) (*mode
 func (r newsRepo) SearchByTitle(ctx context.Context, title string, query *utils.PaginationQuery) (*models.NewsList, error) {
 	var totalCount int
 	if err := r.db.GetContext(ctx, &totalCount, findByTitleCount, title); err != nil {
-		return nil, errors.Wrap(err, "newsRepo SearchByTitle GetContext")
+		return nil, errors.Wrap(err, "newsRepo.SearchByTitle.GetContext")
 	}
 	if totalCount == 0 {
 		return &models.NewsList{
@@ -151,20 +151,20 @@ func (r newsRepo) SearchByTitle(ctx context.Context, title string, query *utils.
 	var newsList = make([]*models.News, 0, query.GetSize())
 	rows, err := r.db.QueryxContext(ctx, findByTitle, title, query.GetOffset(), query.GetLimit())
 	if err != nil {
-		return nil, errors.Wrap(err, "newsRepo SearchByTitle QueryxContext")
+		return nil, errors.Wrap(err, "newsRepo.SearchByTitle.QueryxContext")
 	}
 	defer rows.Close()
 
 	for rows.Next() {
 		n := &models.News{}
 		if err = rows.StructScan(n); err != nil {
-			return nil, errors.Wrap(err, "newsRepo SearchByTitle StructScan")
+			return nil, errors.Wrap(err, "newsRepo.SearchByTitle.StructScan")
 		}
 		newsList = append(newsList, n)
 	}
 
 	if err = rows.Err(); err != nil {
-		return nil, errors.Wrap(err, "newsRepo SearchByTitle rows.Err")
+		return nil, errors.Wrap(err, "newsRepo.SearchByTitle.rows.Err")
 	}
 
 	return &models.NewsList{
