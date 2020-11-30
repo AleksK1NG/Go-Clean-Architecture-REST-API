@@ -65,6 +65,11 @@ aws:
   UseSSL: false
   MinioEndpoint: http://127.0.0.1:9000
 
+jaeger:
+  Host: localhost:6831
+  ServiceName: REST_API
+  LogSpans: true
+
 #aws:
 #  Endpoint: play.min.io
 #  MinioAccessKey: Q3AM3UQ867SPQQA43P2F

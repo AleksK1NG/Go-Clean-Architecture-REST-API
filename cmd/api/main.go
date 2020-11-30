@@ -64,14 +64,15 @@ func main() {
 	appLogger.Info("AWS S3 connected")
 
 	jaegerCfgInstance := jaegercfg.Configuration{
-		ServiceName: "REST_API",
+		//ServiceName: "REST_API",
+		ServiceName: cfg.Jaeger.ServiceName,
 		Sampler: &jaegercfg.SamplerConfig{
 			Type:  jaeger.SamplerTypeConst,
 			Param: 1,
 		},
 		Reporter: &jaegercfg.ReporterConfig{
-			LogSpans:           true,
-			LocalAgentHostPort: "localhost:6831",
+			LogSpans:           cfg.Jaeger.LogSpans,
+			LocalAgentHostPort: cfg.Jaeger.Host,
 		},
 	}
 
