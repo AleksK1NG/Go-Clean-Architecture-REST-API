@@ -8,6 +8,7 @@ import (
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 )
 
@@ -22,7 +23,10 @@ func NewNewsRepository(db *sqlx.DB) news.Repository {
 }
 
 // Create news
-func (r newsRepo) Create(ctx context.Context, news *models.News) (*models.News, error) {
+func (r *newsRepo) Create(ctx context.Context, news *models.News) (*models.News, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "newsRepo.Create")
+	defer span.Finish()
+
 	var n models.News
 	if err := r.db.QueryRowxContext(
 		ctx,
@@ -39,7 +43,10 @@ func (r newsRepo) Create(ctx context.Context, news *models.News) (*models.News, 
 }
 
 // Update news item
-func (r newsRepo) Update(ctx context.Context, news *models.News) (*models.News, error) {
+func (r *newsRepo) Update(ctx context.Context, news *models.News) (*models.News, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "newsRepo.Update")
+	defer span.Finish()
+
 	var n models.News
 	if err := r.db.QueryRowxContext(
 		ctx,
@@ -57,7 +64,10 @@ func (r newsRepo) Update(ctx context.Context, news *models.News) (*models.News, 
 }
 
 // Get single news by id
-func (r newsRepo) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*models.NewsBase, error) {
+func (r *newsRepo) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*models.NewsBase, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "newsRepo.GetNewsByID")
+	defer span.Finish()
+
 	n := &models.NewsBase{}
 	if err := r.db.GetContext(ctx, n, getNewsByID, newsID); err != nil {
 		return nil, errors.Wrap(err, "newsRepo.GetNewsByID.GetContext")
@@ -67,7 +77,10 @@ func (r newsRepo) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*models.Ne
 }
 
 // Delete news by id
-func (r newsRepo) Delete(ctx context.Context, newsID uuid.UUID) error {
+func (r *newsRepo) Delete(ctx context.Context, newsID uuid.UUID) error {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "newsRepo.Delete")
+	defer span.Finish()
+
 	result, err := r.db.ExecContext(ctx, deleteNews, newsID)
 	if err != nil {
 		return errors.Wrap(err, "newsRepo.Delete.ExecContext")
@@ -85,7 +98,10 @@ func (r newsRepo) Delete(ctx context.Context, newsID uuid.UUID) error {
 }
 
 // Get news
-func (r newsRepo) GetNews(ctx context.Context, pq *utils.PaginationQuery) (*models.NewsList, error) {
+func (r *newsRepo) GetNews(ctx context.Context, pq *utils.PaginationQuery) (*models.NewsList, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "newsRepo.GetNews")
+	defer span.Finish()
+
 	var totalCount int
 	if err := r.db.GetContext(ctx, &totalCount, getTotalCount); err != nil {
 		return nil, errors.Wrap(err, "newsRepo.GetNews.GetContext.totalCount")
@@ -132,7 +148,10 @@ func (r newsRepo) GetNews(ctx context.Context, pq *utils.PaginationQuery) (*mode
 }
 
 // Find news by title
-func (r newsRepo) SearchByTitle(ctx context.Context, title string, query *utils.PaginationQuery) (*models.NewsList, error) {
+func (r *newsRepo) SearchByTitle(ctx context.Context, title string, query *utils.PaginationQuery) (*models.NewsList, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "newsRepo.SearchByTitle")
+	defer span.Finish()
+
 	var totalCount int
 	if err := r.db.GetContext(ctx, &totalCount, findByTitleCount, title); err != nil {
 		return nil, errors.Wrap(err, "newsRepo.SearchByTitle.GetContext")

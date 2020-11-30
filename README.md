@@ -18,6 +18,8 @@
 * [gomock](https://github.com/golang/mock) - Mocking framework
 * [CompileDaemon](https://github.com/githubnemo/CompileDaemon) - Compile daemon for Go
 * [Docker](https://www.docker.com/) - Docker
+* [opentracing](https://github.com/opentracing/opentracing-go) - OpenTracing API for Go
+* [jaeger](https://github.com/jaegertracing/jaeger-client-go) - Jaeger Bindings for Go OpenTracing API.
 
 
 #### 🙌👨‍💻🚀 Docker-compose files:

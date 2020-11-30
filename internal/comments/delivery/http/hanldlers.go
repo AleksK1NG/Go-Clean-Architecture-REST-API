@@ -8,6 +8,7 @@ import (
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/opentracing/opentracing-go"
 	"net/http"
 )
 
@@ -32,7 +33,8 @@ func NewCommentsHandlers(cfg *config.Config, comUC comments.UseCase, logger logg
 // @Router /comments [post]
 func (h *commentsHandlers) Create() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx := utils.GetRequestCtx(c)
+		span, ctx := opentracing.StartSpanFromContext(utils.GetRequestCtx(c), "commentsHandlers.Create")
+		defer span.Finish()
 
 		user, err := utils.GetUserFromCtx(ctx)
 		if err != nil {
@@ -70,7 +72,8 @@ func (h *commentsHandlers) Update() echo.HandlerFunc {
 		Likes   int64  `json:"likes" db:"likes" validate:"omitempty"`
 	}
 	return func(c echo.Context) error {
-		ctx := utils.GetRequestCtx(c)
+		span, ctx := opentracing.StartSpanFromContext(utils.GetRequestCtx(c), "commentsHandlers.Update")
+		defer span.Finish()
 
 		commID, err := uuid.Parse(c.Param("comment_id"))
 		if err != nil {
@@ -105,7 +108,8 @@ func (h *commentsHandlers) Update() echo.HandlerFunc {
 // @Router /comments/{id} [delete]
 func (h *commentsHandlers) Delete() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx := utils.GetRequestCtx(c)
+		span, ctx := opentracing.StartSpanFromContext(utils.GetRequestCtx(c), "commentsHandlers.Delete")
+		defer span.Finish()
 
 		commID, err := uuid.Parse(c.Param("comment_id"))
 		if err != nil {
@@ -130,7 +134,8 @@ func (h *commentsHandlers) Delete() echo.HandlerFunc {
 // @Router /comments/{id} [get]
 func (h *commentsHandlers) GetByID() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx := utils.GetRequestCtx(c)
+		span, ctx := opentracing.StartSpanFromContext(utils.GetRequestCtx(c), "commentsHandlers.GetByID")
+		defer span.Finish()
 
 		commID, err := uuid.Parse(c.Param("comment_id"))
 		if err != nil {
@@ -159,7 +164,8 @@ func (h *commentsHandlers) GetByID() echo.HandlerFunc {
 // @Router /comments/byNewsId/{id} [get]
 func (h *commentsHandlers) GetAllByNewsID() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx := utils.GetRequestCtx(c)
+		span, ctx := opentracing.StartSpanFromContext(utils.GetRequestCtx(c), "commentsHandlers.GetAllByNewsID")
+		defer span.Finish()
 
 		newsID, err := uuid.Parse(c.Param("news_id"))
 		if err != nil {
