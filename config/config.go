@@ -19,6 +19,7 @@ type Config struct {
 	Metrics  Metrics
 	Logger   Logger
 	AWS      AWS
+	Jaeger   Jaeger
 }
 
 // Server config struct
@@ -108,6 +109,13 @@ type AWS struct {
 	MinioSecretKey string
 	UseSSL         bool
 	MinioEndpoint  string
+}
+
+// AWS S3
+type Jaeger struct {
+	Host        string
+	ServiceName string
+	LogSpans    bool
 }
 
 // Load config file from given path
