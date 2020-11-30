@@ -12,6 +12,7 @@ import (
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	"io"
 	"net/http"
@@ -39,7 +40,8 @@ func NewAuthHandlers(cfg *config.Config, authUC auth.UseCase, sessUC session.UCS
 // @Router /auth/register [post]
 func (h *authHandlers) Register() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx := utils.GetRequestCtx(c)
+		span, ctx := opentracing.StartSpanFromContext(utils.GetRequestCtx(c), "auth.Register")
+		defer span.Finish()
 
 		user := &models.User{}
 		if err := utils.ReadRequest(c, user); err != nil {
@@ -72,13 +74,13 @@ func (h *authHandlers) Register() echo.HandlerFunc {
 // @Success 200 {object} models.User
 // @Router /auth/login [post]
 func (h *authHandlers) Login() echo.HandlerFunc {
-	// Login user, validate email and password input
 	type Login struct {
 		Email    string `json:"email" db:"email" validate:"omitempty,lte=60,email"`
 		Password string `json:"password,omitempty" db:"password" validate:"required,gte=6"`
 	}
 	return func(c echo.Context) error {
-		ctx := utils.GetRequestCtx(c)
+		span, ctx := opentracing.StartSpanFromContext(utils.GetRequestCtx(c), "auth.Login")
+		defer span.Finish()
 
 		login := &Login{}
 		if err := utils.ReadRequest(c, login); err != nil {
@@ -115,7 +117,8 @@ func (h *authHandlers) Login() echo.HandlerFunc {
 // @Router /auth/logout [post]
 func (h *authHandlers) Logout() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx := utils.GetRequestCtx(c)
+		span, ctx := opentracing.StartSpanFromContext(utils.GetRequestCtx(c), "authHandlers.Logout")
+		defer span.Finish()
 
 		cookie, err := c.Cookie("session-id")
 		if err != nil {
@@ -145,7 +148,8 @@ func (h *authHandlers) Logout() echo.HandlerFunc {
 // @Router /auth/{id} [put]
 func (h *authHandlers) Update() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx := utils.GetRequestCtx(c)
+		span, ctx := opentracing.StartSpanFromContext(utils.GetRequestCtx(c), "authHandlers.Update")
+		defer span.Finish()
 
 		uID, err := uuid.Parse(c.Param("user_id"))
 		if err != nil {
@@ -179,7 +183,8 @@ func (h *authHandlers) Update() echo.HandlerFunc {
 // @Router /auth/{id} [get]
 func (h *authHandlers) GetUserByID() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx := utils.GetRequestCtx(c)
+		span, ctx := opentracing.StartSpanFromContext(utils.GetRequestCtx(c), "authHandlers.GetUserByID")
+		defer span.Finish()
 
 		uID, err := uuid.Parse(c.Param("user_id"))
 		if err != nil {
@@ -205,7 +210,8 @@ func (h *authHandlers) GetUserByID() echo.HandlerFunc {
 // @Router /auth/{id} [delete]
 func (h *authHandlers) Delete() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx := utils.GetRequestCtx(c)
+		span, ctx := opentracing.StartSpanFromContext(utils.GetRequestCtx(c), "authHandlers.Delete")
+		defer span.Finish()
 
 		uID, err := uuid.Parse(c.Param("user_id"))
 		if err != nil {
@@ -231,7 +237,8 @@ func (h *authHandlers) Delete() echo.HandlerFunc {
 // @Router /auth/find [get]
 func (h *authHandlers) FindByName() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx := utils.GetRequestCtx(c)
+		span, ctx := opentracing.StartSpanFromContext(utils.GetRequestCtx(c), "authHandlers.FindByName")
+		defer span.Finish()
 
 		if c.QueryParam("name") == "" {
 			return c.JSON(http.StatusBadRequest, httpErrors.NewBadRequestError("name is required"))
@@ -264,7 +271,8 @@ func (h *authHandlers) FindByName() echo.HandlerFunc {
 // @Router /auth/find [get]
 func (h *authHandlers) GetUsers() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx := utils.GetRequestCtx(c)
+		span, ctx := opentracing.StartSpanFromContext(utils.GetRequestCtx(c), "authHandlers.GetUsers")
+		defer span.Finish()
 
 		paginationQuery, err := utils.GetPaginationFromCtx(c)
 		if err != nil {
@@ -290,6 +298,9 @@ func (h *authHandlers) GetUsers() echo.HandlerFunc {
 // @Router /auth/me [get]
 func (h *authHandlers) GetMe() echo.HandlerFunc {
 	return func(c echo.Context) error {
+		span, _ := opentracing.StartSpanFromContext(utils.GetRequestCtx(c), "authHandlers.GetMe")
+		defer span.Finish()
+
 		user, ok := c.Get("user").(*models.User)
 		if !ok {
 			return utils.ErrResponseWithLog(c, h.logger, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
@@ -309,6 +320,9 @@ func (h *authHandlers) GetMe() echo.HandlerFunc {
 // @Router /auth/token [get]
 func (h *authHandlers) GetCSRFToken() echo.HandlerFunc {
 	return func(c echo.Context) error {
+		span, _ := opentracing.StartSpanFromContext(utils.GetRequestCtx(c), "authHandlers.GetCSRFToken")
+		defer span.Finish()
+
 		sid, ok := c.Get("sid").(string)
 		if !ok {
 			return utils.ErrResponseWithLog(c, h.logger, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
@@ -334,7 +348,9 @@ func (h *authHandlers) GetCSRFToken() echo.HandlerFunc {
 // @Router /auth/{id}/avatar [post]
 func (h *authHandlers) UploadAvatar() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx := utils.GetRequestCtx(c)
+		span, ctx := opentracing.StartSpanFromContext(utils.GetRequestCtx(c), "authHandlers.UploadAvatar")
+		defer span.Finish()
+
 		bucket := c.QueryParam("bucket")
 		uID, err := uuid.Parse(c.Param("user_id"))
 		if err != nil {

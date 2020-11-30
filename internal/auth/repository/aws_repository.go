@@ -7,6 +7,7 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/google/uuid"
 	"github.com/minio/minio-go/v7"
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 )
 
@@ -22,6 +23,9 @@ func NewAuthAWSRepository(awsClient *minio.Client) auth.AWSRepository {
 
 // Upload file to AWS
 func (aws *authAWSRepository) PutObject(ctx context.Context, input models.UploadInput) (*minio.UploadInfo, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "authAWSRepository.PutObject")
+	defer span.Finish()
+
 	options := minio.PutObjectOptions{
 		ContentType:  input.ContentType,
 		UserMetadata: map[string]string{"x-amz-acl": "public-read"},
@@ -37,6 +41,9 @@ func (aws *authAWSRepository) PutObject(ctx context.Context, input models.Upload
 
 // Download file from AWS
 func (aws *authAWSRepository) GetObject(ctx context.Context, bucket string, fileName string) (*minio.Object, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "authAWSRepository.GetObject")
+	defer span.Finish()
+
 	object, err := aws.client.GetObject(ctx, bucket, fileName, minio.GetObjectOptions{})
 	if err != nil {
 		return nil, errors.Wrap(err, "authAWSRepository.FileDownload.GetObject")
@@ -46,6 +53,9 @@ func (aws *authAWSRepository) GetObject(ctx context.Context, bucket string, file
 
 // Delete file from AWS
 func (aws *authAWSRepository) RemoveObject(ctx context.Context, bucket string, fileName string) error {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "authAWSRepository.RemoveObject")
+	defer span.Finish()
+
 	if err := aws.client.RemoveObject(ctx, bucket, fileName, minio.RemoveObjectOptions{}); err != nil {
 		return errors.Wrap(err, "authAWSRepository.RemoveObject")
 	}

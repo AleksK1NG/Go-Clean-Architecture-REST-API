@@ -10,6 +10,7 @@ import (
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	"net/http"
 )
@@ -35,6 +36,9 @@ func NewAuthUseCase(cfg *config.Config, authRepo auth.Repository, redisRepo auth
 
 // Create new user
 func (u *authUC) Register(ctx context.Context, user *models.User) (*models.UserWithToken, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "authUC.Register")
+	defer span.Finish()
+
 	existsUser, err := u.authRepo.FindByEmail(ctx, user)
 	if existsUser != nil || err == nil {
 		return nil, httpErrors.NewRestErrorWithMessage(http.StatusBadRequest, httpErrors.ErrEmailAlreadyExists, nil)
@@ -63,6 +67,9 @@ func (u *authUC) Register(ctx context.Context, user *models.User) (*models.UserW
 
 // Update existing user
 func (u *authUC) Update(ctx context.Context, user *models.User) (*models.User, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "authUC.Update")
+	defer span.Finish()
+
 	if err := user.PrepareUpdate(); err != nil {
 		return nil, httpErrors.NewBadRequestError(errors.Wrap(err, "authUC.Register.PrepareUpdate"))
 	}
@@ -85,6 +92,9 @@ func (u *authUC) Update(ctx context.Context, user *models.User) (*models.User, e
 
 // Delete new user
 func (u *authUC) Delete(ctx context.Context, userID uuid.UUID) error {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "authUC.Delete")
+	defer span.Finish()
+
 	if err := u.authRepo.Delete(ctx, userID); err != nil {
 		return err
 	}
@@ -98,6 +108,9 @@ func (u *authUC) Delete(ctx context.Context, userID uuid.UUID) error {
 
 // Get user by id
 func (u *authUC) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "authUC.GetByID")
+	defer span.Finish()
+
 	cachedUser, err := u.redisRepo.GetByIDCtx(ctx, u.GenerateUserKey(userID.String()))
 	if err != nil {
 		u.logger.Errorf("authUC.GetByID.GetByIDCtx: %v", err)
@@ -122,16 +135,25 @@ func (u *authUC) GetByID(ctx context.Context, userID uuid.UUID) (*models.User, e
 
 // Find users by name
 func (u *authUC) FindByName(ctx context.Context, name string, query *utils.PaginationQuery) (*models.UsersList, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "authUC.FindByName")
+	defer span.Finish()
+
 	return u.authRepo.FindByName(ctx, name, query)
 }
 
 // Get users with pagination
 func (u *authUC) GetUsers(ctx context.Context, pq *utils.PaginationQuery) (*models.UsersList, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "authUC.GetUsers")
+	defer span.Finish()
+
 	return u.authRepo.GetUsers(ctx, pq)
 }
 
 // Login user, returns user model with jwt token
 func (u *authUC) Login(ctx context.Context, user *models.User) (*models.UserWithToken, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "authUC.Login")
+	defer span.Finish()
+
 	foundUser, err := u.authRepo.FindByEmail(ctx, user)
 	if err != nil {
 		return nil, err
@@ -156,6 +178,9 @@ func (u *authUC) Login(ctx context.Context, user *models.User) (*models.UserWith
 
 // Upload user avatar
 func (u *authUC) UploadAvatar(ctx context.Context, userID uuid.UUID, file models.UploadInput) (*models.User, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "authUC.UploadAvatar")
+	defer span.Finish()
+
 	uploadInfo, err := u.awsRepo.PutObject(ctx, file)
 	if err != nil {
 		return nil, httpErrors.NewInternalServerError(errors.Wrap(err, "authUC.UploadAvatar.PutObject"))

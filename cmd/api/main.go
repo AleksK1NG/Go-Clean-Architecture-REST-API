@@ -8,8 +8,14 @@ import (
 	"github.com/AleksK1NG/api-mc/pkg/db/redis"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
+	"github.com/opentracing/opentracing-go"
+	jaegerlog "github.com/uber/jaeger-client-go/log"
+	"github.com/uber/jaeger-lib/metrics"
 	"log"
 	"os"
+
+	"github.com/uber/jaeger-client-go"
+	jaegercfg "github.com/uber/jaeger-client-go/config"
 )
 
 // @title Go Example REST API
@@ -56,6 +62,29 @@ func main() {
 		appLogger.Errorf("AWS Client init: %s", err)
 	}
 	appLogger.Info("AWS S3 connected")
+
+	jaegerCfgInstance := jaegercfg.Configuration{
+		ServiceName: "REST_API",
+		Sampler: &jaegercfg.SamplerConfig{
+			Type:  jaeger.SamplerTypeConst,
+			Param: 1,
+		},
+		Reporter: &jaegercfg.ReporterConfig{
+			LogSpans:           true,
+			LocalAgentHostPort: "localhost:6831",
+		},
+	}
+
+	tracer, closer, err := jaegerCfgInstance.NewTracer(
+		jaegercfg.Logger(jaegerlog.StdLogger),
+		jaegercfg.Metrics(metrics.NullFactory),
+	)
+	if err != nil {
+		log.Fatal("cannot create tracer", err)
+	}
+
+	opentracing.SetGlobalTracer(tracer)
+	defer closer.Close()
 
 	s := server.NewServer(cfg, psqlDB, redisClient, awsClient, appLogger)
 	if err = s.Run(); err != nil {

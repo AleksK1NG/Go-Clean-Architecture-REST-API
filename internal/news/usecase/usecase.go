@@ -10,6 +10,7 @@ import (
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 	"net/http"
 )
@@ -34,6 +35,9 @@ func NewNewsUseCase(cfg *config.Config, newsRepo news.Repository, redisRepo news
 
 // Create news
 func (u *newsUC) Create(ctx context.Context, news *models.News) (*models.News, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "newsUC.Create")
+	defer span.Finish()
+
 	user, err := utils.GetUserFromCtx(ctx)
 	if err != nil {
 		return nil, httpErrors.NewUnauthorizedError(errors.WithMessage(err, "newsUC.Create.GetUserFromCtx"))
@@ -55,6 +59,9 @@ func (u *newsUC) Create(ctx context.Context, news *models.News) (*models.News, e
 
 // Update news item
 func (u *newsUC) Update(ctx context.Context, news *models.News) (*models.News, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "newsUC.Update")
+	defer span.Finish()
+
 	newsByID, err := u.newsRepo.GetNewsByID(ctx, news.NewsID)
 	if err != nil {
 		return nil, err
@@ -78,6 +85,9 @@ func (u *newsUC) Update(ctx context.Context, news *models.News) (*models.News, e
 
 // Get news by id
 func (u *newsUC) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*models.NewsBase, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "newsUC.GetNewsByID")
+	defer span.Finish()
+
 	newsBase, err := u.redisRepo.GetNewsByIDCtx(ctx, u.getKeyWithPrefix(newsID.String()))
 	if err != nil {
 		u.logger.Errorf("newsUC.GetNewsByID.GetNewsByIDCtx: %v", err)
@@ -100,6 +110,9 @@ func (u *newsUC) GetNewsByID(ctx context.Context, newsID uuid.UUID) (*models.New
 
 // Delete news
 func (u *newsUC) Delete(ctx context.Context, newsID uuid.UUID) error {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "newsUC.Delete")
+	defer span.Finish()
+
 	newsByID, err := u.newsRepo.GetNewsByID(ctx, newsID)
 	if err != nil {
 		return err
@@ -122,11 +135,17 @@ func (u *newsUC) Delete(ctx context.Context, newsID uuid.UUID) error {
 
 // Get news
 func (u *newsUC) GetNews(ctx context.Context, pq *utils.PaginationQuery) (*models.NewsList, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "newsUC.GetNews")
+	defer span.Finish()
+
 	return u.newsRepo.GetNews(ctx, pq)
 }
 
 // Find nes by title
 func (u *newsUC) SearchByTitle(ctx context.Context, title string, query *utils.PaginationQuery) (*models.NewsList, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "newsUC.SearchByTitle")
+	defer span.Finish()
+
 	return u.newsRepo.SearchByTitle(ctx, title, query)
 }
 

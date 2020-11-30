@@ -8,6 +8,7 @@ import (
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 )
 
@@ -23,6 +24,9 @@ func NewCommentsRepository(db *sqlx.DB) comments.Repository {
 
 // Create comment
 func (r *commentsRepo) Create(ctx context.Context, comment *models.Comment) (*models.Comment, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "commentsRepo.Create")
+	defer span.Finish()
+
 	c := &models.Comment{}
 	if err := r.db.QueryRowxContext(
 		ctx,
@@ -39,6 +43,9 @@ func (r *commentsRepo) Create(ctx context.Context, comment *models.Comment) (*mo
 
 // Update comment
 func (r *commentsRepo) Update(ctx context.Context, comment *models.Comment) (*models.Comment, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "commentsRepo.Update")
+	defer span.Finish()
+
 	comm := &models.Comment{}
 	if err := r.db.QueryRowxContext(ctx, updateComment, comment.Message, comment.CommentID).StructScan(comm); err != nil {
 		return nil, errors.Wrap(err, "commentsRepo.Update.QueryRowxContext")
@@ -49,6 +56,9 @@ func (r *commentsRepo) Update(ctx context.Context, comment *models.Comment) (*mo
 
 // Delete comment
 func (r *commentsRepo) Delete(ctx context.Context, commentID uuid.UUID) error {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "commentsRepo.Delete")
+	defer span.Finish()
+
 	result, err := r.db.ExecContext(ctx, deleteComment, commentID)
 	if err != nil {
 		return errors.Wrap(err, "commentsRepo.Delete.ExecContext")
@@ -67,6 +77,9 @@ func (r *commentsRepo) Delete(ctx context.Context, commentID uuid.UUID) error {
 
 // GetByID comment
 func (r *commentsRepo) GetByID(ctx context.Context, commentID uuid.UUID) (*models.CommentBase, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "commentsRepo.GetByID")
+	defer span.Finish()
+
 	comment := &models.CommentBase{}
 	if err := r.db.GetContext(ctx, comment, getCommentByID, commentID); err != nil {
 		return nil, errors.Wrap(err, "commentsRepo.GetByID.GetContext")
@@ -76,6 +89,9 @@ func (r *commentsRepo) GetByID(ctx context.Context, commentID uuid.UUID) (*model
 
 // GetAllByNewsID comments
 func (r *commentsRepo) GetAllByNewsID(ctx context.Context, newsID uuid.UUID, query *utils.PaginationQuery) (*models.CommentsList, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "commentsRepo.GetAllByNewsID")
+	defer span.Finish()
+
 	var totalCount int
 	if err := r.db.QueryRowContext(ctx, getTotalCountByNewsID, newsID).Scan(&totalCount); err != nil {
 		return nil, errors.Wrap(err, "commentsRepo.GetAllByNewsID.QueryRowContext")

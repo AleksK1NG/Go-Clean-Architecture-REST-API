@@ -8,6 +8,7 @@ import (
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/opentracing/opentracing-go"
 	"net/http"
 )
 
@@ -32,7 +33,8 @@ func NewNewsHandlers(cfg *config.Config, newsUC news.UseCase, logger logger.Logg
 // @Router /news/create [post]
 func (h newsHandlers) Create() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx := utils.GetRequestCtx(c)
+		span, ctx := opentracing.StartSpanFromContext(utils.GetRequestCtx(c), "newsHandlers.Create")
+		defer span.Finish()
 
 		n := &models.News{}
 		if err := c.Bind(n); err != nil {
@@ -58,7 +60,8 @@ func (h newsHandlers) Create() echo.HandlerFunc {
 // @Router /news/{id} [put]
 func (h newsHandlers) Update() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx := utils.GetRequestCtx(c)
+		span, ctx := opentracing.StartSpanFromContext(utils.GetRequestCtx(c), "newsHandlers.Update")
+		defer span.Finish()
 
 		newsUUID, err := uuid.Parse(c.Param("news_id"))
 		if err != nil {
@@ -90,7 +93,8 @@ func (h newsHandlers) Update() echo.HandlerFunc {
 // @Router /news/{id} [get]
 func (h newsHandlers) GetByID() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx := utils.GetRequestCtx(c)
+		span, ctx := opentracing.StartSpanFromContext(utils.GetRequestCtx(c), "newsHandlers.GetByID")
+		defer span.Finish()
 
 		newsUUID, err := uuid.Parse(c.Param("news_id"))
 		if err != nil {
@@ -116,7 +120,8 @@ func (h newsHandlers) GetByID() echo.HandlerFunc {
 // @Router /news/{id} [delete]
 func (h newsHandlers) Delete() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx := utils.GetRequestCtx(c)
+		span, ctx := opentracing.StartSpanFromContext(utils.GetRequestCtx(c), "newsHandlers.Delete")
+		defer span.Finish()
 
 		newsUUID, err := uuid.Parse(c.Param("news_id"))
 		if err != nil {
@@ -143,7 +148,8 @@ func (h newsHandlers) Delete() echo.HandlerFunc {
 // @Router /news [get]
 func (h newsHandlers) GetNews() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx := utils.GetRequestCtx(c)
+		span, ctx := opentracing.StartSpanFromContext(utils.GetRequestCtx(c), "newsHandlers.GetNews")
+		defer span.Finish()
 
 		pq, err := utils.GetPaginationFromCtx(c)
 		if err != nil {
@@ -171,7 +177,8 @@ func (h newsHandlers) GetNews() echo.HandlerFunc {
 // @Router /news/search [get]
 func (h newsHandlers) SearchByTitle() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx := utils.GetRequestCtx(c)
+		span, ctx := opentracing.StartSpanFromContext(utils.GetRequestCtx(c), "newsHandlers.SearchByTitle")
+		defer span.Finish()
 
 		pq, err := utils.GetPaginationFromCtx(c)
 		if err != nil {
