@@ -31,7 +31,7 @@ func (r *commentsRepo) Create(ctx context.Context, comment *models.Comment) (*mo
 		&comment.NewsID,
 		&comment.Message,
 	).StructScan(c); err != nil {
-		return nil, errors.Wrap(err, "commentsRepo Create StructScan")
+		return nil, errors.Wrap(err, "commentsRepo.Create.StructScan")
 	}
 
 	return c, nil
@@ -41,7 +41,7 @@ func (r *commentsRepo) Create(ctx context.Context, comment *models.Comment) (*mo
 func (r *commentsRepo) Update(ctx context.Context, comment *models.Comment) (*models.Comment, error) {
 	comm := &models.Comment{}
 	if err := r.db.QueryRowxContext(ctx, updateComment, comment.Message, comment.CommentID).StructScan(comm); err != nil {
-		return nil, errors.Wrap(err, "commentsRepo Update QueryRowxContext")
+		return nil, errors.Wrap(err, "commentsRepo.Update.QueryRowxContext")
 	}
 
 	return comm, nil
@@ -51,15 +51,15 @@ func (r *commentsRepo) Update(ctx context.Context, comment *models.Comment) (*mo
 func (r *commentsRepo) Delete(ctx context.Context, commentID uuid.UUID) error {
 	result, err := r.db.ExecContext(ctx, deleteComment, commentID)
 	if err != nil {
-		return errors.Wrap(err, "commentsRepo Delete ExecContext")
+		return errors.Wrap(err, "commentsRepo.Delete.ExecContext")
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return errors.Wrap(err, "commentsRepo Delete RowsAffected")
+		return errors.Wrap(err, "commentsRepo.Delete.RowsAffected")
 	}
 
 	if rowsAffected == 0 {
-		return errors.Wrap(sql.ErrNoRows, "commentsRepo Delete no rowsAffected")
+		return errors.Wrap(sql.ErrNoRows, "commentsRepo.Delete.rowsAffected")
 	}
 
 	return nil
@@ -69,7 +69,7 @@ func (r *commentsRepo) Delete(ctx context.Context, commentID uuid.UUID) error {
 func (r *commentsRepo) GetByID(ctx context.Context, commentID uuid.UUID) (*models.CommentBase, error) {
 	comment := &models.CommentBase{}
 	if err := r.db.GetContext(ctx, comment, getCommentByID, commentID); err != nil {
-		return nil, errors.Wrap(err, "commentsRepo GetByID GetContext")
+		return nil, errors.Wrap(err, "commentsRepo.GetByID.GetContext")
 	}
 	return comment, nil
 }
@@ -78,7 +78,7 @@ func (r *commentsRepo) GetByID(ctx context.Context, commentID uuid.UUID) (*model
 func (r *commentsRepo) GetAllByNewsID(ctx context.Context, newsID uuid.UUID, query *utils.PaginationQuery) (*models.CommentsList, error) {
 	var totalCount int
 	if err := r.db.QueryRowContext(ctx, getTotalCountByNewsID, newsID).Scan(&totalCount); err != nil {
-		return nil, errors.Wrap(err, "commentsRepo GetAllByNewsID QueryRowContext")
+		return nil, errors.Wrap(err, "commentsRepo.GetAllByNewsID.QueryRowContext")
 	}
 	if totalCount == 0 {
 		return &models.CommentsList{
@@ -93,7 +93,7 @@ func (r *commentsRepo) GetAllByNewsID(ctx context.Context, newsID uuid.UUID, que
 
 	rows, err := r.db.QueryxContext(ctx, getCommentsByNewsID, newsID, query.GetOffset(), query.GetLimit())
 	if err != nil {
-		return nil, errors.Wrap(err, "commentsRepo GetAllByNewsID QueryxContext")
+		return nil, errors.Wrap(err, "commentsRepo.GetAllByNewsID.QueryxContext")
 	}
 	defer rows.Close()
 
@@ -101,13 +101,13 @@ func (r *commentsRepo) GetAllByNewsID(ctx context.Context, newsID uuid.UUID, que
 	for rows.Next() {
 		comment := &models.CommentBase{}
 		if err = rows.StructScan(comment); err != nil {
-			return nil, errors.Wrap(err, "commentsRepo GetAllByNewsID StructScan")
+			return nil, errors.Wrap(err, "commentsRepo.GetAllByNewsID.StructScan")
 		}
 		commentsList = append(commentsList, comment)
 	}
 
 	if err = rows.Err(); err != nil {
-		return nil, errors.Wrap(err, "commentsRepo GetAllByNewsID rows.Err")
+		return nil, errors.Wrap(err, "commentsRepo.GetAllByNewsID.rows.Err")
 	}
 
 	return &models.CommentsList{
