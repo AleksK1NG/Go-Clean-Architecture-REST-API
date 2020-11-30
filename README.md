@@ -34,5 +34,14 @@
     make local
     make run
 
-### By default swagger available on port 5000:
+### SWAGGER UI:
 https://localhost:5000/swagger/index.html
+
+### Jaeger UI:
+http://localhost:16686
+
+### Prometheus UI:
+http://localhost:9090
+
+### Grafana UI:
+http://localhost:3000
