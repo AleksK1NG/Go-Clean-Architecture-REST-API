@@ -68,7 +68,7 @@ aws:
 jaeger:
   Host: localhost:6831
   ServiceName: REST_API
-  LogSpans: true
+  LogSpans: false
 
 #aws:
 #  Endpoint: play.min.io

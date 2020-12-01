@@ -64,7 +64,6 @@ func main() {
 	appLogger.Info("AWS S3 connected")
 
 	jaegerCfgInstance := jaegercfg.Configuration{
-		//ServiceName: "REST_API",
 		ServiceName: cfg.Jaeger.ServiceName,
 		Sampler: &jaegercfg.SamplerConfig{
 			Type:  jaeger.SamplerTypeConst,
@@ -83,9 +82,11 @@ func main() {
 	if err != nil {
 		log.Fatal("cannot create tracer", err)
 	}
+	appLogger.Info("Jaeger connected")
 
 	opentracing.SetGlobalTracer(tracer)
 	defer closer.Close()
+	appLogger.Info("Opentracing connected")
 
 	s := server.NewServer(cfg, psqlDB, redisClient, awsClient, appLogger)
 	if err = s.Run(); err != nil {
