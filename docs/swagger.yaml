@@ -274,23 +274,23 @@ paths:
           schema:
             $ref: '#/definitions/httpErrors.RestError'
       summary: Post avatar
-  /auth/find:
+  /auth/all:
     get:
       consumes:
       - application/json
       description: Get the list of all users
       parameters:
-      - description: page
+      - description: page number
         format: page
         in: query
         name: page
         type: integer
-      - description: size
+      - description: number of elements per page
         format: size
         in: query
         name: size
         type: integer
-      - description: order by
+      - description: filter name
         format: orderBy
         in: query
         name: orderBy
@@ -307,6 +307,29 @@ paths:
           schema:
             $ref: '#/definitions/httpErrors.RestError'
       summary: Get users
+  /auth/find:
+    get:
+      consumes:
+      - application/json
+      description: Find user by name
+      parameters:
+      - description: username
+        format: username
+        in: query
+        name: name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.UsersList'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/httpErrors.RestError'
+      summary: Find by name
   /auth/login:
     post:
       consumes:
@@ -475,17 +498,17 @@ paths:
         name: id
         required: true
         type: integer
-      - description: page
+      - description: page number
         format: page
         in: query
         name: page
         type: integer
-      - description: size
+      - description: number of elements per page
         format: size
         in: query
         name: size
         type: integer
-      - description: order by
+      - description: filter name
         format: orderBy
         in: query
         name: orderBy
@@ -508,17 +531,17 @@ paths:
       - application/json
       description: Get all news with pagination
       parameters:
-      - description: page
+      - description: page number
         format: page
         in: query
         name: page
         type: integer
-      - description: size
+      - description: number of elements per page
         format: size
         in: query
         name: size
         type: integer
-      - description: order by
+      - description: filter name
         format: orderBy
         in: query
         name: orderBy
@@ -605,17 +628,17 @@ paths:
       - application/json
       description: Search news by title
       parameters:
-      - description: page
+      - description: page number
         format: page
         in: query
         name: page
         type: integer
-      - description: size
+      - description: number of elements per page
         format: size
         in: query
         name: size
         type: integer
-      - description: order by
+      - description: filter name
         format: orderBy
         in: query
         name: orderBy

@@ -281,13 +281,13 @@ func (h *authHandlers) FindByName() echo.HandlerFunc {
 // @Summary Get users
 // @Description Get the list of all users
 // @Accept json
-// @Param page query int false "page" Format(page)
-// @Param size query int false "size" Format(size)
-// @Param orderBy query int false "order by" Format(orderBy)
+// @Param page query int false "page number" Format(page)
+// @Param size query int false "number of elements per page" Format(size)
+// @Param orderBy query int false "filter name" Format(orderBy)
 // @Produce json
 // @Success 200 {object} models.UsersList
 // @Failure 500 {object} httpErrors.RestError
-// @Router /auth/find [get]
+// @Router /auth/all [get]
 func (h *authHandlers) GetUsers() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		span, ctx := opentracing.StartSpanFromContext(utils.GetRequestCtx(c), "authHandlers.GetUsers")

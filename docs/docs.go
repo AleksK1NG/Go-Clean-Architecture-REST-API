@@ -28,7 +28,7 @@ var doc = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/auth/find": {
+        "/auth/all": {
             "get": {
                 "description": "Get the list of all users",
                 "consumes": [
@@ -42,22 +42,57 @@ var doc = `{
                     {
                         "type": "integer",
                         "format": "page",
-                        "description": "page",
+                        "description": "page number",
                         "name": "page",
                         "in": "query"
                     },
                     {
                         "type": "integer",
                         "format": "size",
-                        "description": "size",
+                        "description": "number of elements per page",
                         "name": "size",
                         "in": "query"
                     },
                     {
                         "type": "integer",
                         "format": "orderBy",
-                        "description": "order by",
+                        "description": "filter name",
                         "name": "orderBy",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.UsersList"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/httpErrors.RestError"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/find": {
+            "get": {
+                "description": "Find user by name",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Find by name",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "username",
+                        "description": "username",
+                        "name": "name",
                         "in": "query"
                     }
                 ],
@@ -381,21 +416,21 @@ var doc = `{
                     {
                         "type": "integer",
                         "format": "page",
-                        "description": "page",
+                        "description": "page number",
                         "name": "page",
                         "in": "query"
                     },
                     {
                         "type": "integer",
                         "format": "size",
-                        "description": "size",
+                        "description": "number of elements per page",
                         "name": "size",
                         "in": "query"
                     },
                     {
                         "type": "integer",
                         "format": "orderBy",
-                        "description": "order by",
+                        "description": "filter name",
                         "name": "orderBy",
                         "in": "query"
                     }
@@ -531,21 +566,21 @@ var doc = `{
                     {
                         "type": "integer",
                         "format": "page",
-                        "description": "page",
+                        "description": "page number",
                         "name": "page",
                         "in": "query"
                     },
                     {
                         "type": "integer",
                         "format": "size",
-                        "description": "size",
+                        "description": "number of elements per page",
                         "name": "size",
                         "in": "query"
                     },
                     {
                         "type": "integer",
                         "format": "orderBy",
-                        "description": "order by",
+                        "description": "filter name",
                         "name": "orderBy",
                         "in": "query"
                     }
@@ -594,21 +629,21 @@ var doc = `{
                     {
                         "type": "integer",
                         "format": "page",
-                        "description": "page",
+                        "description": "page number",
                         "name": "page",
                         "in": "query"
                     },
                     {
                         "type": "integer",
                         "format": "size",
-                        "description": "size",
+                        "description": "number of elements per page",
                         "name": "size",
                         "in": "query"
                     },
                     {
                         "type": "integer",
                         "format": "orderBy",
-                        "description": "order by",
+                        "description": "filter name",
                         "name": "orderBy",
                         "in": "query"
                     }
