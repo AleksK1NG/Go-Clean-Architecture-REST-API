@@ -12,6 +12,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/minio/minio-go/v7"
+	"github.com/opentracing/opentracing-go"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/bcrypt"
 	"testing"
@@ -45,9 +46,11 @@ func TestAuthUC_Register(t *testing.T) {
 	}
 
 	ctx := context.Background()
+	span, ctxWithTrace := opentracing.StartSpanFromContext(ctx, "authUC.UploadAvatar")
+	defer span.Finish()
 
-	mockAuthRepo.EXPECT().FindByEmail(ctx, gomock.Eq(user)).Return(nil, sql.ErrNoRows)
-	mockAuthRepo.EXPECT().Register(ctx, gomock.Eq(user)).Return(user, nil)
+	mockAuthRepo.EXPECT().FindByEmail(ctxWithTrace, gomock.Eq(user)).Return(nil, sql.ErrNoRows)
+	mockAuthRepo.EXPECT().Register(ctxWithTrace, gomock.Eq(user)).Return(user, nil)
 
 	createdUSer, err := authUC.Register(ctx, user)
 	require.NoError(t, err)
@@ -86,9 +89,11 @@ func TestAuthUC_Update(t *testing.T) {
 	key := fmt.Sprintf("%s: %s", basePrefix, user.UserID)
 
 	ctx := context.Background()
+	span, ctxWithTrace := opentracing.StartSpanFromContext(ctx, "authUC.Update")
+	defer span.Finish()
 
-	mockAuthRepo.EXPECT().Update(ctx, gomock.Eq(user)).Return(user, nil)
-	mockRedisRepo.EXPECT().DeleteUserCtx(ctx, key).Return(nil)
+	mockAuthRepo.EXPECT().Update(ctxWithTrace, gomock.Eq(user)).Return(user, nil)
+	mockRedisRepo.EXPECT().DeleteUserCtx(ctxWithTrace, key).Return(nil)
 
 	updatedUser, err := authUC.Update(ctx, user)
 	require.NoError(t, err)
@@ -127,9 +132,11 @@ func TestAuthUC_Delete(t *testing.T) {
 	key := fmt.Sprintf("%s: %s", basePrefix, user.UserID)
 
 	ctx := context.Background()
+	span, ctxWithTrace := opentracing.StartSpanFromContext(ctx, "authUC.Delete")
+	defer span.Finish()
 
-	mockAuthRepo.EXPECT().Delete(ctx, gomock.Eq(user.UserID)).Return(nil)
-	mockRedisRepo.EXPECT().DeleteUserCtx(ctx, key).Return(nil)
+	mockAuthRepo.EXPECT().Delete(ctxWithTrace, gomock.Eq(user.UserID)).Return(nil)
+	mockRedisRepo.EXPECT().DeleteUserCtx(ctxWithTrace, key).Return(nil)
 
 	err := authUC.Delete(ctx, user.UserID)
 	require.NoError(t, err)
@@ -166,10 +173,12 @@ func TestAuthUC_GetByID(t *testing.T) {
 	key := fmt.Sprintf("%s: %s", basePrefix, user.UserID)
 
 	ctx := context.Background()
+	span, ctxWithTrace := opentracing.StartSpanFromContext(ctx, "authUC.GetByID")
+	defer span.Finish()
 
-	mockRedisRepo.EXPECT().GetByIDCtx(ctx, key).Return(nil, nil)
-	mockAuthRepo.EXPECT().GetByID(ctx, gomock.Eq(user.UserID)).Return(user, nil)
-	mockRedisRepo.EXPECT().SetUserCtx(ctx, key, cacheDuration, user).Return(nil)
+	mockRedisRepo.EXPECT().GetByIDCtx(ctxWithTrace, key).Return(nil, nil)
+	mockAuthRepo.EXPECT().GetByID(ctxWithTrace, gomock.Eq(user.UserID)).Return(user, nil)
+	mockRedisRepo.EXPECT().SetUserCtx(ctxWithTrace, key, cacheDuration, user).Return(nil)
 
 	u, err := authUC.GetByID(ctx, user.UserID)
 	require.NoError(t, err)
@@ -207,10 +216,12 @@ func TestAuthUC_FindByName(t *testing.T) {
 		OrderBy: "",
 	}
 	ctx := context.Background()
+	span, ctxWithTrace := opentracing.StartSpanFromContext(ctx, "authUC.FindByName")
+	defer span.Finish()
 
 	usersList := &models.UsersList{}
 
-	mockAuthRepo.EXPECT().FindByName(ctx, gomock.Eq(userName), query).Return(usersList, nil)
+	mockAuthRepo.EXPECT().FindByName(ctxWithTrace, gomock.Eq(userName), query).Return(usersList, nil)
 
 	userList, err := authUC.FindByName(ctx, userName, query)
 	require.NoError(t, err)
@@ -247,9 +258,12 @@ func TestAuthUC_GetUsers(t *testing.T) {
 		OrderBy: "",
 	}
 	ctx := context.Background()
+	span, ctxWithTrace := opentracing.StartSpanFromContext(ctx, "authUC.GetUsers")
+	defer span.Finish()
+
 	usersList := &models.UsersList{}
 
-	mockAuthRepo.EXPECT().GetUsers(ctx, query).Return(usersList, nil)
+	mockAuthRepo.EXPECT().GetUsers(ctxWithTrace, query).Return(usersList, nil)
 
 	users, err := authUC.GetUsers(ctx, query)
 	require.NoError(t, err)
@@ -281,6 +295,9 @@ func TestAuthUC_Login(t *testing.T) {
 	authUC := NewAuthUseCase(cfg, mockAuthRepo, mockRedisRepo, nil, apiLogger)
 
 	ctx := context.Background()
+	span, ctxWithTrace := opentracing.StartSpanFromContext(ctx, "authUC.Login")
+	defer span.Finish()
+
 	user := &models.User{
 		Password: "123456",
 		Email:    "email@gmail.com",
@@ -294,7 +311,7 @@ func TestAuthUC_Login(t *testing.T) {
 		Password: string(hashPassword),
 	}
 
-	mockAuthRepo.EXPECT().FindByEmail(ctx, gomock.Eq(user)).Return(mockUser, nil)
+	mockAuthRepo.EXPECT().FindByEmail(ctxWithTrace, gomock.Eq(user)).Return(mockUser, nil)
 
 	userWithToken, err := authUC.Login(ctx, user)
 	require.NoError(t, err)
@@ -327,6 +344,9 @@ func TestAuthUC_UploadAvatar(t *testing.T) {
 	authUC := NewAuthUseCase(cfg, mockAuthRepo, mockRedisRepo, mockAWSRepo, apiLogger)
 
 	ctx := context.Background()
+	span, ctxWithTrace := opentracing.StartSpanFromContext(ctx, "authUC.UploadAvatar")
+	defer span.Finish()
+
 	file := models.UploadInput{}
 	uploadInfo := &minio.UploadInfo{}
 	userUID := uuid.New()
@@ -337,8 +357,8 @@ func TestAuthUC_UploadAvatar(t *testing.T) {
 		Email:    "email@gmail.com",
 	}
 
-	mockAWSRepo.EXPECT().PutObject(ctx, gomock.Eq(file)).Return(uploadInfo, nil)
-	mockAuthRepo.EXPECT().Update(ctx, gomock.Any()).Return(user, nil)
+	mockAWSRepo.EXPECT().PutObject(ctxWithTrace, gomock.Eq(file)).Return(uploadInfo, nil)
+	mockAuthRepo.EXPECT().Update(ctxWithTrace, gomock.Any()).Return(user, nil)
 
 	updatedUser, err := authUC.UploadAvatar(ctx, userUID, file)
 	require.NoError(t, err)

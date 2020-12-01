@@ -9,6 +9,7 @@ import (
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
+	"github.com/opentracing/opentracing-go"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
@@ -36,8 +37,10 @@ func TestNewsUC_Create(t *testing.T) {
 	}
 
 	ctx := context.WithValue(context.Background(), utils.UserCtxKey{}, user)
+	span, ctxWithTrace := opentracing.StartSpanFromContext(ctx, "newsUC.Create")
+	defer span.Finish()
 
-	mockNewsRepo.EXPECT().Create(ctx, gomock.Eq(news)).Return(news, nil)
+	mockNewsRepo.EXPECT().Create(ctxWithTrace, gomock.Eq(news)).Return(news, nil)
 
 	createdNews, err := newsUC.Create(ctx, news)
 	require.NoError(t, err)
@@ -79,10 +82,12 @@ func TestNewsUC_Update(t *testing.T) {
 	cacheKey := fmt.Sprintf("%s: %s", basePrefix, news.NewsID)
 
 	ctx := context.WithValue(context.Background(), utils.UserCtxKey{}, user)
+	span, ctxWithTrace := opentracing.StartSpanFromContext(ctx, "newsUC.Update")
+	defer span.Finish()
 
-	mockNewsRepo.EXPECT().GetNewsByID(ctx, gomock.Eq(news.NewsID)).Return(newsBase, nil)
-	mockNewsRepo.EXPECT().Update(ctx, gomock.Eq(news)).Return(news, nil)
-	mockRedisRepo.EXPECT().DeleteNewsCtx(ctx, gomock.Eq(cacheKey)).Return(nil)
+	mockNewsRepo.EXPECT().GetNewsByID(ctxWithTrace, gomock.Eq(news.NewsID)).Return(newsBase, nil)
+	mockNewsRepo.EXPECT().Update(ctxWithTrace, gomock.Eq(news)).Return(news, nil)
+	mockRedisRepo.EXPECT().DeleteNewsCtx(ctxWithTrace, gomock.Eq(cacheKey)).Return(nil)
 
 	updatedNews, err := newsUC.Update(ctx, news)
 	require.NoError(t, err)
@@ -106,11 +111,13 @@ func TestNewsUC_GetNewsByID(t *testing.T) {
 		NewsID: newsUID,
 	}
 	ctx := context.Background()
+	span, ctxWithTrace := opentracing.StartSpanFromContext(ctx, "newsUC.GetNewsByID")
+	defer span.Finish()
 	cacheKey := fmt.Sprintf("%s: %s", basePrefix, newsUID)
 
-	mockRedisRepo.EXPECT().GetNewsByIDCtx(ctx, gomock.Eq(cacheKey)).Return(nil, nil)
-	mockNewsRepo.EXPECT().GetNewsByID(ctx, gomock.Eq(newsUID)).Return(newsBase, nil)
-	mockRedisRepo.EXPECT().SetNewsCtx(ctx, cacheKey, cacheDuration, newsBase).Return(nil)
+	mockRedisRepo.EXPECT().GetNewsByIDCtx(ctxWithTrace, gomock.Eq(cacheKey)).Return(nil, nil)
+	mockNewsRepo.EXPECT().GetNewsByID(ctxWithTrace, gomock.Eq(newsUID)).Return(newsBase, nil)
+	mockRedisRepo.EXPECT().SetNewsCtx(ctxWithTrace, cacheKey, cacheDuration, newsBase).Return(nil)
 
 	newsByID, err := newsUC.GetNewsByID(ctx, newsBase.NewsID)
 	require.NoError(t, err)
@@ -142,10 +149,12 @@ func TestNewsUC_Delete(t *testing.T) {
 	}
 
 	ctx := context.WithValue(context.Background(), utils.UserCtxKey{}, user)
+	span, ctxWithTrace := opentracing.StartSpanFromContext(ctx, "newsUC.Delete")
+	defer span.Finish()
 
-	mockNewsRepo.EXPECT().GetNewsByID(ctx, gomock.Eq(newsBase.NewsID)).Return(newsBase, nil)
-	mockNewsRepo.EXPECT().Delete(ctx, gomock.Eq(newsUID)).Return(nil)
-	mockRedisRepo.EXPECT().DeleteNewsCtx(ctx, gomock.Eq(cacheKey)).Return(nil)
+	mockNewsRepo.EXPECT().GetNewsByID(ctxWithTrace, gomock.Eq(newsBase.NewsID)).Return(newsBase, nil)
+	mockNewsRepo.EXPECT().Delete(ctxWithTrace, gomock.Eq(newsUID)).Return(nil)
+	mockRedisRepo.EXPECT().DeleteNewsCtx(ctxWithTrace, gomock.Eq(cacheKey)).Return(nil)
 
 	err := newsUC.Delete(ctx, newsBase.NewsID)
 	require.NoError(t, err)
@@ -164,6 +173,9 @@ func TestNewsUC_GetNews(t *testing.T) {
 	newsUC := NewNewsUseCase(nil, mockNewsRepo, mockRedisRepo, apiLogger)
 
 	ctx := context.Background()
+	span, ctxWithTrace := opentracing.StartSpanFromContext(ctx, "newsUC.GetNews")
+	defer span.Finish()
+
 	query := &utils.PaginationQuery{
 		Size:    10,
 		Page:    1,
@@ -172,7 +184,7 @@ func TestNewsUC_GetNews(t *testing.T) {
 
 	newsList := &models.NewsList{}
 
-	mockNewsRepo.EXPECT().GetNews(ctx, query).Return(newsList, nil)
+	mockNewsRepo.EXPECT().GetNews(ctxWithTrace, query).Return(newsList, nil)
 
 	news, err := newsUC.GetNews(ctx, query)
 	require.NoError(t, err)
@@ -192,6 +204,8 @@ func TestNewsUC_SearchByTitle(t *testing.T) {
 	newsUC := NewNewsUseCase(nil, mockNewsRepo, mockRedisRepo, apiLogger)
 
 	ctx := context.Background()
+	span, ctxWithTrace := opentracing.StartSpanFromContext(ctx, "newsUC.SearchByTitle")
+	defer span.Finish()
 	query := &utils.PaginationQuery{
 		Size:    10,
 		Page:    1,
@@ -201,7 +215,7 @@ func TestNewsUC_SearchByTitle(t *testing.T) {
 	newsList := &models.NewsList{}
 	title := "title"
 
-	mockNewsRepo.EXPECT().SearchByTitle(ctx, title, query).Return(newsList, nil)
+	mockNewsRepo.EXPECT().SearchByTitle(ctxWithTrace, title, query).Return(newsList, nil)
 
 	news, err := newsUC.SearchByTitle(ctx, title, query)
 	require.NoError(t, err)

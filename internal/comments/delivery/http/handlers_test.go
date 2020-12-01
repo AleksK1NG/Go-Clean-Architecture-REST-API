@@ -56,7 +56,6 @@ func TestCommentsHandlers_Create(t *testing.T) {
 
 	e := echo.New()
 	ctx := e.NewContext(req, res)
-	ctxWithReqID := utils.GetRequestCtx(ctx)
 
 	mockComm := &models.Comment{
 		AuthorID: userID,
@@ -67,7 +66,7 @@ func TestCommentsHandlers_Create(t *testing.T) {
 	fmt.Printf("COMMENT: %#v\n", comment)
 	fmt.Printf("MOCK COMMENT: %#v\n", mockComm)
 
-	mockCommUC.EXPECT().Create(ctxWithReqID, gomock.Any()).Return(mockComm, nil)
+	mockCommUC.EXPECT().Create(gomock.Any(), gomock.Any()).Return(mockComm, nil)
 
 	err = handlerFunc(ctx)
 	require.NoError(t, err)
@@ -92,11 +91,10 @@ func TestCommentsHandlers_GetByID(t *testing.T) {
 	c := e.NewContext(r, w)
 	c.SetParamNames("comment_id")
 	c.SetParamValues("5c9a9d67-ad38-499c-9858-086bfdeaf7d2")
-	ctx := utils.GetRequestCtx(c)
 
 	comm := &models.CommentBase{}
 
-	mockCommUC.EXPECT().GetByID(ctx, gomock.Any()).Return(comm, nil)
+	mockCommUC.EXPECT().GetByID(gomock.Any(), gomock.Any()).Return(comm, nil)
 
 	err := handlerFunc(c)
 	require.NoError(t, err)
@@ -133,10 +131,9 @@ func TestCommentsHandlers_Delete(t *testing.T) {
 	c := e.NewContext(r, w)
 	c.SetParamNames("comment_id")
 	c.SetParamValues(commID.String())
-	ctx := utils.GetRequestCtx(c)
 
-	mockCommUC.EXPECT().GetByID(ctx, commID).Return(comm, nil)
-	mockCommUC.EXPECT().Delete(ctx, commID).Return(nil)
+	mockCommUC.EXPECT().GetByID(gomock.Any(), commID).Return(comm, nil)
+	mockCommUC.EXPECT().Delete(gomock.Any(), commID).Return(nil)
 
 	err := handlerFunc(c)
 	require.NoError(t, err)

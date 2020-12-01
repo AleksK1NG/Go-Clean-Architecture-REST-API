@@ -10,6 +10,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/opentracing/opentracing-go"
 	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
@@ -53,6 +54,8 @@ func TestNewsHandlers_Create(t *testing.T) {
 	e := echo.New()
 	ctx := e.NewContext(req, res)
 	ctxWithReqID := utils.GetRequestCtx(ctx)
+	span, ctxWithTrace := opentracing.StartSpanFromContext(ctxWithReqID, "newsHandlers.Create")
+	defer span.Finish()
 
 	mockNews := &models.News{
 		AuthorID: userID,
@@ -60,7 +63,7 @@ func TestNewsHandlers_Create(t *testing.T) {
 		Content:  "TestNewsHandlers_Create title content asdasdsadsadadsad",
 	}
 
-	mockNewsUC.EXPECT().Create(ctxWithReqID, gomock.Any()).Return(mockNews, nil)
+	mockNewsUC.EXPECT().Create(ctxWithTrace, gomock.Any()).Return(mockNews, nil)
 
 	err = handlerFunc(ctx)
 	require.NoError(t, err)
@@ -104,6 +107,8 @@ func TestNewsHandlers_Update(t *testing.T) {
 	ctx.SetParamNames("news_id")
 	ctx.SetParamValues("f8a3cc26-fbe1-4713-98be-a2927201356e")
 	ctxWithReqID := utils.GetRequestCtx(ctx)
+	span, ctxWithTrace := opentracing.StartSpanFromContext(ctxWithReqID, "newsHandlers.Update")
+	defer span.Finish()
 
 	mockNews := &models.News{
 		AuthorID: userID,
@@ -111,7 +116,7 @@ func TestNewsHandlers_Update(t *testing.T) {
 		Content:  "TestNewsHandlers_Create title content asdasdsadsadadsad",
 	}
 
-	mockNewsUC.EXPECT().Update(ctxWithReqID, gomock.Any()).Return(mockNews, nil)
+	mockNewsUC.EXPECT().Update(ctxWithTrace, gomock.Any()).Return(mockNews, nil)
 
 	err = handlerFunc(ctx)
 	require.NoError(t, err)
@@ -144,6 +149,8 @@ func TestNewsHandlers_GetByID(t *testing.T) {
 	ctx.SetParamNames("news_id")
 	ctx.SetParamValues(newsID.String())
 	ctxWithReqID := utils.GetRequestCtx(ctx)
+	span, ctxWithTrace := opentracing.StartSpanFromContext(ctxWithReqID, "newsHandlers.GetByID")
+	defer span.Finish()
 
 	mockNews := &models.NewsBase{
 		NewsID:   newsID,
@@ -152,7 +159,7 @@ func TestNewsHandlers_GetByID(t *testing.T) {
 		Content:  "TestNewsHandlers_Create title content asdasdsadsadadsad",
 	}
 
-	mockNewsUC.EXPECT().GetNewsByID(ctxWithReqID, newsID).Return(mockNews, nil)
+	mockNewsUC.EXPECT().GetNewsByID(ctxWithTrace, newsID).Return(mockNews, nil)
 
 	err := handlerFunc(ctx)
 	require.NoError(t, err)

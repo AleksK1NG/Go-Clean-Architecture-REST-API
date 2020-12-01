@@ -45,19 +45,22 @@ func (h *authHandlers) Register() echo.HandlerFunc {
 
 		user := &models.User{}
 		if err := utils.ReadRequest(c, user); err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		createdUser, err := h.authUC.Register(ctx, user)
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		sess, err := h.sessUC.CreateSession(ctx, &models.Session{
 			UserID: createdUser.User.UserID,
 		}, h.cfg.Session.Expire)
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		c.SetCookie(utils.CreateSessionCookie(h.cfg, sess))
@@ -84,7 +87,8 @@ func (h *authHandlers) Login() echo.HandlerFunc {
 
 		login := &Login{}
 		if err := utils.ReadRequest(c, login); err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		userWithToken, err := h.authUC.Login(ctx, &models.User{
@@ -92,14 +96,16 @@ func (h *authHandlers) Login() echo.HandlerFunc {
 			Password: login.Password,
 		})
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		sess, err := h.sessUC.CreateSession(ctx, &models.Session{
 			UserID: userWithToken.User.UserID,
 		}, h.cfg.Session.Expire)
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		c.SetCookie(utils.CreateSessionCookie(h.cfg, sess))
@@ -123,13 +129,16 @@ func (h *authHandlers) Logout() echo.HandlerFunc {
 		cookie, err := c.Cookie("session-id")
 		if err != nil {
 			if errors.Is(err, http.ErrNoCookie) {
+				utils.LogResponseError(c, h.logger, err)
 				return c.JSON(http.StatusUnauthorized, httpErrors.NewUnauthorizedError(err))
 			}
+			utils.LogResponseError(c, h.logger, err)
 			return c.JSON(http.StatusInternalServerError, httpErrors.NewInternalServerError(err))
 		}
 
 		if err := h.sessUC.DeleteByID(ctx, cookie.Value); err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		utils.DeleteSessionCookie(c, h.cfg.Session.Name)
@@ -153,19 +162,22 @@ func (h *authHandlers) Update() echo.HandlerFunc {
 
 		uID, err := uuid.Parse(c.Param("user_id"))
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		user := &models.User{}
 		user.UserID = uID
 
 		if err = utils.ReadRequest(c, user); err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		updatedUser, err := h.authUC.Update(ctx, user)
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		return c.JSON(http.StatusOK, updatedUser)
@@ -188,12 +200,14 @@ func (h *authHandlers) GetUserByID() echo.HandlerFunc {
 
 		uID, err := uuid.Parse(c.Param("user_id"))
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		user, err := h.authUC.GetByID(ctx, uID)
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		return c.JSON(http.StatusOK, user)
@@ -215,11 +229,13 @@ func (h *authHandlers) Delete() echo.HandlerFunc {
 
 		uID, err := uuid.Parse(c.Param("user_id"))
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		if err = h.authUC.Delete(ctx, uID); err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		return c.NoContent(http.StatusOK)
@@ -241,17 +257,20 @@ func (h *authHandlers) FindByName() echo.HandlerFunc {
 		defer span.Finish()
 
 		if c.QueryParam("name") == "" {
+			utils.LogResponseError(c, h.logger, httpErrors.NewBadRequestError("name is required"))
 			return c.JSON(http.StatusBadRequest, httpErrors.NewBadRequestError("name is required"))
 		}
 
 		paginationQuery, err := utils.GetPaginationFromCtx(c)
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		response, err := h.authUC.FindByName(ctx, c.QueryParam("name"), paginationQuery)
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		return c.JSON(http.StatusOK, response)
@@ -276,12 +295,14 @@ func (h *authHandlers) GetUsers() echo.HandlerFunc {
 
 		paginationQuery, err := utils.GetPaginationFromCtx(c)
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		usersList, err := h.authUC.GetUsers(ctx, paginationQuery)
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		return c.JSON(http.StatusOK, usersList)
@@ -303,6 +324,7 @@ func (h *authHandlers) GetMe() echo.HandlerFunc {
 
 		user, ok := c.Get("user").(*models.User)
 		if !ok {
+			utils.LogResponseError(c, h.logger, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
 			return utils.ErrResponseWithLog(c, h.logger, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
 		}
 
@@ -325,6 +347,7 @@ func (h *authHandlers) GetCSRFToken() echo.HandlerFunc {
 
 		sid, ok := c.Get("sid").(string)
 		if !ok {
+			utils.LogResponseError(c, h.logger, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
 			return utils.ErrResponseWithLog(c, h.logger, httpErrors.NewUnauthorizedError(httpErrors.Unauthorized))
 		}
 		token := csrf.MakeToken(sid, h.logger)
@@ -354,28 +377,33 @@ func (h *authHandlers) UploadAvatar() echo.HandlerFunc {
 		bucket := c.QueryParam("bucket")
 		uID, err := uuid.Parse(c.Param("user_id"))
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		image, err := utils.ReadImage(c, "file")
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		file, err := image.Open()
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 		defer file.Close()
 
 		binaryImage := bytes.NewBuffer(nil)
 		if _, err = io.Copy(binaryImage, file); err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		contentType, err := utils.CheckImageFileContentType(binaryImage.Bytes())
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		reader := bytes.NewReader(binaryImage.Bytes())
@@ -388,7 +416,8 @@ func (h *authHandlers) UploadAvatar() echo.HandlerFunc {
 			BucketName:  bucket,
 		})
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		return c.JSON(http.StatusOK, updatedUser)
