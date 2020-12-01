@@ -151,9 +151,9 @@ func (h newsHandlers) Delete() echo.HandlerFunc {
 // @Description Get all news with pagination
 // @Accept json
 // @Produce json
-// @Param page query int false "page" Format(page)
-// @Param size query int false "size" Format(size)
-// @Param orderBy query int false "order by" Format(orderBy)
+// @Param page query int false "page number" Format(page)
+// @Param size query int false "number of elements per page" Format(size)
+// @Param orderBy query int false "filter name" Format(orderBy)
 // @Success 200 {object} models.NewsList
 // @Router /news [get]
 func (h newsHandlers) GetNews() echo.HandlerFunc {
@@ -182,9 +182,9 @@ func (h newsHandlers) GetNews() echo.HandlerFunc {
 // @Description Search news by title
 // @Accept json
 // @Produce json
-// @Param page query int false "page" Format(page)
-// @Param size query int false "size" Format(size)
-// @Param orderBy query int false "order by" Format(orderBy)
+// @Param page query int false "page number" Format(page)
+// @Param size query int false "number of elements per page" Format(size)
+// @Param orderBy query int false "filter name" Format(orderBy)
 // @Success 200 {object} models.NewsList
 // @Router /news/search [get]
 func (h newsHandlers) SearchByTitle() echo.HandlerFunc {
