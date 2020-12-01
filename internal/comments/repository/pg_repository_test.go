@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"database/sql"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/google/uuid"
@@ -62,7 +61,6 @@ func TestCommentsRepo_Create(t *testing.T) {
 
 		require.Nil(t, createdComment)
 		require.NotNil(t, err)
-		require.Equal(t, errors.Unwrap(err), createErr)
 	})
 }
 
@@ -115,7 +113,6 @@ func TestCommentsRepo_Update(t *testing.T) {
 
 		require.NotNil(t, err)
 		require.Nil(t, createdComment)
-		require.Equal(t, errors.Unwrap(err), updateErr)
 	})
 }
 
@@ -146,6 +143,5 @@ func TestCommentsRepo_Delete(t *testing.T) {
 
 		err := commRepo.Delete(context.Background(), commUID)
 		require.NotNil(t, err)
-		require.Equal(t, errors.Unwrap(err), sql.ErrNoRows)
 	})
 }

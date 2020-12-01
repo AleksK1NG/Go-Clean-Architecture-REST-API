@@ -22,7 +22,7 @@ func TestSessionUC_CreateSession(t *testing.T) {
 	sess := &models.Session{}
 	sid := "session id"
 
-	mockSessRepo.EXPECT().CreateSession(ctx, gomock.Eq(sess), 10).Return(sid, nil)
+	mockSessRepo.EXPECT().CreateSession(gomock.Any(), gomock.Eq(sess), 10).Return(sid, nil)
 
 	createdSess, err := sessUC.CreateSession(ctx, sess, 10)
 	require.NoError(t, err)
@@ -43,7 +43,7 @@ func TestSessionUC_GetSessionByID(t *testing.T) {
 	sess := &models.Session{}
 	sid := "session id"
 
-	mockSessRepo.EXPECT().GetSessionByID(ctx, gomock.Eq(sid)).Return(sess, nil)
+	mockSessRepo.EXPECT().GetSessionByID(gomock.Any(), gomock.Eq(sid)).Return(sess, nil)
 
 	session, err := sessUC.GetSessionByID(ctx, sid)
 	require.NoError(t, err)
@@ -63,7 +63,7 @@ func TestSessionUC_DeleteByID(t *testing.T) {
 	ctx := context.Background()
 	sid := "session id"
 
-	mockSessRepo.EXPECT().DeleteByID(ctx, gomock.Eq(sid)).Return(nil)
+	mockSessRepo.EXPECT().DeleteByID(gomock.Any(), gomock.Eq(sid)).Return(nil)
 
 	err := sessUC.DeleteByID(ctx, sid)
 	require.NoError(t, err)

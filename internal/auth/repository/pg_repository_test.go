@@ -2,14 +2,12 @@ package repository
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
@@ -122,7 +120,6 @@ func TestAuthRepo_Delete(t *testing.T) {
 		err := authRepo.Delete(context.Background(), uid)
 
 		require.NotNil(t, err)
-		require.Equal(t, errors.Unwrap(err), sql.ErrNoRows)
 	})
 }
 

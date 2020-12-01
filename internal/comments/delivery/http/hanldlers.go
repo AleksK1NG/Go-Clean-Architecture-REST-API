@@ -4,6 +4,7 @@ import (
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/comments"
 	"github.com/AleksK1NG/api-mc/internal/models"
+	"github.com/AleksK1NG/api-mc/pkg/httpErrors"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
@@ -38,7 +39,8 @@ func (h *commentsHandlers) Create() echo.HandlerFunc {
 
 		user, err := utils.GetUserFromCtx(ctx)
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		comment := &models.Comment{}
@@ -51,7 +53,8 @@ func (h *commentsHandlers) Create() echo.HandlerFunc {
 
 		createdComment, err := h.comUC.Create(ctx, comment)
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		return c.JSON(http.StatusCreated, createdComment)
@@ -77,12 +80,14 @@ func (h *commentsHandlers) Update() echo.HandlerFunc {
 
 		commID, err := uuid.Parse(c.Param("comment_id"))
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		comm := &UpdateComment{}
 		if err = utils.SanitizeRequest(c, comm); err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		updatedComment, err := h.comUC.Update(ctx, &models.Comment{
@@ -91,7 +96,8 @@ func (h *commentsHandlers) Update() echo.HandlerFunc {
 			Likes:     comm.Likes,
 		})
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		return c.JSON(http.StatusOK, updatedComment)
@@ -113,11 +119,13 @@ func (h *commentsHandlers) Delete() echo.HandlerFunc {
 
 		commID, err := uuid.Parse(c.Param("comment_id"))
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		if err = h.comUC.Delete(ctx, commID); err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		return c.NoContent(http.StatusOK)
@@ -139,12 +147,14 @@ func (h *commentsHandlers) GetByID() echo.HandlerFunc {
 
 		commID, err := uuid.Parse(c.Param("comment_id"))
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		comment, err := h.comUC.GetByID(ctx, commID)
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		return c.JSON(http.StatusOK, comment)
@@ -169,17 +179,20 @@ func (h *commentsHandlers) GetAllByNewsID() echo.HandlerFunc {
 
 		newsID, err := uuid.Parse(c.Param("news_id"))
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		pq, err := utils.GetPaginationFromCtx(c)
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		commentsList, err := h.comUC.GetAllByNewsID(ctx, newsID, pq)
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		return c.JSON(http.StatusOK, commentsList)

@@ -11,6 +11,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/opentracing/opentracing-go"
 	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
@@ -60,6 +61,8 @@ func TestAuthHandlers_Register(t *testing.T) {
 
 	c := e.NewContext(req, rec)
 	ctx := utils.GetRequestCtx(c)
+	span, ctxWithTrace := opentracing.StartSpanFromContext(ctx, "auth.Register")
+	defer span.Finish()
 
 	handlerFunc := authHandlers.Register()
 
@@ -74,8 +77,8 @@ func TestAuthHandlers_Register(t *testing.T) {
 	}
 	session := "session"
 
-	mockAuthUC.EXPECT().Register(ctx, gomock.Eq(user)).Return(userWithToken, nil)
-	mockSessUC.EXPECT().CreateSession(ctx, gomock.Eq(sess), 10).Return(session, nil)
+	mockAuthUC.EXPECT().Register(ctxWithTrace, gomock.Eq(user)).Return(userWithToken, nil)
+	mockSessUC.EXPECT().CreateSession(ctxWithTrace, gomock.Eq(sess), 10).Return(session, nil)
 
 	err = handlerFunc(c)
 	require.NoError(t, err)
@@ -130,6 +133,8 @@ func TestAuthHandlers_Login(t *testing.T) {
 
 	c := e.NewContext(req, rec)
 	ctx := utils.GetRequestCtx(c)
+	span, ctxWithTrace := opentracing.StartSpanFromContext(ctx, "auth.Login")
+	defer span.Finish()
 
 	handlerFunc := authHandlers.Login()
 
@@ -144,8 +149,8 @@ func TestAuthHandlers_Login(t *testing.T) {
 	}
 	session := "session"
 
-	mockAuthUC.EXPECT().Login(ctx, gomock.Eq(user)).Return(userWithToken, nil)
-	mockSessUC.EXPECT().CreateSession(ctx, gomock.Eq(sess), 10).Return(session, nil)
+	mockAuthUC.EXPECT().Login(ctxWithTrace, gomock.Eq(user)).Return(userWithToken, nil)
+	mockSessUC.EXPECT().CreateSession(ctxWithTrace, gomock.Eq(sess), 10).Return(session, nil)
 
 	err = handlerFunc(c)
 	require.NoError(t, err)
@@ -184,6 +189,8 @@ func TestAuthHandlers_Logout(t *testing.T) {
 
 	c := e.NewContext(req, rec)
 	ctx := utils.GetRequestCtx(c)
+	span, ctxWithTrace := opentracing.StartSpanFromContext(ctx, "auth.Logout")
+	defer span.Finish()
 
 	logout := authHandlers.Logout()
 
@@ -193,7 +200,7 @@ func TestAuthHandlers_Logout(t *testing.T) {
 	require.NotEqual(t, cookie.Value, "")
 	require.Equal(t, cookie.Value, cookieValue)
 
-	mockSessUC.EXPECT().DeleteByID(ctx, gomock.Eq(cookie.Value)).Return(nil)
+	mockSessUC.EXPECT().DeleteByID(ctxWithTrace, gomock.Eq(cookie.Value)).Return(nil)
 
 	err = logout(c)
 	require.NoError(t, err)

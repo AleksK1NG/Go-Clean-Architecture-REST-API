@@ -8,6 +8,7 @@ import (
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
+	"github.com/opentracing/opentracing-go"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
@@ -24,7 +25,10 @@ func TestCommentsUC_Create(t *testing.T) {
 
 	comm := &models.Comment{}
 
-	mockCommRepo.EXPECT().Create(context.Background(), gomock.Eq(comm)).Return(comm, nil)
+	span, ctx := opentracing.StartSpanFromContext(context.Background(), "commentsUC.Create")
+	defer span.Finish()
+
+	mockCommRepo.EXPECT().Create(ctx, gomock.Eq(comm)).Return(comm, nil)
 
 	createdComment, err := commUC.Create(context.Background(), comm)
 	require.NoError(t, err)
@@ -57,9 +61,11 @@ func TestCommentsUC_Update(t *testing.T) {
 	}
 
 	ctx := context.WithValue(context.Background(), utils.UserCtxKey{}, user)
+	span, ctxWithTrace := opentracing.StartSpanFromContext(ctx, "commentsUC.Update")
+	defer span.Finish()
 
-	mockCommRepo.EXPECT().GetByID(ctx, gomock.Eq(comm.CommentID)).Return(baseComm, nil)
-	mockCommRepo.EXPECT().Update(ctx, gomock.Eq(comm)).Return(comm, nil)
+	mockCommRepo.EXPECT().GetByID(ctxWithTrace, gomock.Eq(comm.CommentID)).Return(baseComm, nil)
+	mockCommRepo.EXPECT().Update(ctxWithTrace, gomock.Eq(comm)).Return(comm, nil)
 
 	updatedComment, err := commUC.Update(ctx, comm)
 	require.NoError(t, err)
@@ -92,9 +98,11 @@ func TestCommentsUC_Delete(t *testing.T) {
 	}
 
 	ctx := context.WithValue(context.Background(), utils.UserCtxKey{}, user)
+	span, ctxWithTrace := opentracing.StartSpanFromContext(ctx, "commentsUC.Delete")
+	defer span.Finish()
 
-	mockCommRepo.EXPECT().GetByID(ctx, gomock.Eq(comm.CommentID)).Return(baseComm, nil)
-	mockCommRepo.EXPECT().Delete(ctx, gomock.Eq(comm.CommentID)).Return(nil)
+	mockCommRepo.EXPECT().GetByID(ctxWithTrace, gomock.Eq(comm.CommentID)).Return(baseComm, nil)
+	mockCommRepo.EXPECT().Delete(ctxWithTrace, gomock.Eq(comm.CommentID)).Return(nil)
 
 	err := commUC.Delete(ctx, comm.CommentID)
 	require.NoError(t, err)
@@ -118,8 +126,10 @@ func TestCommentsUC_GetByID(t *testing.T) {
 	baseComm := &models.CommentBase{}
 
 	ctx := context.Background()
+	span, ctxWithTrace := opentracing.StartSpanFromContext(ctx, "commentsUC.GetByID")
+	defer span.Finish()
 
-	mockCommRepo.EXPECT().GetByID(ctx, gomock.Eq(comm.CommentID)).Return(baseComm, nil)
+	mockCommRepo.EXPECT().GetByID(ctxWithTrace, gomock.Eq(comm.CommentID)).Return(baseComm, nil)
 
 	commentBase, err := commUC.GetByID(ctx, comm.CommentID)
 	require.NoError(t, err)
@@ -147,13 +157,16 @@ func TestCommentsUC_GetAllByNewsID(t *testing.T) {
 	commentsList := &models.CommentsList{}
 
 	ctx := context.Background()
+	span, ctxWithTrace := opentracing.StartSpanFromContext(ctx, "commentsUC.GetAllByNewsID")
+	defer span.Finish()
+
 	query := &utils.PaginationQuery{
 		Size:    10,
 		Page:    1,
 		OrderBy: "",
 	}
 
-	mockCommRepo.EXPECT().GetAllByNewsID(ctx, gomock.Eq(comm.NewsID), query).Return(commentsList, nil)
+	mockCommRepo.EXPECT().GetAllByNewsID(ctxWithTrace, gomock.Eq(comm.NewsID), query).Return(commentsList, nil)
 
 	commList, err := commUC.GetAllByNewsID(ctx, comm.NewsID, query)
 	require.NoError(t, err)

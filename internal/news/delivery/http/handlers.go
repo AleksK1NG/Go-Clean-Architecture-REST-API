@@ -4,6 +4,7 @@ import (
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/internal/news"
+	"github.com/AleksK1NG/api-mc/pkg/httpErrors"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
 	"github.com/google/uuid"
@@ -38,12 +39,14 @@ func (h newsHandlers) Create() echo.HandlerFunc {
 
 		n := &models.News{}
 		if err := c.Bind(n); err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		createdNews, err := h.newsUC.Create(ctx, n)
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		return c.JSON(http.StatusCreated, createdNews)
@@ -65,18 +68,21 @@ func (h newsHandlers) Update() echo.HandlerFunc {
 
 		newsUUID, err := uuid.Parse(c.Param("news_id"))
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		n := &models.News{}
 		if err = c.Bind(n); err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 		n.NewsID = newsUUID
 
 		updatedNews, err := h.newsUC.Update(ctx, n)
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		return c.JSON(http.StatusOK, updatedNews)
@@ -98,12 +104,14 @@ func (h newsHandlers) GetByID() echo.HandlerFunc {
 
 		newsUUID, err := uuid.Parse(c.Param("news_id"))
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		newsByID, err := h.newsUC.GetNewsByID(ctx, newsUUID)
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		return c.JSON(http.StatusOK, newsByID)
@@ -125,11 +133,13 @@ func (h newsHandlers) Delete() echo.HandlerFunc {
 
 		newsUUID, err := uuid.Parse(c.Param("news_id"))
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		if err = h.newsUC.Delete(ctx, newsUUID); err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		return c.NoContent(http.StatusOK)
@@ -153,12 +163,14 @@ func (h newsHandlers) GetNews() echo.HandlerFunc {
 
 		pq, err := utils.GetPaginationFromCtx(c)
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		newsList, err := h.newsUC.GetNews(ctx, pq)
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		return c.JSON(http.StatusOK, newsList)
@@ -182,13 +194,15 @@ func (h newsHandlers) SearchByTitle() echo.HandlerFunc {
 
 		pq, err := utils.GetPaginationFromCtx(c)
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		newsList, err := h.newsUC.SearchByTitle(ctx, c.QueryParam("title"), pq)
 
 		if err != nil {
-			return utils.ErrResponseWithLog(c, h.logger, err)
+			utils.LogResponseError(c, h.logger, err)
+			return c.JSON(httpErrors.ErrorResponse(err))
 		}
 
 		return c.JSON(http.StatusOK, newsList)
