@@ -1,6 +1,13 @@
 package main
 
 import (
+	"log"
+	"os"
+
+	"github.com/opentracing/opentracing-go"
+	jaegerlog "github.com/uber/jaeger-client-go/log"
+	"github.com/uber/jaeger-lib/metrics"
+
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/server"
 	"github.com/AleksK1NG/api-mc/pkg/db/aws"
@@ -8,11 +15,6 @@ import (
 	"github.com/AleksK1NG/api-mc/pkg/db/redis"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
-	"github.com/opentracing/opentracing-go"
-	jaegerlog "github.com/uber/jaeger-client-go/log"
-	"github.com/uber/jaeger-lib/metrics"
-	"log"
-	"os"
 
 	"github.com/uber/jaeger-client-go"
 	jaegercfg "github.com/uber/jaeger-client-go/config"

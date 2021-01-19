@@ -3,13 +3,15 @@ package repository
 import (
 	"context"
 	"fmt"
-	"github.com/AleksK1NG/api-mc/internal/models"
-	"github.com/AleksK1NG/api-mc/pkg/utils"
+	"testing"
+
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/require"
-	"testing"
+
+	"github.com/AleksK1NG/api-mc/internal/models"
+	"github.com/AleksK1NG/api-mc/pkg/utils"
 )
 
 func TestAuthRepo_Register(t *testing.T) {

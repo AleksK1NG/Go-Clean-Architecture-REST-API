@@ -2,15 +2,17 @@ package usecase
 
 import (
 	"context"
-	"github.com/AleksK1NG/api-mc/internal/comments/mock"
-	"github.com/AleksK1NG/api-mc/internal/models"
-	"github.com/AleksK1NG/api-mc/pkg/logger"
-	"github.com/AleksK1NG/api-mc/pkg/utils"
+	"testing"
+
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/opentracing/opentracing-go"
 	"github.com/stretchr/testify/require"
-	"testing"
+
+	"github.com/AleksK1NG/api-mc/internal/comments/mock"
+	"github.com/AleksK1NG/api-mc/internal/models"
+	"github.com/AleksK1NG/api-mc/pkg/logger"
+	"github.com/AleksK1NG/api-mc/pkg/utils"
 )
 
 func TestCommentsUC_Create(t *testing.T) {

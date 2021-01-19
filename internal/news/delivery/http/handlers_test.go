@@ -2,20 +2,22 @@ package http
 
 import (
 	"context"
-	"github.com/AleksK1NG/api-mc/internal/models"
-	"github.com/AleksK1NG/api-mc/internal/news/mock"
-	"github.com/AleksK1NG/api-mc/pkg/converter"
-	"github.com/AleksK1NG/api-mc/pkg/logger"
-	"github.com/AleksK1NG/api-mc/pkg/utils"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/opentracing/opentracing-go"
 	"github.com/stretchr/testify/require"
-	"net/http"
-	"net/http/httptest"
-	"strings"
-	"testing"
+
+	"github.com/AleksK1NG/api-mc/internal/models"
+	"github.com/AleksK1NG/api-mc/internal/news/mock"
+	"github.com/AleksK1NG/api-mc/pkg/converter"
+	"github.com/AleksK1NG/api-mc/pkg/logger"
+	"github.com/AleksK1NG/api-mc/pkg/utils"
 )
 
 func TestNewsHandlers_Create(t *testing.T) {

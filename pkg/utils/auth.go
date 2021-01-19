@@ -2,6 +2,7 @@ package utils
 
 import (
 	"context"
+
 	"github.com/AleksK1NG/api-mc/pkg/httpErrors"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 )

@@ -3,13 +3,15 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"github.com/AleksK1NG/api-mc/internal/auth"
-	"github.com/AleksK1NG/api-mc/internal/models"
-	"github.com/AleksK1NG/api-mc/pkg/utils"
+
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
+
+	"github.com/AleksK1NG/api-mc/internal/auth"
+	"github.com/AleksK1NG/api-mc/internal/models"
+	"github.com/AleksK1NG/api-mc/pkg/utils"
 )
 
 // Auth Repository

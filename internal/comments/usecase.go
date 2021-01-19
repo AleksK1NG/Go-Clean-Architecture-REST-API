@@ -3,9 +3,11 @@ package comments
 
 import (
 	"context"
+
+	"github.com/google/uuid"
+
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
-	"github.com/google/uuid"
 )
 
 // Comments use case

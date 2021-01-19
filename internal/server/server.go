@@ -2,19 +2,21 @@ package server
 
 import (
 	"context"
-	"github.com/AleksK1NG/api-mc/config"
-	_ "github.com/AleksK1NG/api-mc/docs"
-	"github.com/AleksK1NG/api-mc/pkg/logger"
-	"github.com/go-redis/redis/v8"
-	"github.com/jmoiron/sqlx"
-	"github.com/labstack/echo/v4"
-	"github.com/minio/minio-go/v7"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/go-redis/redis/v8"
+	"github.com/jmoiron/sqlx"
+	"github.com/labstack/echo/v4"
+	"github.com/minio/minio-go/v7"
+
+	"github.com/AleksK1NG/api-mc/config"
+	_ "github.com/AleksK1NG/api-mc/docs"
+	"github.com/AleksK1NG/api-mc/pkg/logger"
 )
 
 const (

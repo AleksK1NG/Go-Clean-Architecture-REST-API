@@ -1,10 +1,12 @@
 package middleware
 
 import (
-	"github.com/AleksK1NG/api-mc/pkg/sanitize"
-	"github.com/labstack/echo"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/labstack/echo"
+
+	"github.com/AleksK1NG/api-mc/pkg/sanitize"
 )
 
 // Sanitize and read request body to ctx for next use in easy json

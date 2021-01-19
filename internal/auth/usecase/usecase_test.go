@@ -4,18 +4,20 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/AleksK1NG/api-mc/config"
-	"github.com/AleksK1NG/api-mc/internal/auth/mock"
-	"github.com/AleksK1NG/api-mc/internal/models"
-	"github.com/AleksK1NG/api-mc/pkg/logger"
-	"github.com/AleksK1NG/api-mc/pkg/utils"
+	"testing"
+
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/minio/minio-go/v7"
 	"github.com/opentracing/opentracing-go"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/bcrypt"
-	"testing"
+
+	"github.com/AleksK1NG/api-mc/config"
+	"github.com/AleksK1NG/api-mc/internal/auth/mock"
+	"github.com/AleksK1NG/api-mc/internal/models"
+	"github.com/AleksK1NG/api-mc/pkg/logger"
+	"github.com/AleksK1NG/api-mc/pkg/utils"
 )
 
 func TestAuthUC_Register(t *testing.T) {

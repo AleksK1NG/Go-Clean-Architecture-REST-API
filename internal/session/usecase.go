@@ -3,6 +3,7 @@ package session
 
 import (
 	"context"
+
 	"github.com/AleksK1NG/api-mc/internal/models"
 )
 

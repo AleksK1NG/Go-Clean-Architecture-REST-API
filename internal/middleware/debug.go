@@ -2,9 +2,10 @@ package middleware
 
 import (
 	"fmt"
-	"github.com/labstack/echo/v4"
 	"net/http"
 	"net/http/httputil"
+
+	"github.com/labstack/echo/v4"
 )
 
 // Debug dump request middleware

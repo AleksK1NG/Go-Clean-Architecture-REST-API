@@ -3,20 +3,22 @@ package http
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+
+	"github.com/golang/mock/gomock"
+	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
+	"github.com/stretchr/testify/require"
+
 	"github.com/AleksK1NG/api-mc/internal/comments/mock"
 	"github.com/AleksK1NG/api-mc/internal/comments/usecase"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/pkg/converter"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
-	"github.com/golang/mock/gomock"
-	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
-	"github.com/stretchr/testify/require"
-	"net/http"
-	"net/http/httptest"
-	"strings"
-	"testing"
 )
 
 func TestCommentsHandlers_Create(t *testing.T) {

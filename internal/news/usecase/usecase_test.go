@@ -3,15 +3,17 @@ package usecase
 import (
 	"context"
 	"fmt"
-	"github.com/AleksK1NG/api-mc/internal/models"
-	"github.com/AleksK1NG/api-mc/internal/news/mock"
-	"github.com/AleksK1NG/api-mc/pkg/logger"
-	"github.com/AleksK1NG/api-mc/pkg/utils"
+	"testing"
+
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/opentracing/opentracing-go"
 	"github.com/stretchr/testify/require"
-	"testing"
+
+	"github.com/AleksK1NG/api-mc/internal/models"
+	"github.com/AleksK1NG/api-mc/internal/news/mock"
+	"github.com/AleksK1NG/api-mc/pkg/logger"
+	"github.com/AleksK1NG/api-mc/pkg/utils"
 )
 
 func TestNewsUC_Create(t *testing.T) {

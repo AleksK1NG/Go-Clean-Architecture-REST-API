@@ -3,17 +3,19 @@ package utils
 import (
 	"context"
 	"encoding/json"
+	"io/ioutil"
+	"mime/multipart"
+	"net/http"
+	"time"
+
+	"github.com/labstack/echo/v4"
+	"github.com/pkg/errors"
+
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/pkg/httpErrors"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/AleksK1NG/api-mc/pkg/sanitize"
-	"github.com/labstack/echo/v4"
-	"github.com/pkg/errors"
-	"io/ioutil"
-	"mime/multipart"
-	"net/http"
-	"time"
 )
 
 // Get request id from echo context

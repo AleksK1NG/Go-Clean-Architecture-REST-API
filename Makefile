@@ -100,7 +100,7 @@ jaeger:
 
 run-linter:
 	echo "Starting linters"
-	golangci-lint -c .golangci.yml run ./...
+	golangci-lint run ./...
 
 swaggo:
 	echo "Starting swagger generating"

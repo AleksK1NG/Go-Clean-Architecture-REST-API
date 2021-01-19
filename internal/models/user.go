@@ -1,10 +1,11 @@
 package models
 
 import (
-	"github.com/google/uuid"
-	"golang.org/x/crypto/bcrypt"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // User full model

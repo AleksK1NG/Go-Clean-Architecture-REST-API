@@ -2,9 +2,10 @@ package config
 
 import (
 	"errors"
-	"github.com/spf13/viper"
 	"log"
 	"time"
+
+	"github.com/spf13/viper"
 )
 
 // App config struct

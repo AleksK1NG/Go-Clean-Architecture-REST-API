@@ -3,8 +3,9 @@ package csrf
 import (
 	"crypto/sha256"
 	"encoding/base64"
-	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"io"
+
+	"github.com/AleksK1NG/api-mc/pkg/logger"
 )
 
 const (

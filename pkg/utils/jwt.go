@@ -2,13 +2,15 @@ package utils
 
 import (
 	"errors"
-	"github.com/AleksK1NG/api-mc/config"
-	"github.com/AleksK1NG/api-mc/internal/models"
-	"github.com/dgrijalva/jwt-go"
 	"html"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/dgrijalva/jwt-go"
+
+	"github.com/AleksK1NG/api-mc/config"
+	"github.com/AleksK1NG/api-mc/internal/models"
 )
 
 // JWT Claims struct

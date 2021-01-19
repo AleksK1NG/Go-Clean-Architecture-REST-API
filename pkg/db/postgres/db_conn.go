@@ -2,10 +2,12 @@ package postgres
 
 import (
 	"fmt"
-	"github.com/AleksK1NG/api-mc/config"
+	"time"
+
 	_ "github.com/jackc/pgx/stdlib" // pgx driver
 	"github.com/jmoiron/sqlx"
-	"time"
+
+	"github.com/AleksK1NG/api-mc/config"
 )
 
 const (

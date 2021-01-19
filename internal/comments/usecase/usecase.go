@@ -2,16 +2,18 @@ package usecase
 
 import (
 	"context"
+	"net/http"
+
+	"github.com/google/uuid"
+	"github.com/opentracing/opentracing-go"
+	"github.com/pkg/errors"
+
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/comments"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/pkg/httpErrors"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
-	"github.com/google/uuid"
-	"github.com/opentracing/opentracing-go"
-	"github.com/pkg/errors"
-	"net/http"
 )
 
 // Comments UseCase

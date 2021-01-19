@@ -2,6 +2,14 @@ package http
 
 import (
 	"bytes"
+	"io"
+	"net/http"
+
+	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
+	"github.com/opentracing/opentracing-go"
+	"github.com/pkg/errors"
+
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/auth"
 	"github.com/AleksK1NG/api-mc/internal/models"
@@ -10,12 +18,6 @@ import (
 	"github.com/AleksK1NG/api-mc/pkg/httpErrors"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
-	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
-	"github.com/opentracing/opentracing-go"
-	"github.com/pkg/errors"
-	"io"
-	"net/http"
 )
 
 // Auth handlers

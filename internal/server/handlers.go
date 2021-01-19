@@ -1,11 +1,17 @@
 package server
 
 import (
-	"github.com/AleksK1NG/api-mc/docs"
-	"github.com/AleksK1NG/api-mc/pkg/csrf"
+	"net/http"
 	"strings"
 
-	//_ "github.com/AleksK1NG/api-mc/docs"
+	"github.com/AleksK1NG/api-mc/docs"
+	"github.com/AleksK1NG/api-mc/pkg/csrf"
+
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	echoSwagger "github.com/swaggo/echo-swagger"
+
+	// _ "github.com/AleksK1NG/api-mc/docs"
 	authHttp "github.com/AleksK1NG/api-mc/internal/auth/delivery/http"
 	authRepository "github.com/AleksK1NG/api-mc/internal/auth/repository"
 	authUseCase "github.com/AleksK1NG/api-mc/internal/auth/usecase"
@@ -20,10 +26,6 @@ import (
 	"github.com/AleksK1NG/api-mc/internal/session/usecase"
 	"github.com/AleksK1NG/api-mc/pkg/metric"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-	echoSwagger "github.com/swaggo/echo-swagger"
-	"net/http"
 )
 
 // Map Server Handlers

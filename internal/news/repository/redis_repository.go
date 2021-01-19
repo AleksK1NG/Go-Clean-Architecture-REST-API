@@ -3,12 +3,14 @@ package repository
 import (
 	"context"
 	"encoding/json"
-	"github.com/AleksK1NG/api-mc/internal/models"
-	"github.com/AleksK1NG/api-mc/internal/news"
+	"time"
+
 	"github.com/go-redis/redis/v8"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	"time"
+
+	"github.com/AleksK1NG/api-mc/internal/models"
+	"github.com/AleksK1NG/api-mc/internal/news"
 )
 
 // News redis repository

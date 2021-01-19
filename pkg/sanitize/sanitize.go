@@ -3,6 +3,7 @@ package sanitize
 import (
 	"bytes"
 	"encoding/json"
+
 	"github.com/microcosm-cc/bluemonday"
 )
 

@@ -1,9 +1,11 @@
 package middleware
 
 import (
-	"github.com/AleksK1NG/api-mc/pkg/metric"
-	"github.com/labstack/echo/v4"
 	"time"
+
+	"github.com/labstack/echo/v4"
+
+	"github.com/AleksK1NG/api-mc/pkg/metric"
 )
 
 // Prometheus metrics middleware

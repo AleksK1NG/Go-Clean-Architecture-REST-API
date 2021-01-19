@@ -3,6 +3,7 @@ package auth
 
 import (
 	"context"
+
 	"github.com/AleksK1NG/api-mc/internal/models"
 )
 

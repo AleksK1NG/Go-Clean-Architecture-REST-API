@@ -2,11 +2,13 @@ package utils
 
 import (
 	"errors"
-	"github.com/AleksK1NG/api-mc/pkg/httpErrors"
-	"github.com/google/uuid"
 	"mime/multipart"
 	"net/http"
 	"net/textproto"
+
+	"github.com/google/uuid"
+
+	"github.com/AleksK1NG/api-mc/pkg/httpErrors"
 )
 
 var allowedImagesContentType = map[string]string{

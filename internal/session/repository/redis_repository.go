@@ -4,14 +4,16 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/AleksK1NG/api-mc/config"
-	"github.com/AleksK1NG/api-mc/internal/models"
-	"github.com/AleksK1NG/api-mc/internal/session"
+	"time"
+
 	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	"time"
+
+	"github.com/AleksK1NG/api-mc/config"
+	"github.com/AleksK1NG/api-mc/internal/models"
+	"github.com/AleksK1NG/api-mc/internal/session"
 )
 
 const (

@@ -3,18 +3,20 @@ package middleware
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"strings"
+	"time"
+
+	"github.com/dgrijalva/jwt-go"
+	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
+	"go.uber.org/zap"
+
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/auth"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/pkg/httpErrors"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
-	"github.com/dgrijalva/jwt-go"
-	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
-	"go.uber.org/zap"
-	"net/http"
-	"strings"
-	"time"
 )
 
 // Auth sessions middleware using redis
@@ -221,7 +223,7 @@ func (mw *MiddlewareManager) validateJWTToken(tokenString string, authUC auth.Us
 		c.Set("user", u)
 
 		ctx := context.WithValue(c.Request().Context(), utils.UserCtxKey{}, u)
-		//req := c.Request().WithContext(ctx)
+		// req := c.Request().WithContext(ctx)
 		c.SetRequest(c.Request().WithContext(ctx))
 	}
 	return nil

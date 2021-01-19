@@ -2,13 +2,15 @@ package repository
 
 import (
 	"context"
-	"github.com/AleksK1NG/api-mc/internal/models"
+	"testing"
+
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
-	"testing"
+
+	"github.com/AleksK1NG/api-mc/internal/models"
 )
 
 func TestCommentsRepo_Create(t *testing.T) {

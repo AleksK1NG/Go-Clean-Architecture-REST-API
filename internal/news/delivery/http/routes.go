@@ -1,9 +1,10 @@
 package http
 
 import (
+	"github.com/labstack/echo/v4"
+
 	"github.com/AleksK1NG/api-mc/internal/middleware"
 	"github.com/AleksK1NG/api-mc/internal/news"
-	"github.com/labstack/echo/v4"
 )
 
 // Map news routes

@@ -1,16 +1,18 @@
 package http
 
 import (
+	"net/http"
+
+	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
+	"github.com/opentracing/opentracing-go"
+
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/comments"
 	"github.com/AleksK1NG/api-mc/internal/models"
 	"github.com/AleksK1NG/api-mc/pkg/httpErrors"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
-	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
-	"github.com/opentracing/opentracing-go"
-	"net/http"
 )
 
 // Comments handlers
@@ -48,7 +50,7 @@ func (h *commentsHandlers) Create() echo.HandlerFunc {
 
 		if err = utils.SanitizeRequest(c, comment); err != nil {
 			return utils.ErrResponseWithLog(c, h.logger, err)
-			//return err
+			// return err
 		}
 
 		createdComment, err := h.comUC.Create(ctx, comment)

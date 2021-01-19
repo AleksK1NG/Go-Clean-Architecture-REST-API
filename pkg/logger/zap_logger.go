@@ -1,10 +1,12 @@
 package logger
 
 import (
-	"github.com/AleksK1NG/api-mc/config"
+	"os"
+
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"os"
+
+	"github.com/AleksK1NG/api-mc/config"
 )
 
 // Logger methods interface
@@ -59,8 +61,7 @@ func (l *apiLogger) getLoggerLevel(cfg *config.Config) zapcore.Level {
 func (l *apiLogger) InitLogger() {
 	logLevel := l.getLoggerLevel(l.cfg)
 
-	var logWriter zapcore.WriteSyncer
-	logWriter = zapcore.AddSync(os.Stderr)
+	logWriter := zapcore.AddSync(os.Stderr)
 
 	var encoderCfg zapcore.EncoderConfig
 	if l.cfg.Server.Mode == "Development" {

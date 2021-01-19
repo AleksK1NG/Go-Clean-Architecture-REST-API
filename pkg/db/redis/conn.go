@@ -1,9 +1,11 @@
 package redis
 
 import (
-	"github.com/AleksK1NG/api-mc/config"
-	"github.com/go-redis/redis/v8"
 	"time"
+
+	"github.com/go-redis/redis/v8"
+
+	"github.com/AleksK1NG/api-mc/config"
 )
 
 // Returns new redis client

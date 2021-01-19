@@ -1,11 +1,13 @@
 package middleware
 
 import (
+	"net/http"
+
+	"github.com/labstack/echo/v4"
+
 	"github.com/AleksK1NG/api-mc/pkg/csrf"
 	"github.com/AleksK1NG/api-mc/pkg/httpErrors"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
-	"github.com/labstack/echo/v4"
-	"net/http"
 )
 
 // CSRF Middleware

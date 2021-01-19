@@ -2,14 +2,16 @@ package repository
 
 import (
 	"context"
-	"github.com/AleksK1NG/api-mc/internal/auth"
-	"github.com/AleksK1NG/api-mc/internal/models"
+	"log"
+	"testing"
+
 	"github.com/alicebob/miniredis"
 	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
-	"log"
-	"testing"
+
+	"github.com/AleksK1NG/api-mc/internal/auth"
+	"github.com/AleksK1NG/api-mc/internal/models"
 )
 
 func SetupRedis() auth.RedisRepository {

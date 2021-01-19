@@ -3,12 +3,14 @@ package repository
 import (
 	"context"
 	"encoding/json"
-	"github.com/AleksK1NG/api-mc/internal/auth"
-	"github.com/AleksK1NG/api-mc/internal/models"
+	"time"
+
 	"github.com/go-redis/redis/v8"
 	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	"time"
+
+	"github.com/AleksK1NG/api-mc/internal/auth"
+	"github.com/AleksK1NG/api-mc/internal/models"
 )
 
 // Auth redis repository

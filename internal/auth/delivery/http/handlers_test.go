@@ -1,6 +1,17 @@
 package http
 
 import (
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+
+	"github.com/golang/mock/gomock"
+	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
+	"github.com/opentracing/opentracing-go"
+	"github.com/stretchr/testify/require"
+
 	"github.com/AleksK1NG/api-mc/config"
 	"github.com/AleksK1NG/api-mc/internal/auth/mock"
 	"github.com/AleksK1NG/api-mc/internal/models"
@@ -8,15 +19,6 @@ import (
 	"github.com/AleksK1NG/api-mc/pkg/converter"
 	"github.com/AleksK1NG/api-mc/pkg/logger"
 	"github.com/AleksK1NG/api-mc/pkg/utils"
-	"github.com/golang/mock/gomock"
-	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
-	"github.com/opentracing/opentracing-go"
-	"github.com/stretchr/testify/require"
-	"net/http"
-	"net/http/httptest"
-	"strings"
-	"testing"
 )
 
 func TestAuthHandlers_Register(t *testing.T) {
