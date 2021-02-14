@@ -36,7 +36,7 @@ type Server struct {
 	logger      logger.Logger
 }
 
-// New Server constructor
+// NewServer New Server constructor
 func NewServer(cfg *config.Config, db *sqlx.DB, redisClient *redis.Client, awsS3Client *minio.Client, logger logger.Logger) *Server {
 	return &Server{echo: echo.New(), cfg: cfg, db: db, redisClient: redisClient, awsClient: awsS3Client, logger: logger}
 }
@@ -88,7 +88,6 @@ func (s *Server) Run() error {
 
 	go func() {
 		s.logger.Infof("Server is listening on PORT: %s", s.cfg.Server.Port)
-		s.logger.Infof("HTTP *****************: %v", s.cfg.Server.SSL)
 		if err := s.echo.StartServer(server); err != nil {
 			s.logger.Fatalf("Error starting Server: ", err)
 		}

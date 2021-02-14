@@ -28,6 +28,7 @@ services:
   prometheus:
     container_name: prometheus_container
     image: prom/prometheus
+    restart: always
     volumes:
       - ./docker/monitoring/prometheus-local.yml:/etc/prometheus/prometheus.yml:Z
     command:
@@ -43,6 +44,7 @@ services:
 
   node_exporter:
     container_name: node_exporter_container
+    restart: always
     image: prom/node-exporter
     ports:
       - '9101:9100'
@@ -51,6 +53,7 @@ services:
 
   grafana:
     container_name: grafana_container
+    restart: always
     image: grafana/grafana
     ports:
       - '3000:3000'
@@ -86,6 +89,7 @@ services:
 
   jaeger:
     container_name: jaeger_container
+    restart: always
     image: jaegertracing/all-in-one:1.21
     environment:
       - COLLECTOR_ZIPKIN_HTTP_PORT=9411
