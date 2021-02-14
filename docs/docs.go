@@ -37,6 +37,9 @@ var doc = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Auth"
+                ],
                 "summary": "Get users",
                 "parameters": [
                     {
@@ -86,6 +89,9 @@ var doc = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Auth"
+                ],
                 "summary": "Find by name",
                 "parameters": [
                     {
@@ -121,6 +127,9 @@ var doc = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Auth"
+                ],
                 "summary": "Login new user",
                 "responses": {
                     "200": {
@@ -141,6 +150,9 @@ var doc = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Auth"
+                ],
                 "summary": "Logout user",
                 "responses": {
                     "200": {
@@ -160,6 +172,9 @@ var doc = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "Auth"
                 ],
                 "summary": "Get user by id",
                 "responses": {
@@ -187,6 +202,9 @@ var doc = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Auth"
+                ],
                 "summary": "Register new user",
                 "responses": {
                     "201": {
@@ -206,6 +224,9 @@ var doc = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "Auth"
                 ],
                 "summary": "Get CSRF token",
                 "responses": {
@@ -232,6 +253,9 @@ var doc = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "Auth"
                 ],
                 "summary": "get user by id",
                 "parameters": [
@@ -266,6 +290,9 @@ var doc = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Auth"
+                ],
                 "summary": "Update user",
                 "parameters": [
                     {
@@ -293,7 +320,10 @@ var doc = `{
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Delete",
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Delete user account",
                 "parameters": [
                     {
                         "type": "integer",
@@ -327,6 +357,9 @@ var doc = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "Auth"
                 ],
                 "summary": "Post avatar",
                 "parameters": [
@@ -378,6 +411,9 @@ var doc = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Comments"
+                ],
                 "summary": "Create new comment",
                 "responses": {
                     "201": {
@@ -403,6 +439,9 @@ var doc = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "Comments"
                 ],
                 "summary": "Get comments by news",
                 "parameters": [
@@ -460,6 +499,9 @@ var doc = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Comments"
+                ],
                 "summary": "Get comment",
                 "parameters": [
                     {
@@ -493,6 +535,9 @@ var doc = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Comments"
+                ],
                 "summary": "Update comment",
                 "parameters": [
                     {
@@ -525,6 +570,9 @@ var doc = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "Comments"
                 ],
                 "summary": "Delete comment",
                 "parameters": [
@@ -560,6 +608,9 @@ var doc = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "News"
                 ],
                 "summary": "Get all news",
                 "parameters": [
@@ -604,6 +655,9 @@ var doc = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "News"
+                ],
                 "summary": "Create news",
                 "responses": {
                     "201": {
@@ -623,6 +677,9 @@ var doc = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "News"
                 ],
                 "summary": "Search by title",
                 "parameters": [
@@ -667,6 +724,9 @@ var doc = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "News"
+                ],
                 "summary": "Get by id news",
                 "parameters": [
                     {
@@ -694,6 +754,9 @@ var doc = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "News"
+                ],
                 "summary": "Update news",
                 "parameters": [
                     {
@@ -720,6 +783,9 @@ var doc = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "News"
                 ],
                 "summary": "Delete news",
                 "parameters": [

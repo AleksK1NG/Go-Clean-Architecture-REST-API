@@ -22,7 +22,7 @@ type newsHandlers struct {
 	logger logger.Logger
 }
 
-// News handlers constructor
+// NewNewsHandlers News handlers constructor
 func NewNewsHandlers(cfg *config.Config, newsUC news.UseCase, logger logger.Logger) news.Handlers {
 	return &newsHandlers{cfg: cfg, newsUC: newsUC, logger: logger}
 }
@@ -30,6 +30,7 @@ func NewNewsHandlers(cfg *config.Config, newsUC news.UseCase, logger logger.Logg
 // Create godoc
 // @Summary Create news
 // @Description Create news handler
+// @Tags News
 // @Accept json
 // @Produce json
 // @Success 201 {object} models.News
@@ -58,6 +59,7 @@ func (h newsHandlers) Create() echo.HandlerFunc {
 // Update godoc
 // @Summary Update news
 // @Description Update news handler
+// @Tags News
 // @Accept json
 // @Produce json
 // @Param id path int true "news_id"
@@ -94,6 +96,7 @@ func (h newsHandlers) Update() echo.HandlerFunc {
 // GetByID godoc
 // @Summary Get by id news
 // @Description Get by id news handler
+// @Tags News
 // @Accept json
 // @Produce json
 // @Param id path int true "news_id"
@@ -123,6 +126,7 @@ func (h newsHandlers) GetByID() echo.HandlerFunc {
 // Delete godoc
 // @Summary Delete news
 // @Description Delete by id news handler
+// @Tags News
 // @Accept json
 // @Produce json
 // @Param id path int true "news_id"
@@ -151,6 +155,7 @@ func (h newsHandlers) Delete() echo.HandlerFunc {
 // GetNews godoc
 // @Summary Get all news
 // @Description Get all news with pagination
+// @Tags News
 // @Accept json
 // @Produce json
 // @Param page query int false "page number" Format(page)
@@ -182,6 +187,7 @@ func (h newsHandlers) GetNews() echo.HandlerFunc {
 // SearchByTitle godoc
 // @Summary Search by title
 // @Description Search news by title
+// @Tags News
 // @Accept json
 // @Produce json
 // @Param page query int false "page number" Format(page)

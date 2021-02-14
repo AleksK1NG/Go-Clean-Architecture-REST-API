@@ -22,13 +22,15 @@ type commentsHandlers struct {
 	logger logger.Logger
 }
 
-// Comments handlers constructor
+// NewCommentsHandlers Comments handlers constructor
 func NewCommentsHandlers(cfg *config.Config, comUC comments.UseCase, logger logger.Logger) comments.Handlers {
 	return &commentsHandlers{cfg: cfg, comUC: comUC, logger: logger}
 }
 
+// Create
 // @Summary Create new comment
 // @Description create new comment
+// @Tags Comments
 // @Accept  json
 // @Produce  json
 // @Success 201 {object} models.Comment
@@ -63,8 +65,10 @@ func (h *commentsHandlers) Create() echo.HandlerFunc {
 	}
 }
 
+// Update
 // @Summary Update comment
 // @Description update new comment
+// @Tags Comments
 // @Accept  json
 // @Produce  json
 // @Param id path int true "comment_id"
@@ -106,8 +110,10 @@ func (h *commentsHandlers) Update() echo.HandlerFunc {
 	}
 }
 
+// Delete
 // @Summary Delete comment
 // @Description delete comment
+// @Tags Comments
 // @Accept  json
 // @Produce  json
 // @Param id path int true "comment_id"
@@ -134,8 +140,10 @@ func (h *commentsHandlers) Delete() echo.HandlerFunc {
 	}
 }
 
+// GetByID
 // @Summary Get comment
 // @Description Get comment by id
+// @Tags Comments
 // @Accept  json
 // @Produce  json
 // @Param id path int true "comment_id"
@@ -163,8 +171,10 @@ func (h *commentsHandlers) GetByID() echo.HandlerFunc {
 	}
 }
 
+// GetAllByNewsID
 // @Summary Get comments by news
 // @Description Get all comment by news id
+// @Tags Comments
 // @Accept  json
 // @Produce  json
 // @Param id path int true "news_id"

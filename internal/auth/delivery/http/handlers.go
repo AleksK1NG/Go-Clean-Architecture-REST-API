@@ -28,7 +28,7 @@ type authHandlers struct {
 	logger logger.Logger
 }
 
-// Auth handlers constructor
+// NewAuthHandlers Auth handlers constructor
 func NewAuthHandlers(cfg *config.Config, authUC auth.UseCase, sessUC session.UCSession, log logger.Logger) auth.Handlers {
 	return &authHandlers{cfg: cfg, authUC: authUC, sessUC: sessUC, logger: log}
 }
@@ -36,6 +36,7 @@ func NewAuthHandlers(cfg *config.Config, authUC auth.UseCase, sessUC session.UCS
 // Register godoc
 // @Summary Register new user
 // @Description register new user, returns user and token
+// @Tags Auth
 // @Accept json
 // @Produce json
 // @Success 201 {object} models.User
@@ -74,6 +75,7 @@ func (h *authHandlers) Register() echo.HandlerFunc {
 // Login godoc
 // @Summary Login new user
 // @Description login user, returns user and set session
+// @Tags Auth
 // @Accept json
 // @Produce json
 // @Success 200 {object} models.User
@@ -119,6 +121,7 @@ func (h *authHandlers) Login() echo.HandlerFunc {
 // Logout godoc
 // @Summary Logout user
 // @Description logout user removing session
+// @Tags Auth
 // @Accept  json
 // @Produce  json
 // @Success 200 {string} string	"ok"
@@ -152,6 +155,7 @@ func (h *authHandlers) Logout() echo.HandlerFunc {
 // Update godoc
 // @Summary Update user
 // @Description update existing user
+// @Tags Auth
 // @Accept json
 // @Param id path int true "user_id"
 // @Produce json
@@ -189,6 +193,7 @@ func (h *authHandlers) Update() echo.HandlerFunc {
 // GetUserByID godoc
 // @Summary get user by id
 // @Description get string by ID
+// @Tags Auth
 // @Accept  json
 // @Produce  json
 // @Param id path int true "user_id"
@@ -216,8 +221,10 @@ func (h *authHandlers) GetUserByID() echo.HandlerFunc {
 	}
 }
 
-// @Summary Delete
+// Delete
+// @Summary Delete user account
 // @Description some description
+// @Tags Auth
 // @Accept json
 // @Param id path int true "user_id"
 // @Produce json
@@ -247,6 +254,7 @@ func (h *authHandlers) Delete() echo.HandlerFunc {
 // FindByName godoc
 // @Summary Find by name
 // @Description Find user by name
+// @Tags Auth
 // @Accept json
 // @Param name query string false "username" Format(username)
 // @Produce json
@@ -282,6 +290,7 @@ func (h *authHandlers) FindByName() echo.HandlerFunc {
 // GetUsers godoc
 // @Summary Get users
 // @Description Get the list of all users
+// @Tags Auth
 // @Accept json
 // @Param page query int false "page number" Format(page)
 // @Param size query int false "number of elements per page" Format(size)
@@ -314,6 +323,7 @@ func (h *authHandlers) GetUsers() echo.HandlerFunc {
 // GetMe godoc
 // @Summary Get user by id
 // @Description Get current user by id
+// @Tags Auth
 // @Accept json
 // @Produce json
 // @Success 200 {object} models.User
@@ -337,6 +347,7 @@ func (h *authHandlers) GetMe() echo.HandlerFunc {
 // GetCSRFToken godoc
 // @Summary Get CSRF token
 // @Description Get CSRF token, required auth session cookie
+// @Tags Auth
 // @Accept json
 // @Produce json
 // @Success 200 {string} string "Ok"
@@ -363,6 +374,7 @@ func (h *authHandlers) GetCSRFToken() echo.HandlerFunc {
 // UploadAvatar godoc
 // @Summary Post avatar
 // @Description Post user avatar image
+// @Tags Auth
 // @Accept  json
 // @Produce  json
 // @Param file formData file true "Body with image file"

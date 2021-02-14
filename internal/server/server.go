@@ -79,11 +79,6 @@ func (s *Server) Run() error {
 		return s.echo.Server.Shutdown(ctx)
 	}
 
-	e := echo.New()
-	if err := s.MapHandlers(s.echo); err != nil {
-		return err
-	}
-
 	server := &http.Server{
 		Addr:           s.cfg.Server.Port,
 		ReadTimeout:    time.Second * s.cfg.Server.ReadTimeout,
@@ -93,7 +88,8 @@ func (s *Server) Run() error {
 
 	go func() {
 		s.logger.Infof("Server is listening on PORT: %s", s.cfg.Server.Port)
-		if err := e.StartServer(server); err != nil {
+		s.logger.Infof("HTTP *****************: %v", s.cfg.Server.SSL)
+		if err := s.echo.StartServer(server); err != nil {
 			s.logger.Fatalf("Error starting Server: ", err)
 		}
 	}()
@@ -104,6 +100,10 @@ func (s *Server) Run() error {
 			s.logger.Errorf("Error PPROF ListenAndServe: %s", err)
 		}
 	}()
+
+	if err := s.MapHandlers(s.echo); err != nil {
+		return err
+	}
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)

@@ -199,7 +199,9 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/httpErrors.RestError'
-      summary: Delete
+      summary: Delete user account
+      tags:
+      - Auth
     get:
       consumes:
       - application/json
@@ -222,6 +224,8 @@ paths:
           schema:
             $ref: '#/definitions/httpErrors.RestError'
       summary: get user by id
+      tags:
+      - Auth
     put:
       consumes:
       - application/json
@@ -240,6 +244,8 @@ paths:
           schema:
             $ref: '#/definitions/models.User'
       summary: Update user
+      tags:
+      - Auth
   /auth/{id}/avatar:
     post:
       consumes:
@@ -274,6 +280,8 @@ paths:
           schema:
             $ref: '#/definitions/httpErrors.RestError'
       summary: Post avatar
+      tags:
+      - Auth
   /auth/all:
     get:
       consumes:
@@ -307,6 +315,8 @@ paths:
           schema:
             $ref: '#/definitions/httpErrors.RestError'
       summary: Get users
+      tags:
+      - Auth
   /auth/find:
     get:
       consumes:
@@ -330,6 +340,8 @@ paths:
           schema:
             $ref: '#/definitions/httpErrors.RestError'
       summary: Find by name
+      tags:
+      - Auth
   /auth/login:
     post:
       consumes:
@@ -343,6 +355,8 @@ paths:
           schema:
             $ref: '#/definitions/models.User'
       summary: Login new user
+      tags:
+      - Auth
   /auth/logout:
     post:
       consumes:
@@ -356,6 +370,8 @@ paths:
           schema:
             type: string
       summary: Logout user
+      tags:
+      - Auth
   /auth/me:
     get:
       consumes:
@@ -373,6 +389,8 @@ paths:
           schema:
             $ref: '#/definitions/httpErrors.RestError'
       summary: Get user by id
+      tags:
+      - Auth
   /auth/register:
     post:
       consumes:
@@ -386,6 +404,8 @@ paths:
           schema:
             $ref: '#/definitions/models.User'
       summary: Register new user
+      tags:
+      - Auth
   /auth/token:
     get:
       consumes:
@@ -403,6 +423,8 @@ paths:
           schema:
             $ref: '#/definitions/httpErrors.RestError'
       summary: Get CSRF token
+      tags:
+      - Auth
   /comments:
     post:
       consumes:
@@ -420,6 +442,8 @@ paths:
           schema:
             $ref: '#/definitions/httpErrors.RestErr'
       summary: Create new comment
+      tags:
+      - Comments
   /comments/{id}:
     delete:
       consumes:
@@ -443,6 +467,8 @@ paths:
           schema:
             $ref: '#/definitions/httpErrors.RestErr'
       summary: Delete comment
+      tags:
+      - Comments
     get:
       consumes:
       - application/json
@@ -465,6 +491,8 @@ paths:
           schema:
             $ref: '#/definitions/httpErrors.RestErr'
       summary: Get comment
+      tags:
+      - Comments
     put:
       consumes:
       - application/json
@@ -487,6 +515,8 @@ paths:
           schema:
             $ref: '#/definitions/httpErrors.RestErr'
       summary: Update comment
+      tags:
+      - Comments
   /comments/byNewsId/{id}:
     get:
       consumes:
@@ -525,6 +555,8 @@ paths:
           schema:
             $ref: '#/definitions/httpErrors.RestErr'
       summary: Get comments by news
+      tags:
+      - Comments
   /news:
     get:
       consumes:
@@ -554,6 +586,8 @@ paths:
           schema:
             $ref: '#/definitions/models.NewsList'
       summary: Get all news
+      tags:
+      - News
   /news/{id}:
     delete:
       consumes:
@@ -573,6 +607,8 @@ paths:
           schema:
             type: string
       summary: Delete news
+      tags:
+      - News
     get:
       consumes:
       - application/json
@@ -591,6 +627,8 @@ paths:
           schema:
             $ref: '#/definitions/models.News'
       summary: Get by id news
+      tags:
+      - News
     put:
       consumes:
       - application/json
@@ -609,6 +647,8 @@ paths:
           schema:
             $ref: '#/definitions/models.News'
       summary: Update news
+      tags:
+      - News
   /news/create:
     post:
       consumes:
@@ -622,6 +662,8 @@ paths:
           schema:
             $ref: '#/definitions/models.News'
       summary: Create news
+      tags:
+      - News
   /news/search:
     get:
       consumes:
@@ -651,4 +693,6 @@ paths:
           schema:
             $ref: '#/definitions/models.NewsList'
       summary: Search by title
+      tags:
+      - News
 swagger: "2.0"
