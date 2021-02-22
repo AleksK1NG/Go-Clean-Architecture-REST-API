@@ -19,7 +19,7 @@ migrate_down:
 # ==============================================================================
 # Docker compose commands
 
-docker:
+develop:
 	echo "Starting docker environment"
 	docker-compose -f docker-compose.dev.yml up --build
 

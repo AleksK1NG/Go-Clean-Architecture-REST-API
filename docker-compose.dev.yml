@@ -5,23 +5,16 @@ services:
     container_name: api
     build:
       context: ./
-      dockerfile: docker/Dockerfile.HotReload
-    #      dockerfile: docker/Dockerfile
+      dockerfile: docker/Dockerfile
     ports:
       - "5000:5000"
       - "5555:5555"
       - "7070:7070"
-    #      - "40000:40000"
     environment:
       - PORT=5000
-    #    security_opt:
-    #      - "seccomp:unconfined"
-    #    cap_add:
-    #      - SYS_PTRACE
     depends_on:
       - postgesql
       - redis
-
     restart: always
     volumes:
       - ./:/app
