@@ -20,8 +20,8 @@ import (
 )
 
 const (
-	certFile       = "ssl/Server.crt"
-	keyFile        = "ssl/Server.pem"
+	certFile       = "ssl/server.crt"
+	keyFile        = "ssl/server.pem"
 	maxHeaderBytes = 1 << 20
 	ctxTimeout     = 5
 )
